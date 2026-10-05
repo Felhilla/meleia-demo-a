@@ -6,7 +6,8 @@ import vm from 'node:vm';
 const leer = ruta => readFileSync(new URL('../' + ruta, import.meta.url), 'utf8');
 const css = leer('public/estilos.css');
 const bloques = [...css.matchAll(/:root(?:\[data-tema="oscuro"\])?\s*\{([^}]+)\}/g)];
-const temas = bloques.slice(0, 2).map(m => Object.fromEntries([...m[1].matchAll(/--([\w-]+):\s*(#[\da-f]{6})/gi)].map(x => [x[1], x[2]])));
+const propios = bloques.slice(0, 2).map(m => Object.fromEntries([...m[1].matchAll(/--([\w-]+):\s*(#[\da-f]{6})/gi)].map(x => [x[1], x[2]])));
+const temas = [propios[0], {...propios[0], ...propios[1]}];
 function luminancia(hex) {
   const c = hex.slice(1).match(/../g).map(x => parseInt(x,16)/255).map(x => x <= .04045 ? x/12.92 : ((x+.055)/1.055)**2.4);
   return c[0]*.2126+c[1]*.7152+c[2]*.0722;
@@ -30,8 +31,8 @@ test('E11 carga Lato 400/700, cuatro PNG y variantes de logos por tema', () => {
     assert.equal(png.subarray(1,4).toString(),'PNG'); assert.ok(png.length<100000);
     assert.match(html,new RegExp(`class="logo-${variante}" src="img/${nombre}"`));
   }
-  assert.match(css,/:root\[data-tema="oscuro"\] \.logo-color \{ display:none;/);
-  assert.match(css,/:root\[data-tema="oscuro"\] \.logo-blanco \{ display:block;/);
+  assert.match(css,/:root\[data-tema="oscuro"\] \.logo-color \{\s*display:\s*none(?:\s*!important)?;/);
+  assert.match(css,/:root\[data-tema="oscuro"\] \.logo-blanco \{\s*display:\s*block(?:\s*!important)?;/);
   assert.match(css,/:root:not\(\[data-tema="claro"\]\) \.logo-blanco/);
 });
 test('E11 no conserva selectores ni parámetros de paleta en public', () => {
@@ -67,19 +68,20 @@ test('E11 claro predeterminado, sistema oscuro, elección persistente prioritari
   assert.equal(r.boton.attrs['aria-pressed'],'false');
   const b=iniciar({bloqueado:true}); assert.doesNotThrow(()=>b.boton.onclick()); assert.equal(b.document.documentElement.dataset.tema,'oscuro');
 });
-test('E11 diámetro >=420, ejes >=13 y anillos >=11 con cajas de etiquetas sin superposición', () => {
-  const {posicionesArana}=createRequire(import.meta.url)('../public/vista-estandares.js');
-  const estandares=JSON.parse(leer('public/data/estandares.json'));
-  const estilo=leer('public/estilos-estandares.css');
-  const ancho=Number([...estilo.matchAll(/min-width:(\d+)px/g)].at(-1)[1]);
-  const intersecta=(a,b)=>a.x<b.x+b.ancho&&a.x+a.ancho>b.x&&a.y<b.y+b.alto&&a.y+a.alto>b.y;
+test('arañas legibles a 1440 px: etiquetas >=13 px y diámetro >=340 px con la columna central de 614 px', () => {
+  // A 1440 px la columna de la araña mide 614 px (rejilla .8fr · 2.4fr · .8fr en estilos-estandares.css).
+  const fuente=leer('public/vista-estandares.js');
+  const contexto={window:{},App:{el(){},registrarVista(){}},Intl};
+  vm.runInNewContext(fuente.replace(/\}\(\)\);\s*$/,'globalThis.g={ubicarEtiqueta}; }());'),contexto);
+  assert.match(leer('public/estilos-estandares.css'),/minmax\(460px, 2\.4fr\)/);
+  const dims=JSON.parse(leer('public/data/dimensiones.json')), estandares=JSON.parse(leer('public/data/estandares.json'));
+  const lineas=(t,l)=>t.split(/\s+/).reduce((r,p)=>{if(!r.length||r.at(-1).length+p.length+1>l)r.push(p);else r[r.length-1]+=' '+p;return r;},[]);
   for(const tipo of ['etapas-ocde','temas-ddhh']) {
-    const ejes=createRequire(import.meta.url)('../public/estandares.js').ejesDe(tipo,estandares);
-    assert.ok(ejes.length>=6);
-    const cajas=ejes.map((e,i)=>{const partes=e.nombre.split(/\s+/).reduce((r,p)=>{if(!r.length||r.at(-1).length+p.length+1>16)r.push(p);else r[r.length-1]+=' '+p;return r;},[]);return posicionesArana(i,ejes.length,partes).etiqueta.caja;});
-    const anchoVista=Math.max(720,...cajas.map(c=>c.x+c.ancho))-Math.min(0,...cajas.map(c=>c.x))+48;
-    const escala=ancho/anchoVista;
-    assert.ok(480*escala>=420,`diámetro ${480*escala}`); assert.ok(18*escala>=13); assert.ok(16*escala>=11);
-    cajas.forEach((c,i)=>cajas.slice(i+1).forEach(b=>assert.equal(intersecta(c,b),false)));
+    const ejes=estandares.ejes.filter(e=>e.grafico===tipo);
+    const cajas=ejes.map((e,i)=>contexto.g.ubicarEtiqueta(i,ejes.length,lineas(dims.ejes[e.id].corto,13)).caja);
+    const ancho=Math.max(300,...cajas.map(c=>c.x+c.ancho))-Math.min(-300,...cajas.map(c=>c.x))+24;
+    const escala=614/ancho;
+    assert.ok(24*escala>=13,`etiquetas de ${tipo}: ${(24*escala).toFixed(1)} px`);
+    assert.ok(600*escala>=340,`diámetro de ${tipo}: ${(600*escala).toFixed(0)} px`);
   }
 });

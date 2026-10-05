@@ -17,7 +17,7 @@
     marker.append(svg('path', {d:'M 0 0 L 10 5 L 0 10', fill:'none', stroke:'var(--principal)'})); defs.append(marker); flujo.append(defs);
     ['M 175 80 L 285 143','M 545 80 L 435 143','M 360 181 L 360 245','M 130 80 L 130 275 L 260 275','M 590 80 L 590 275 L 460 275'].forEach(d => flujo.append(svg('path', {d, fill:'none', stroke:'var(--principal)', 'stroke-width':1.5, 'marker-end':'url(#metodo-flecha)'})));
     [[20,20,280,'Brechas frente a estándares'],[420,20,280,'Riesgos en DDHH'],[245,121,230,'Doble materialidad'],[260,245,200,'Plan de acción']].forEach(([x,y,w,t]) => { flujo.append(svg('rect',{x,y,width:w,height:60,rx:8,fill:'var(--superficie)',stroke:'var(--borde-fuerte)'}),svg('text',{x:x+w/2,y:y+36,'text-anchor':'middle',fill:'var(--texto)','font-size':18},t)); });
-    enfoque.append(flujo);
+    const marco = el('div', null, 'relato-flujo-marco'); marco.setAttribute('tabindex', '0'); marco.setAttribute('role', 'region'); marco.setAttribute('aria-label', 'Flujo del método'); marco.append(flujo); enfoque.append(marco);
     const proceso = seccion('Proceso', 'Cinco fases, una misma trazabilidad', 'Cada fase utiliza la evidencia de la anterior.');
     const fases = el('div', null, 'cadena relato-fases'); fases.setAttribute('role', 'list');
     m.fases.forEach(f => { const a = el('article', null, 'eslabon'); a.setAttribute('role','listitem'); a.append(el('span', String(f.numero).padStart(2,'0'), 'numeral'),el('h3',f.titulo),el('p',f.texto)); fases.append(a); }); proceso.append(fases);

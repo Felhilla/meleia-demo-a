@@ -55,7 +55,7 @@
 
   /* Geometría de etiquetas para tipografía de 24 px: caja conservadora por carácter y por línea,
      proyectada fuera del círculo para que nunca toque anillos, valores ni puntos. */
-  const R = 300, CX = 0, CY = 0, CHAR = 14, LINEA = 28, HOLGURA = 40;
+  const R = 300, CX = 0, CY = 0, CHAR = 13, LINEA = 28, HOLGURA = 36;
   function ubicarEtiqueta(indice, total, partes) {
     const angulo = 2 * Math.PI * indice / total - Math.PI / 2, ux = Math.cos(angulo), uy = Math.sin(angulo);
     const ancho = Math.max(...partes.map(p => p.length * CHAR), CHAR), alto = partes.length * LINEA;

@@ -31,7 +31,7 @@ test('filtros combinados, vacíos y ordenación sin mutaciones', () => {
   for (const k of ['impacto','financiera']) {const sorted = M.ordenar(filas,k); assert.ok(sorted.every((f,i) => !i || sorted[i-1][k] >= f[k]));}
   assert.equal(JSON.stringify(filas), copia);
 });
-function iniciar(hash = '#/ddhh/materialidad', sinDatos = false) {
+function iniciar(hash = '#/materialidad/doble', sinDatos = false) {
   const eventos = {}, document = {};
   class Nodo {
     constructor(tag) {this.tag = tag; this.children = []; this.attrs = {}; this.dataset = {}; this.style = {}; this.className = ''; this.classList = {add: c => {this.className += ' ' + c;}, remove: c => {this.className = this.className.replace(c,'');}};}
@@ -50,38 +50,138 @@ function iniciar(hash = '#/ddhh/materialidad', sinDatos = false) {
   const datos = {materialidad:sinDatos ? null : data, materialidadConfig:cfg, riesgos:leer('data/riesgos.json'), estandares:leer('data/estandares.json'), evaluaciones:leer('data/evaluaciones.json'), criticidad:leer('config/criticidad-config.json'), plan:leer('data/plan.json')};
   // Verifica que la ficha consulta el plan vivo, no el respaldo.
   const vivo = datos.plan.map(a => ({...a, estado:'en_curso', avance:37}));
-  let vista; const location = {hash};
-  const contexto = {Materialidad:M, Riesgos, URLSearchParams, Intl, document, location, window:{matchMedia:() => ({matches:true})}, App:{el, obtenerPlan:() => vivo, registrarVista:(_,v) => {vista = v;}}};
+  const vistas = {}; const microtareas = []; const location = {hash};
+  const contexto = {Materialidad:M, Riesgos, URLSearchParams, Intl, document, location, window:{matchMedia:() => ({matches:true}), queueMicrotask:fn => microtareas.push(fn)}, App:{el, obtenerPlan:() => vivo, registrarVista:(nombre,v) => {vistas[nombre] = v;}}};
   vm.runInNewContext(readFileSync(new URL('../public/vista-materialidad.js',import.meta.url),'utf8'), contexto);
-  const [ruta,q] = hash.split('?'); const limpiar = vista.render(main, datos, {id:ruta.split('/')[3], filtros:new URLSearchParams(q)});
-  return {main, document, location, eventos, limpiar};
+  const pintar = () => {
+    const [ruta,q] = location.hash.split('?'), sub = ruta.split('/')[2];
+    main.children = [];
+    return vistas[sub === 'doble' ? 'materialidad' : 'materialidad-' + sub].render(main, datos, {id:ruta.split('/')[3], sub, filtros:new URLSearchParams(q)});
+  };
+  const limpiar = pintar();
+  return {main, document, location, eventos, limpiar, pintar, microtareas, vistas};
 }
 function todos(n) {return typeof n === 'object' ? [n,...n.children.flatMap(todos)] : [];}
 function texto(n) {return typeof n === 'object' ? [n.textContent || '',...n.children.map(texto)].join(' ') : String(n);}
-test('render: matriz, 15 filas, seis etapas y encabezado sin duplicar siguiente', () => {
-  const {main} = iniciar(), ns = todos(main);
-  assert.equal(ns.filter(n => n.tag === 'svg').length,1);
-  assert.equal(ns.find(n => n.id === 'mat-tabla').children[2].children.length,15);
-  assert.equal(ns.filter(n => n.attrs.role === 'tab').length,6);
-  assert.equal(texto(main).match(/Paso 2 de 4/g).length,1);
-  assert.doesNotMatch(texto(main), /Siguiente:/);
+const clase = (n, c) => (n.className || n.attrs.class || '').split(' ').includes(c);
+const cerca = (a, b) => assert.ok(Math.abs(a-b) < 1e-10, `${a} ≠ ${b}`);
+const media = xs => xs.reduce((a,b)=>a+b,0)/xs.length;
+test('mapas: promedios independientes, umbrales, materialidad estricta y pureza', () => {
+  const copia = JSON.stringify({data,cfg});
+  for (const [dimension, calcular] of [['impacto',M.mapaImpacto],['financiera',M.mapaFinanciero]]) {
+    const puntos = calcular(data.temas,cfg);
+    puntos.forEach(p => {
+      const t = data.temas.find(t=>t.id===p.id);
+      const evs = Object.values(t[dimension==='impacto'?'evaluacion_impacto':'evaluacion_financiera']);
+      cerca(p.x,media(evs.map(e=>dimension==='impacto'?e.probabilidad:e.gasto_operativo)));
+      cerca(p.y,media(evs.map(e=>dimension==='impacto'?(e.escala+e.alcance+e.irremediabilidad)/3:e.rentabilidad)));
+      assert.equal(p.material,filas.find(f=>f.id===p.id)[dimension]>M.umbrales(data.temas,cfg)[dimension]);
+    });
+    cerca(puntos.umbrales.x,media(puntos.map(p=>p.x)));
+    cerca(puntos.umbrales.y,media(puntos.map(p=>p.y)));
+    const fijo = {...cfg,umbral:{...cfg.umbral,metodo:'fijo',valor_fijo:3}};
+    assert.deepEqual(calcular(data.temas,fijo).umbrales,puntos.umbrales);
+    calcular(data.temas,fijo).forEach(p=>assert.equal(p.material,filas.find(f=>f.id===p.id)[dimension]>3));
+    const igual = {...fijo,umbral:{...fijo.umbral,valor_fijo:filas[0][dimension]}};
+    assert.equal(calcular(data.temas,igual).find(p=>p.id===filas[0].id).material,false);
+    assert.throws(()=>calcular([],cfg));
+  }
+  assert.equal(JSON.stringify({data,cfg}),copia);
 });
-test('ficha tema-03: cruce, plan vivo, Esc, contención y limpieza', () => {
-  const r = iniciar('#/ddhh/materialidad/tema-03?etapa=3');
-  const dialogo = todos(r.document.body).find(n => n.attrs.role === 'dialog'); assert.ok(dialogo);
-  const links = todos(dialogo).filter(n => n.tag === 'a');
-  assert.ok(links.some(n => n.href.includes('riesgo-05'))); assert.ok(links.some(n => n.href.includes('accion=')));
-  assert.match(texto(dialogo), /37 %/); assert.ok(r.main.inert);
-  const ultimo = links.at(-1); ultimo.focus(); r.eventos.keydown({key:'Tab',preventDefault(){}}); assert.equal(r.document.activeElement.tag,'button');
-  r.eventos.keydown({key:'Escape',preventDefault(){}}); assert.equal(r.location.hash,'#/ddhh/materialidad?etapa=3');
-  r.limpiar(); assert.ok(!r.main.inert); assert.ok(!todos(r.document.body).some(n => n.attrs.role === 'dialog')); assert.equal(r.eventos.keydown,undefined);
+test('matrices: celdas, totales, orden descendente y entradas intactas', () => {
+  const copia=JSON.stringify(data);
+  for(const [calcular,dimension,n] of [[M.matrizGrupos,'impacto',6],[M.matrizEvaluadores,'financiera',5]]) {
+    const rs=calcular(data.temas,cfg);
+    assert.equal(rs.length,15);
+    rs.forEach((r,i)=>{
+      assert.equal(Object.keys(r.celdas).length,n);
+      const t=data.temas.find(t=>t.id===r.id);
+      for(const [id,v] of Object.entries(r.celdas)) {
+        const e=t[dimension==='impacto'?'evaluacion_impacto':'evaluacion_financiera'][id];
+        cerca(v,dimension==='impacto'?((e.escala+e.alcance+e.irremediabilidad)/3+e.probabilidad)/2:(e.rentabilidad+e.gasto_operativo)/2);
+      }
+      cerca(r.total,media(Object.values(r.celdas)));
+      cerca(r.total,filas.find(f=>f.id===r.id)[dimension]);
+      assert.ok(!i || rs[i-1].total>=r.total);
+    });
+    assert.deepEqual(calcular([...data.temas].reverse(),cfg),rs);
+  }
+  assert.equal(JSON.stringify(data),copia);
 });
-test('seis etapas renderizan y filtros conservan el universo de umbrales', () => {
-  for (let i=1;i<=6;i++) {const {main} = iniciar('#/ddhh/materialidad?etapa='+i); assert.match(texto(main), new RegExp(cfg.etapas[i-1].titulo.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));}
-  const {main} = iniciar('#/ddhh/materialidad?materiales=1&orden=financiera'); assert.equal(todos(main).find(n=>n.id==='mat-tabla').children[2].children.length,9);
+test('tono de calor: cinco niveles, recorte y escalas inválidas',()=>{
+  assert.deepEqual([-2,0,1,2,3,4,5,9].map(v=>M.tonoCalor(v,0,5)),[0,0,1,2,3,4,4,4]);
+  assert.equal(M.tonoCalor(2,2,2),0);
+  assert.equal(M.tonoCalor(15,10,20),2);
+  for(const args of [[NaN,0,5],[1,5,0],[Infinity,0,5]]) assert.throws(()=>M.tonoCalor(...args));
 });
-test('puntos responden a espacio y filtros cambian URL', () => {
-  const r = iniciar(); const ns = todos(r.main), punto = ns.find(n=>n.attrs.role==='button'); punto.onkeydown({key:' ',preventDefault(){}}); assert.match(r.location.hash,/materialidad\/tema-/);
-  const filtro = ns.find(n=>n.id==='mat-filtro-dimension'); filtro.value='ambiental'; filtro.onchange(); assert.match(r.location.hash,/dimension=ambiental/);
+for(const sub of ['impacto','financiera','doble']) {
+  test(`${sub}: mapa, matriz completa, resultados, nota única y teclado`,()=>{
+    const r=iniciar('#/materialidad/'+sub), ns=todos(r.main);
+    assert.deepEqual(Object.keys(r.vistas).sort(),['materialidad','materialidad-financiera','materialidad-impacto']);
+    for(const c of ['mat-mapa','mat-matriz','mat-resultados']) assert.equal(ns.filter(n=>clase(n,c)).length,1);
+    assert.equal(ns.filter(n=>n.tag==='h1').length,0);
+    assert.doesNotMatch(texto(r.main),/Paso \d de 4|Siguiente:/);
+    assert.equal(ns.filter(n=>clase(n,'nota')).length,1);
+    const tabla=ns.find(n=>n.id==='mat-tabla'), cab=tabla.children[1].children[0], rows=tabla.children[2].children;
+    assert.equal(rows.length,15);
+    const columnas=sub==='impacto'?data.grupos:sub==='financiera'?data.evaluadores_financieros:[];
+    assert.equal(cab.children.length,sub==='doble'?5:columnas.length+2);
+    columnas.forEach((g,i)=>assert.equal(texto(cab.children[i+1]).trim(),g.nombre));
+    const orden=sub==='doble'?[...filas].sort((a,b)=>(b.impacto+b.financiera)-(a.impacto+a.financiera)||a.id.localeCompare(b.id)).map(f=>f.id): (sub==='impacto'?M.matrizGrupos:M.matrizEvaluadores)(data.temas,cfg).map(f=>f.id);
+    assert.deepEqual(rows.map(row=>todos(row).find(n=>n.tag==='a').href.split('/').at(-1)),orden);
+    const puntos=ns.filter(n=>n.attrs.role==='button'); assert.equal(puntos.length,15);
+    const materiales=sub==='doble'?9:filas.filter(f=>f[sub]>M.umbrales(data.temas,cfg)[sub]).length;
+    assert.equal(puntos.filter(n=>clase(n,'mat-material')).length,materiales);
+    assert.match(texto(ns.find(n=>n.tag==='h2')),new RegExp(`${materiales} de 15`));
+    puntos.forEach((p,i)=>{
+      const c=p.children[0];
+      puntos.slice(i+1).forEach(q=>assert.ok(Math.hypot(c.attrs.cx-q.children[0].attrs.cx,c.attrs.cy-q.children[0].attrs.cy)>=40));
+      for(const key of ['Enter',' ']) {let prevenido=false;p.onkeydown({key,preventDefault(){prevenido=true;}});assert.ok(prevenido);assert.equal(r.location.hash,`#/materialidad/${sub}/tema-${p.children[1].textContent}`);}
+    });
+    rows[0].onclick({target:{}});assert.equal(r.location.hash,todos(rows[0]).find(n=>n.tag==='a').href);
+    const ranking=ns.find(n=>clase(n,'mat-ranking'));
+    assert.equal(todos(ranking).filter(n=>clase(n,'mat-marca')).length,sub==='doble'?30:15);
+    if(sub==='doble') {
+      const corta=ns.find(n=>clase(n,'mat-lista-corta'));
+      assert.equal(corta.children.length,3);
+      assert.deepEqual(corta.children.map(c=>todos(c).filter(n=>n.tag==='li').length),[4,3,2]);
+      assert.equal(ns.filter(n=>clase(n,'mat-cruce')).length,9);
+    } else {
+      const destacados=ns.find(n=>clase(n,'mat-destacados'));
+      assert.equal(destacados.children.length,3);
+      if(sub==='impacto') destacados.children.forEach(c=>assert.ok(todos(c).some(n=>n.href?.startsWith('#/ddhh/riesgos/riesgo-'))));
+      else assert.match(texto(destacados),/Referencia SASB/);
+    }
+  });
+  test(`${sub}: ficha tema-03, cruce, plan vivo, foco, Escape y limpieza`,()=>{
+    const r=iniciar(`#/materialidad/${sub}/tema-03`);
+    const dialogo=todos(r.document.body).find(n=>n.attrs.role==='dialog');assert.ok(dialogo);
+    assert.equal(dialogo.attrs['aria-modal'],'true');
+    const links=todos(dialogo).filter(n=>n.tag==='a');
+    assert.ok(links.some(n=>n.href==='#/ddhh/riesgos/riesgo-05'));
+    const t=data.temas.find(t=>t.id==='tema-03');
+    t.ejes.forEach(id=>assert.ok(links.some(n=>n.href==='#/ddhh/dimensiones?eje='+id)));
+    assert.ok(links.some(n=>n.href.startsWith('#/plan?accion=')));
+    assert.match(texto(dialogo),/37 %/);assert.match(texto(dialogo),/Referencia SASB/);
+    assert.equal(todos(dialogo).filter(n=>clase(n,'mat-marca')).length,12);
+    assert.ok(r.main.inert);const cerrar=r.document.activeElement;assert.equal(cerrar.tag,'button');
+    r.eventos.keydown({key:'Tab',shiftKey:true,preventDefault(){}});assert.equal(r.document.activeElement,links.at(-1));
+    r.eventos.keydown({key:'Tab',preventDefault(){}});assert.equal(r.document.activeElement,cerrar);
+    r.eventos.keydown({key:'Escape',preventDefault(){}});assert.equal(r.location.hash,`#/materialidad/${sub}`);
+    r.limpiar();assert.ok(!r.main.inert);assert.equal(r.eventos.keydown,undefined);
+    assert.ok(!todos(r.document.body).some(n=>n.attrs.role==='dialog'));
+    r.pintar();r.main.focus();r.microtareas.forEach(fn=>fn());
+    assert.equal(r.document.activeElement.id,'mat-fila-tema-03');
+  });
+}
+test('limpieza al navegar restaura el fondo y elimina los eventos',()=>{
+  const r=iniciar('#/materialidad/doble/tema-03');r.location.hash='#/plan';r.limpiar();r.limpiar();
+  assert.ok(!r.main.inert);assert.equal(r.eventos.keydown,undefined);
+  assert.ok(!todos(r.document.body).some(n=>n.attrs.role==='dialog'));
 });
-test('sin datos conserva Contenido en preparación y banda ilustrativa', () => {const {main} = iniciar(undefined,true); assert.match(texto(main),/Contenido en preparación/); assert.match(texto(main),/Los temas y las calificaciones/);});
+test('sin datos conserva preparación y nota ilustrativa en cada vista',()=>{
+  for(const sub of ['impacto','financiera','doble']) {
+    const {main}=iniciar('#/materialidad/'+sub,true);
+    assert.match(texto(main),/Contenido en preparación/);assert.match(texto(main),/Temas y calificaciones ilustrativos/);
+  }
+});

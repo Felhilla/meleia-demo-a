@@ -71,14 +71,17 @@ test('filtros combinados y búsqueda ignoran mayúsculas y tildes', () => {
 async function iniciar({set = async () => {}, list, timeout = false} = {}) {
   const eventos = {}; const nodos = new Map();
   const nodo = () => ({dataset: {}, children: [], append(...n) {this.children.push(...n);}, replaceChildren(...n) {this.children = n;}, setAttribute() {}, removeAttribute() {}, addEventListener() {}, focus() {}, querySelector() { return null; }});
-  const document = {documentElement: nodo(), activeElement: null, addEventListener(t, fn) {eventos[t] = fn;}, createElement: nodo, querySelector: s => s === '.saltar' ? nodo() : null, getElementById: id => {if (!nodos.has(id)) nodos.set(id, nodo()); return nodos.get(id);}};
+  const document = {documentElement: nodo(), activeElement: null, addEventListener(t, fn) {eventos[t] = fn;}, createElement: nodo, createTextNode: texto => ({textContent: texto}), querySelector: s => s === '.saltar' ? nodo() : null, getElementById: id => {if (!nodos.has(id)) nodos.set(id, nodo()); return nodos.get(id);}};
   const api = {estado: 'base', set, list: list || (async () => [])};
   const contexto = {document, location: {search: '', hash: '#/', pathname: '/'}, URLSearchParams, Plan, Riesgos: {resumen: () => ({Alta: 1, Media: 8})}, GHDatos: api, setTimeout: timeout ? (fn, ms) => {assert.equal(ms, 5000); queueMicrotask(fn); return 1;} : setTimeout, clearTimeout: timeout ? () => {} : clearTimeout, fetch: async ruta => ({ok: true, json: async () => leer(ruta)})};
   contexto.window = contexto; contexto.addEventListener = () => {};
   vm.runInNewContext(readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), contexto);
   await eventos.DOMContentLoaded();
   const empresa = leer('config/empresa-config.json');
-  assert.equal(nodos.get('contexto-empresa').textContent, `${empresa.nombre} · ${empresa.etiqueta_ficticia}`);
+  assert.equal(nodos.get('caso-nombre').textContent, empresa.nombre);
+  assert.equal(nodos.get('caso-ficticia').textContent, 'Empresa ficticia');
+  assert.equal(nodos.get('caso-ficticia').title, empresa.etiqueta_ficticia);
+  assert.equal(nodos.get('capitulos').children[0].children.length, 6);
   assert.equal(contexto.App.datos.empresa.nombre, empresa.nombre);
   return contexto.App;
 }

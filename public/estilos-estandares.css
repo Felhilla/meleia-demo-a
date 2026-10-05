@@ -23,7 +23,7 @@
 .dim-puntaje .cifra { font-size: clamp(2.6rem, 4vw, 3.6rem); }
 .dim-delta { display: block; margin-top: 6px; font-size: var(--t-chico); font-weight: 700; color: var(--principal); }
 
-.dim-cuerpo { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(460px, 2fr) minmax(200px, 1fr); gap: var(--e4); align-items: center; padding: var(--e4) var(--e5); }
+.dim-cuerpo { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(460px, 2.4fr) minmax(180px, .8fr); gap: var(--e4); align-items: center; padding: var(--e4) var(--e5); }
 .dim-col h3 { font-size: var(--t-micro); letter-spacing: .14em; text-transform: uppercase; margin-bottom: var(--e3); }
 .dim-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e3); }
 .dim-col li { position: relative; padding-left: 20px; font-size: .98rem; line-height: 1.5; }

@@ -172,6 +172,8 @@ label { font-size: var(--t-chico); color: var(--texto-suave); }
 table { width: 100%; border-collapse: collapse; font-size: var(--t-chico); }
 th { text-align: left; font-weight: 700; color: var(--texto-suave); font-size: var(--t-micro); letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--borde-fuerte); }
 th, td { padding: 12px 10px; border-bottom: 1px solid var(--borde); vertical-align: top; overflow-wrap: anywhere; }
+thead th { overflow-wrap: normal; word-break: normal; hyphens: manual; }
+th[scope="row"] { text-transform: none; letter-spacing: 0; font-size: var(--t-chico); font-weight: 400; color: var(--texto); }
 .listado tbody tr { cursor: pointer; transition: background-color 120ms ease; }
 @media (hover: hover) and (pointer: fine) { .listado tbody tr:hover { background: var(--fondo); } }
 

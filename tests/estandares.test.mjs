@@ -6,6 +6,7 @@ const E = require('../public/estandares.js');
 const estandares = require('../public/data/estandares.json');
 const evaluaciones = require('../public/data/evaluaciones.json');
 const umbrales = require('../public/config/umbrales-config.json');
+const dimensiones = require('../public/data/dimensiones.json');
 const ejes = estandares.ejes;
 const entrada = () => ({nombre:'Medición pública', fecha:'2027-03', puntajes:Object.fromEntries(ejes.map(e => [e.id, '3,5']))});
 
@@ -67,7 +68,7 @@ test('puntosPoligono: cero es el centro; cinco alcanza el radio en cada direcci�
 // DOM mínimo para verificar contratos de la vista sin navegador, dependencias ni red.
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
-async function montar({estado = 'base', guardar = async () => {}, plan = []} = {}) {
+async function montar({estado = 'base', guardar = async () => {}, plan = [], base = [], filtros = '', datos = {}} = {}) {
   const todos = [];
   class Nodo {
     constructor(tag) { this.tag = tag; this.children = []; this.attrs = {}; this.dataset = {}; this.style = {}; this.eventos = {}; this._texto = ''; todos.push(this); }
@@ -86,64 +87,100 @@ async function montar({estado = 'base', guardar = async () => {}, plan = []} = {
     scrollIntoView() {}
     showModal() { this.open = true; }
     close() { this.open = false; this.eventos.close?.(); }
-    querySelector(s) { return todos.find(n => n.isConnected && (s.startsWith('#') ? n.id === s.slice(1) : n.tag === s)) || null; }
+    matches(s) { return s.startsWith('#') ? this.id === s.slice(1) : s.startsWith('.') ? s.slice(1).split('.').every(c => (this.className || this.attrs.class || '').split(/\s+/).includes(c)) : this.tag === s; }
+    querySelectorAll(s) { return this.children.flatMap(n => [...(n.matches(s) ? [n] : []), ...n.querySelectorAll(s)]); }
+    querySelector(s) { return this.querySelectorAll(s)[0] || null; }
   }
   const document = {createElement: t => new Nodo(t), createElementNS: (_,t) => new Nodo(t)};
+  document.createTextNode = texto => { const n = new Nodo('#text'); n.textContent = texto; return n; };
   document.body = new Nodo('body');
   const contenedor = new Nodo('main'); document.body.append(contenedor);
-  const api = {estado, list: async () => [], set: guardar}; let vista, ruta;
-  const App = {el: (tag,texto,clase) => {const n = new Nodo(tag); if (texto != null) n.textContent = texto; n.className = clase; return n;}, registrarVista: (_,v) => {vista = v;}, obtenerPlan: () => Promise.resolve(plan)};
-  const contexto = {App, Estandares:E, GHDatos:api, document, URLSearchParams, Intl, history:{replaceState: (_, __, url) => {ruta = url;}}}; contexto.window = contexto;
+  const api = {estado, list: async () => base, set: guardar}; let vista, ruta;
+  const App = {el: (tag,texto,clase) => {const n = new Nodo(tag); if (texto != null) n.textContent = texto; n.className = clase; return n;}, registrarVista: (_,v) => {vista = v;}, obtenerPlan: () => plan};
+  const contexto = {matchMedia: () => ({matches:true}), App, Estandares:E, GHDatos:api, document, URLSearchParams, Intl, history:{replaceState: (_, __, url) => {ruta = url;}}}; contexto.window = contexto;
   vm.runInNewContext(readFileSync(new URL('../public/vista-estandares.js', import.meta.url), 'utf8'), contexto);
-  const limpiar = vista.render(contenedor, {estandares, evaluaciones, umbrales, planConfig:require('../public/config/plan-config.json')}, {filtros:new URLSearchParams()});
+  const limpiar = vista.render(contenedor, {estandares, evaluaciones, umbrales, dimensiones, planConfig:require('../public/config/plan-config.json'), ...datos}, {filtros:new URLSearchParams(filtros)});
   await new Promise(resolve => setImmediate(resolve));
   const buscar = pred => todos.find(n => n.isConnected && pred(n));
   const boton = texto => buscar(n => n.tag === 'button' && n.textContent === texto);
   const campo = id => buscar(n => n.id === 'e3-campo-' + id);
   return {document, todos, contenedor, limpiar, buscar, boton, campo, ruta:() => ruta};
 }
-test('vista: dos SVG, tablas equivalentes, URL, plan asíncrono y respaldo visible', async () => {
-  const v = await montar({estado:'respaldo', plan:[{id:'accion-01', titulo:'Acción vinculada', componente:'componente-1', estado:'pendiente', ejes:['etapa-ocde-1'], vinculos_estimados:true}]});
-  assert.equal(v.todos.filter(n => n.isConnected && n.tag === 'svg').length, 2);
-  assert.equal(v.todos.filter(n => n.isConnected && n.tag === 'table').length, 2);
-  assert.equal(v.todos.filter(n => n.isConnected && n.className === 'e3-datos' && !n.open).length, 2);
-  const opciones = v.buscar(n => n.id === 'e3-eval').children.map(n => n.textContent);
-  assert.ok(opciones.includes('Evaluación de brechas · dic de 2025') || opciones.includes('Evaluación de brechas · dic. 2025') || opciones.includes('Evaluación de brechas · dic 2025'));
-  assert.ok(opciones.some(t => /^Evaluación de ejemplo · dic\.? (?:de )?2026 \(ejemplo\)$/.test(t)));
-  assert.match(v.ruta(), /eval=eval-ejemplo-2026&vs=eval-2025-12/);
+test('vista: dos arañas y tablas, selectores y respaldo visible bloquean el guardado', async () => {
+  let escrituras = 0;
+  const v = await montar({estado:'respaldo', guardar:async () => { escrituras++; }});
+  assert.equal(v.contenedor.querySelectorAll('.dim-arana').length, 2);
+  assert.equal(v.contenedor.querySelectorAll('table').length, 2);
+  assert.equal(v.contenedor.querySelectorAll('.e3-datos').filter(n => !n.open).length, 2);
+  const selector = v.buscar(n => n.id === 'e3-eval');
+  const vs = v.buscar(n => n.id === 'e3-vs');
+  assert.equal(selector.tag, 'select'); assert.equal(vs.tag, 'select');
+  assert.deepEqual(selector.children.map(n => n.value), ['eval-ejemplo-2026', 'eval-2025-12']);
+  assert.match(selector.children[0].textContent, /Evaluación de ejemplo.*2026 \(ejemplo\)/);
+  assert.match(selector.children[1].textContent, /Evaluación de brechas.*2025/);
+  assert.equal(vs.children[0].textContent, 'Sin comparación');
+  assert.equal(vs.children[0].value, '');
+  assert.equal(selector.value, 'eval-2025-12'); assert.equal(vs.value, '');
+  assert.equal(v.ruta(), '#/ddhh/dimensiones?eval=eval-2025-12');
   assert.match(v.contenedor.textContent, /No hay conexión con la base de datos/);
-  assert.match(v.contenedor.textContent, /Esta evaluación solo registra puntajes/);
-  assert.match(v.contenedor.textContent, /Vínculo estimado/);
-  v.boton('Cargar nueva evaluación').onclick(); assert.equal(v.boton('Guardar evaluación').disabled, true);
+  v.boton('Cargar nueva evaluación').onclick();
+  assert.equal(v.boton('Guardar evaluación').disabled, true);
+  await v.buscar(n => n.tag === 'form').onsubmit({preventDefault(){}});
+  assert.equal(escrituras, 0);
   v.limpiar(); assert.equal(v.buscar(n => n.tag === 'dialog'), undefined);
 });
-test('vista: al fallar el guardado conserva campos; al reintentar escribe un registro y selecciona la evaluación', async () => {
-  let falla = true; const llamadas = [];
-  const v = await montar({guardar:async (...args) => {llamadas.push(args); if (falla) throw Error('sin conexión');}});
+test('vista: elige la fuente más reciente aunque existan ejemplos y cargas posteriores', async () => {
+  const fuente = {...evaluaciones[0], id:'fuente-reciente', fecha:'2027-01'};
+  const v = await montar({base:[{...fuente, id:'carga', origen:'cargada', fecha:'2029-01'}, fuente]});
+  assert.equal(v.buscar(n => n.id === 'e3-eval').value, fuente.id);
+  assert.equal(v.buscar(n => n.id === 'e3-vs').value, '');
+  assert.equal(v.ruta(), '#/ddhh/dimensiones?eval=fuente-reciente');
+  const selector = v.buscar(n => n.id === 'e3-eval'), vs = v.buscar(n => n.id === 'e3-vs');
+  selector.value = 'eval-ejemplo-2026'; selector.onchange();
+  vs.value = fuente.id; vs.onchange();
+  assert.equal(v.ruta(), '#/ddhh/dimensiones?eval=eval-ejemplo-2026&vs=fuente-reciente');
+  assert.equal(v.contenedor.querySelectorAll('.dim-comparada').length, 2);
+  vs.value = ''; vs.onchange();
+  assert.equal(v.ruta(), '#/ddhh/dimensiones?eval=eval-ejemplo-2026');
+  assert.equal(v.contenedor.querySelectorAll('.dim-comparada').length, 0);
+});
+test('vista: al fallar conserva todos los campos; al reintentar guarda un solo registro', async () => {
+  let falla = true; const llamadas = [], registros = new Map();
+  const v = await montar({guardar:async (...args) => {llamadas.push(args); if (falla) throw Error('sin conexión'); registros.set(args[1], args[2]);}});
   v.boton('Cargar nueva evaluación').onclick();
   v.campo('nombre').value = 'Medición pública'; v.campo('fecha').value = '2027-03';
   v.boton('Prellenar con la evaluación actual').onclick();
-  assert.equal(v.campo('etapa-ocde-1').value, '3,5');
+  assert.equal(v.campo('etapa-ocde-1').value, '2,9');
+  const ids = ['nombre', 'fecha', ...ejes.map(e => e.id)];
+  const escritos = ids.map(id => v.campo(id).value);
   const form = v.buscar(n => n.tag === 'form');
   await form.onsubmit({preventDefault(){}});
-  assert.equal(v.campo('nombre').value, 'Medición pública');
+  assert.deepEqual(ids.map(id => v.campo(id).value), escritos);
+  assert.equal(registros.size, 0);
+  assert.equal(v.buscar(n => n.tag === 'dialog').open, true);
+  assert.equal(v.boton('Guardar evaluación').disabled, false);
   assert.match(v.buscar(n => n.attrs.role === 'alert').textContent, /Los datos escritos se conservan/);
   falla = false; await form.onsubmit({preventDefault(){}});
-  assert.equal(llamadas.length, 2);
+  assert.equal(llamadas.length, 2); assert.equal(registros.size, 1);
   assert.equal(llamadas[1][0], 'evaluaciones'); assert.equal(llamadas[1][1], 'eval-2027-03-medicion-publica');
-  assert.equal(Object.keys(llamadas[1][2].puntajes).length, 16);
-  assert.match(v.ruta(), /eval=eval-2027-03-medicion-publica&vs=eval-ejemplo-2026/);
+  const registro = llamadas[1][2];
+  assert.equal(registro.nombre, escritos[0]); assert.equal(registro.fecha, escritos[1]);
+  assert.equal(registro.origen, 'cargada');
+  assert.deepEqual({...registro.puntajes}, Object.fromEntries(ejes.map((e, i) => [e.id, E.parsearPuntaje(escritos[i + 2])])));
+  assert.equal(v.ruta(), '#/ddhh/dimensiones?eval=eval-2027-03-medicion-publica&vs=eval-2025-12');
+  assert.equal(v.buscar(n => n.id === 'e3-eval').value, registro.id);
+  assert.equal(v.buscar(n => n.id === 'e3-vs').value, 'eval-2025-12');
   assert.match(v.contenedor.textContent, /Cargada en la plataforma/);
   assert.equal(v.buscar(n => n.tag === 'dialog'), undefined);
 });
-test('vista: seleccionar la fuente muestra criterios e indicadores y el teclado cambia puntajes en décimas', async () => {
+test('vista: el teclado cambia puntajes en décimas y respeta los límites', async () => {
   const v = await montar();
-  const selector = v.buscar(n => n.id === 'e3-eval'); selector.value = 'eval-2025-12'; selector.onchange();
-  assert.match(v.contenedor.textContent, /Adopción de una política empresarial responsable/);
-  assert.match(v.contenedor.textContent, /Brecha identificada/);
-  assert.match(v.contenedor.textContent, /Documentos analizados/);
   v.boton('Cargar nueva evaluación').onclick();
   const input = v.campo('etapa-ocde-1'); input.value = '3,5';
-  input.eventos.keydown({key:'ArrowUp', preventDefault(){}}); assert.equal(input.value, '3,6');
-  input.eventos.keydown({key:'End', preventDefault(){}}); assert.equal(input.value, '5,0');
+  for (const [key, esperado] of [['ArrowUp','3,6'], ['ArrowDown','3,5'], ['End','5,0'], ['ArrowUp','5,0'], ['Home','0,0'], ['ArrowDown','0,0']]) {
+    let prevenido = false;
+    input.eventos.keydown({key, preventDefault(){prevenido = true;}});
+    assert.equal(prevenido, true); assert.equal(input.value, esperado);
+    assert.equal(input.attrs['aria-valuenow'], String(E.parsearPuntaje(esperado)));
+  }
 });

@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   const el = App.el, M = Materialidad;
+  let focoPendiente = null;
   const numero = v => new Intl.NumberFormat('es-CO', {maximumFractionDigits: 2}).format(v);
   const nota = 'Temas y calificaciones ilustrativos: muestran cómo funciona el método (GRI 3 · SASB Gas Utilities & Distributors)';
   const enlace = (texto, href) => {const a = el('a', texto); a.href = href; return a;};
@@ -129,7 +130,13 @@
       M.listaCorta(temas,cfg).forEach(f=>{const c=el('article',null,'tarjeta mat-cruce'),h=el('h4');h.append(linkTema(f.id));c.append(h);const cruce=cruzar(tema(f.id));['riesgos','ejes','acciones'].forEach(k=>{const a=enlace(`${cruce[k].length} ${k} · Ver vínculos`,ruta(f.id));c.append(a);});acciones.append(c);});resultados.append(acciones);
     }
     raiz.append(resultados,el('p',nota,'nota'));
-    if(!params.id || !tema(params.id)) return;
+    if(!params.id || !tema(params.id)) {
+      if (focoPendiente?.ruta === ruta()) {
+        const id = focoPendiente.id; focoPendiente = null;
+        window.queueMicrotask?.(() => document.getElementById('mat-fila-' + id)?.focus({preventScroll:true}));
+      }
+      return;
+    }
     const t=tema(params.id), f=fila(t.id), pi=mi.find(p=>p.id===t.id), pf=mf.find(p=>p.id===t.id);
     const fondo=el('div',null,'fondo-dialogo mat-fondo'),dialogo=el('section',null,'panel materialidad mat-dialogo');
     dialogo.setAttribute('role','dialog');dialogo.setAttribute('aria-modal','true');dialogo.setAttribute('aria-labelledby','mat-titulo');
@@ -140,14 +147,14 @@
     const porGrupo=M.porGrupo(t,cfg);data.grupos.forEach(g=>dialogo.append(barra(g.nombre,porGrupo[g.id],limites.impacto)));
     dialogo.append(el('h3','Riesgos en DDHH'),riesgos(t),el('h3','Ejes de estándares'));
     const cruce=cruzar(t),ultima=[...datos.evaluaciones].sort((a,b)=>b.fecha.localeCompare(a.fecha)||b.id.localeCompare(a.id))[0];
-    cruce.ejes.forEach(e=>{const puntaje=ultima?.puntajes[e.id];dialogo.append(enlace(e.nombre+' · '+(Number.isFinite(puntaje)?numero(puntaje):'Sin puntaje')+(ultima?' · '+ultima.fecha:''),'#/ddhh/dimensiones?eje='+encodeURIComponent(e.id)));});
+    cruce.ejes.forEach(e=>{const puntaje=ultima?.puntajes[e.id];dialogo.append(enlace(e.nombre+' · '+(Number.isFinite(puntaje)?numero(puntaje):'Sin puntaje')+(ultima?' · '+ultima.fecha+(ultima.origen==='ejemplo'?' (ejemplo)':''):''),'#/ddhh/dimensiones?eje='+encodeURIComponent(e.id)));});
     dialogo.append(el('h3','Acciones del plan'));cruce.acciones.forEach(a=>{const c=el('article',null,'mat-accion');c.append(enlace(a.titulo,'#/plan?accion='+encodeURIComponent(a.id)),el('p',a.estado.replaceAll('_',' ')+' · Avance: '+numero(a.avance)+' %'));dialogo.append(c);});
     if(!cruce.acciones.length) dialogo.append(el('p','Sin acciones vinculadas.'));sasb(t,dialogo);
     const anterior=document.activeElement,regiones=[...document.querySelectorAll('body > header, body > main, body > footer, body > .saltar')],inertes=regiones.map(n=>n.inert);
     regiones.forEach(n=>{n.inert=true;});fondo.append(dialogo);document.body.append(fondo);document.body.classList.add('dialogo-abierto');cerrar.focus();
     let limpio=false;
-    function limpiar() {if(limpio)return;limpio=true;document.removeEventListener('keydown',teclado);regiones.forEach((n,i)=>{n.inert=inertes[i];});fondo.remove();document.body.classList.remove('dialogo-abierto');(document.getElementById('mat-fila-'+t.id)||anterior)?.focus();window.queueMicrotask?.(()=>{if(location.hash===ruta())document.getElementById('mat-fila-'+t.id)?.focus({preventScroll:true});});}
-    cerrar.onclick=()=>{limpiar();location.hash=ruta();};
+    function limpiar() {if(limpio)return;limpio=true;document.removeEventListener('keydown',teclado);regiones.forEach((n,i)=>{n.inert=inertes[i];});fondo.remove();document.body.classList.remove('dialogo-abierto');(document.getElementById('mat-fila-'+t.id)||anterior)?.focus();}
+    cerrar.onclick=()=>{focoPendiente={ruta:ruta(),id:t.id};limpiar();location.hash=ruta();};
     function teclado(e) {if(e.key==='Escape'){e.preventDefault();cerrar.onclick();}if(e.key==='Tab'){const focos=[...dialogo.querySelectorAll('button, a[href]')],primero=focos[0],ultimo=focos.at(-1);if(e.shiftKey&&document.activeElement===primero){e.preventDefault();ultimo.focus();}else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primero.focus();}}}
     document.addEventListener('keydown',teclado);return limpiar;
   }
