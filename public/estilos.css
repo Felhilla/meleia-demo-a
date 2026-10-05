@@ -219,9 +219,12 @@ ol.texto-dato { padding-inline-start: 24px; white-space: normal; }
 .caso-hero .acciones { display: flex; gap: var(--e3); flex-wrap: wrap; margin-top: var(--e5); }
 .motivo-arco { position: relative; aspect-ratio: 1; width: 100%; max-width: 440px; justify-self: end; }
 .motivo-arco svg { width: 100%; height: 100%; overflow: visible; }
-.dato-fila { display: flex; align-items: center; gap: 14px; }
-.icono-dato { flex-shrink: 0; width: 56px; height: 56px; color: var(--principal); }
-.hechos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--e5); }
+.hechos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e5) var(--e6); padding-left: 14px; }
+.hecho { position: relative; display: grid; grid-template-columns: 112px auto minmax(0, 1fr); align-items: center; column-gap: var(--e4); min-height: 96px; padding: 0 var(--e5) 0 0; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); box-shadow: var(--sombra); }
+.hecho-icono { width: 112px; height: 112px; margin: -8px 0 -8px -14px; display: grid; place-items: center; border-radius: 50%; background: var(--suave); border: 5px solid var(--fondo); box-shadow: 0 0 0 1px var(--borde); color: var(--principal); }
+.icono-dato { width: 68px; height: 68px; }
+.hecho .cifra { font-size: clamp(2.2rem, 3.4vw, 2.9rem); white-space: nowrap; }
+.hecho .cifra-etiqueta { margin: 0; font-size: 1.02rem; line-height: 1.35; color: var(--texto-suave); max-width: 22ch; }
 
 .cadena { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; counter-reset: eslabon; }
 .eslabon { position: relative; padding: var(--e5) var(--e4) 0 0; }
@@ -259,7 +262,7 @@ ol.texto-dato { padding-inline-start: 24px; white-space: normal; }
 @media (max-width: 1100px) {
   .caso-hero { grid-template-columns: 1fr; }
   .motivo-arco { display: none; }
-  .hechos, .rejilla.cuatro, .cadena { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--e5); }
+  .rejilla.cuatro, .cadena { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--e5); }
   .seccion-cabeza { grid-template-columns: 1fr; gap: var(--e3); }
   .filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .caso-actual > span:not(.chip) { display: none; }
@@ -271,6 +274,8 @@ ol.texto-dato { padding-inline-start: 24px; white-space: normal; }
   #capitulos ol { padding: 0 var(--e3); }
   main { padding: var(--e5) var(--e3) var(--e6); }
   .hechos, .rejilla.dos, .rejilla.tres, .rejilla.cuatro, .cadena, .resumen, .filtros, .continuar { grid-template-columns: 1fr; }
+  .hecho { grid-template-columns: 88px auto minmax(0, 1fr); column-gap: var(--e3); padding-right: var(--e3); }
+  .hecho-icono { width: 88px; height: 88px; } .icono-dato { width: 48px; height: 48px; }
   .continuar .siguiente { grid-column: 1; }
   .pregunta { padding: var(--e5) var(--e4); }
   .seccion { margin-top: var(--e7); }

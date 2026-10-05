@@ -50,13 +50,15 @@
       ['circle', {cx: 19.3, cy: 30.7, r: 2.8, oro: true}]
     ]
   };
+  // Encuadre ajustado a cada dibujo para que llene el círculo; el trazo no se escala.
+  const ENCUADRE = {planta: '0 12 48 31', camion: '1 8 46 33', casco: '3 14 42 24', mapa: '6 0 36 48'};
   function icono(nombre) {
     const partes = ICONOS[nombre];
     if (!partes) return null;
-    const s = svg('svg', {viewBox: '0 0 48 48', width: 48, height: 48, 'aria-hidden': 'true', class: 'icono-dato', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.75, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+    const s = svg('svg', {viewBox: ENCUADRE[nombre] || '0 0 48 48', width: 48, height: 48, 'aria-hidden': 'true', class: 'icono-dato', fill: 'none', stroke: 'currentColor', 'stroke-width': 2.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
     partes.forEach(([tag, attrs]) => {
       const {oro, ...resto} = attrs;
-      s.append(svg(tag, oro ? {...resto, fill: 'var(--oro)', stroke: 'none'} : resto));
+      s.append(svg(tag, oro ? {...resto, fill: 'var(--oro)', stroke: 'none'} : {...resto, 'vector-effect': 'non-scaling-stroke'}));
     });
     return s;
   }
@@ -77,10 +79,10 @@
 
     const hechos = el('div', null, 'hechos');
     caso.empresa.hechos.forEach(h => {
-      const d = el('div', null, 'dato'), fila = el('div', null, 'dato-fila');
-      fila.append(el('span', h.valor, 'cifra'));
-      const i = icono(h.icono); if (i) fila.append(i);
-      d.append(fila, el('span', h.etiqueta, 'cifra-etiqueta')); hechos.append(d);
+      // Tarjeta del boceto: círculo con el ícono (sobresale a la izquierda), cifra y etiqueta.
+      const d = el('div', null, 'hecho'), circulo = el('span', null, 'hecho-icono');
+      const i = icono(h.icono); if (i) circulo.append(i);
+      d.append(circulo, el('span', h.valor, 'cifra'), el('span', h.etiqueta, 'cifra-etiqueta')); hechos.append(d);
     });
 
     // 2 · Cadena de valor
