@@ -20,22 +20,37 @@
     c.append(App.el('h4', 'Madurez de gestión · ' + new Intl.DateTimeFormat('es-CO', {month: 'long', year: 'numeric'}).format(new Date(evaluacion.fecha + '-01T12:00:00'))));
     const grupos = [['etapas-ocde', 'Implementación de la debida diligencia'], ['temas-ddhh', 'Gestión DDHH']];
     const max = d.umbrales.escala.maximo, umbral = d.umbrales.cortes[0].menor_que;
-    grupos.forEach(([id, nombre]) => {
+    // Un solo gráfico: dos barras con el puntaje dentro, separadas por una línea punteada; escala 0–5 una vez.
+    const medias = grupos.map(([id, nombre]) => {
       const valores = Estandares.comparar(evaluacion, null, Estandares.ejesDe(id, d.estandares)).map(f => f.a).filter(v => v !== null);
-      const media = valores.length ? valores.reduce((a, b) => a + b, 0) / valores.length : null;
-      const etiqueta = nombre + ': ' + (media === null ? 'sin datos' : numero(media)) + ' sobre ' + max + '. Umbral ' + numero(umbral) + '.';
-      const s = grafico(400, 84, etiqueta);
-      texto(s, 0, 20, nombre); texto(s, 400, 20, media === null ? '—' : numero(media), {'text-anchor': 'end'});
-      s.append(svg('rect', {x: 0, y: 36, width: 400, height: 24, rx: 4, fill: 'var(--suave)'}));
-      if (media !== null) s.append(svg('rect', {x: 0, y: 36, width: 400 * media / max, height: 24, rx: 4, fill: 'var(--principal)'}));
-      s.append(svg('line', {x1: 400 * umbral / max, x2: 400 * umbral / max, y1: 30, y2: 65, stroke: 'var(--texto)', 'stroke-width': 2}));
-      texto(s, 0, 82, '0'); texto(s, 400, 82, String(max), {'text-anchor': 'end'}); c.append(s);
+      return [nombre, valores.length ? valores.reduce((a, b) => a + b, 0) / valores.length : null];
     });
+    const etiqueta = medias.map(([n, m]) => n + ': ' + (m === null ? 'sin datos' : numero(m)) + ' sobre ' + max).join('. ') + '. Umbral ' + numero(umbral) + '.';
+    const s = grafico(400, 196, etiqueta), x = v => 400 * v / max, valores = [];
+    medias.forEach(([nombre, media], i) => {
+      const y = 22 + i * 86;
+      texto(s, 0, y, nombre, {'font-size': 15, 'font-weight': 700});
+      s.append(svg('rect', {x: 0, y: y + 12, width: 400, height: 40, rx: 6, fill: 'var(--suave)'}));
+      if (media !== null) {
+        s.append(svg('rect', {x: 0, y: y + 12, width: x(media), height: 40, rx: 6, fill: 'var(--principal)'}));
+        valores.push([x(media) - 12, y + 39, numero(media)]);
+      }
+    });
+    s.append(svg('line', {x1: 0, x2: 400, y1: 84, y2: 84, stroke: 'var(--borde-fuerte)', 'stroke-width': 1.5, 'stroke-dasharray': '6 6'}));
+    s.append(svg('line', {x1: x(umbral), x2: x(umbral), y1: 28, y2: 162, stroke: 'var(--texto)', 'stroke-width': 2}));
+    texto(s, x(umbral), 182, 'umbral ' + numero(umbral), {'text-anchor': 'middle', 'font-size': 14, fill: 'var(--texto-suave)'});
+    texto(s, 0, 182, '0', {'font-size': 14, fill: 'var(--texto-suave)'}); texto(s, 400, 182, String(max), {'text-anchor': 'end', 'font-size': 14, fill: 'var(--texto-suave)'});
+    // Los puntajes se dibujan al final, con halo del color de la barra, para que el umbral no los cruce.
+    valores.forEach(([vx, vy, t]) => texto(s, vx, vy, t, {'text-anchor': 'end', 'font-size': 20, 'font-weight': 700, fill: 'var(--sobre-principal)', stroke: 'var(--principal)', 'stroke-width': 8, 'paint-order': 'stroke', class: 'res-valor-barra'}));
+    c.append(s);
     c.append(App.el('p', 'Cómo leerlo: una barra más larga indica mayor madurez. El filete marca el umbral ' + numero(umbral) + '.', 'nota'));
     dt.append(App.el('h4', 'Las tres dimensiones con menor puntaje'));
-    const lista = App.el('ol', null, 'relato-brechas');
+    const lista = App.el('ul', null, 'relato-brechas');
     Estandares.comparar(evaluacion, null, d.estandares.ejes).filter(f => f.a !== null).sort((a, b) => a.a - b.a || a.eje.id.localeCompare(b.eje.id)).slice(0, 3).forEach(f => {
-      const li = App.el('li'); li.append(App.el('span', f.eje.nombre), App.el('strong', numero(f.a), 'res-puntaje')); lista.append(li);
+      // Puntaje en un círculo con el color del semáforo de brechas (nivel entero del puntaje).
+      const nivel = (d.caso.metodologia?.calificacion?.brechas?.niveles || []).find(n => n.valor === Math.floor(f.a));
+      const circulo = App.el('strong', numero(f.a), 'res-puntaje sem-' + (nivel?.color || 'gris'));
+      const li = App.el('li'); li.append(circulo, App.el('span', f.eje.nombre)); lista.append(li);
     });
     dt.append(lista);
   }
