@@ -107,3 +107,65 @@ button.enlace:focus-visible { outline: 2px solid var(--principal); outline-offse
   .dim-barras li { grid-template-columns: 32px minmax(0, 1fr) 40px; }
   .dim-barras .pista { grid-column: 2 / 4; }
 }
+
+/* Estándares relacionados en viñetas (tarjetas generales) */
+.dim-estandares { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.dim-estandares li { position: relative; padding-left: 16px; font-size: .98rem; }
+.dim-estandares li::before { content: ""; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--oro); }
+
+/* Ficha del eje en ventana centrada (boceto de Felipe) */
+.fondo-dialogo.centrado { justify-content: center; align-items: center; padding: var(--e4); }
+.dim-ficha { position: relative; width: min(1180px, 96vw); height: auto; max-height: 92vh; border-radius: var(--radio); padding: 0; overflow-y: auto; }
+@starting-style { .dim-ficha { transform: translateY(12px); opacity: 0; } }
+.dim-ficha { transition: transform 240ms var(--ease-out), opacity 200ms ease; }
+.dim-ficha .dim-cerrar { position: sticky; top: var(--e3); float: right; margin: var(--e3) var(--e3) 0 0; z-index: 2; background: var(--superficie); }
+.dim-ficha-cabeza { display: grid; grid-template-columns: minmax(0, 1fr) 240px; border-bottom: 1px solid var(--borde); }
+.dim-ficha-titulo { padding: var(--e5) var(--e5) var(--e4); }
+.dim-ficha-titulo h2 { margin: 0 0 8px; font-size: var(--t-h2); }
+.dim-ficha-titulo .nota { margin: 0; font-size: 1rem; }
+.dim-ficha-calif { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; padding: var(--e4) var(--e5); border-left: 1px solid var(--borde); }
+.dim-ficha-calif strong { font-size: 3.4rem; line-height: 1; letter-spacing: -.03em; }
+.dim-ficha-rotulo { font-size: .85rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.dim-ficha-nivel { font-size: .95rem; font-weight: 700; }
+.sem-fondo-rojo { background: var(--sem-rojo-fondo); color: #7A2E1F; } .sem-fondo-naranja { background: var(--sem-naranja-fondo); color: #7A4316; }
+.sem-fondo-ambar { background: var(--sem-ambar-fondo); color: #6B5214; } .sem-fondo-amarillo { background: var(--sem-amarillo-fondo); color: #5E5414; }
+.sem-fondo-verde { background: var(--sem-verde-fondo); color: #2F5A2B; } .sem-fondo-gris { background: var(--sem-gris-fondo); color: var(--texto); }
+:root[data-tema="oscuro"] [class*="sem-fondo-"] { color: var(--texto); }
+@media (prefers-color-scheme: dark) { :root:not([data-tema="claro"]) [class*="sem-fondo-"] { color: var(--texto); } }
+.dim-ficha-hallazgos { padding: var(--e4) var(--e5); border-bottom: 1px solid var(--borde); background: var(--fondo-alterno); }
+.dim-ficha-hallazgos h3 { font-size: .85rem; letter-spacing: .12em; text-transform: uppercase; color: var(--principal); margin: 0 0 var(--e3); }
+.dim-ficha-hallazgos ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--e3) var(--e5); }
+.dim-ficha-hallazgos li { position: relative; padding-left: 20px; font-size: 1.02rem; line-height: 1.5; }
+.dim-ficha-hallazgos li::before { content: ""; position: absolute; left: 0; top: .55em; width: 9px; height: 9px; border-radius: 50%; background: var(--principal); }
+.dim-ficha-tabla-env { padding: 0 var(--e5); overflow-x: auto; }
+.dim-ficha-tabla { table-layout: fixed; width: 100%; margin: var(--e4) 0; font-size: .95rem; }
+.dim-ficha-tabla .col-indicador { width: 36%; } .dim-ficha-tabla .col-calif { width: 11%; } .dim-ficha-tabla .col-brecha { width: 35%; } .dim-ficha-tabla .col-estandares { width: 18%; }
+.dim-ficha-tabla th[scope="col"] { position: sticky; top: 0; background: var(--superficie); z-index: 1; }
+.dim-ficha-tabla th[scope="row"] { font-size: .95rem; line-height: 1.45; }
+.dim-ficha-tabla td, .dim-ficha-tabla th { vertical-align: top; padding: 14px 12px; overflow-wrap: break-word; }
+.dim-codigo { display: inline-block; min-width: 30px; font-weight: 700; color: var(--oro-texto); }
+.dim-ficha-c { text-align: center; }
+.dim-circulo { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; font-weight: 700; color: #fff; background: var(--sem-gris); }
+.dim-circulo.sem-rojo { background: var(--sem-rojo); } .dim-circulo.sem-naranja { background: var(--sem-naranja); }
+.dim-circulo.sem-ambar { background: var(--sem-ambar); color: #1F332B; } .dim-circulo.sem-amarillo { background: var(--sem-amarillo); color: #1F332B; } .dim-circulo.sem-verde { background: var(--sem-verde); }
+.dim-ficha-brecha { line-height: 1.5; } .dim-ficha-brecha.vacia { color: var(--texto-suave); font-style: italic; }
+.dim-ficha-estandares { background: var(--fondo); border-left: 1px solid var(--borde); }
+.dim-ficha-estandares ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; position: sticky; top: 56px; }
+.dim-ficha-estandares li { position: relative; padding-left: 16px; font-weight: 700; line-height: 1.35; }
+.dim-ficha-estandares li::before { content: ""; position: absolute; left: 0; top: .5em; width: 7px; height: 7px; border-radius: 50%; background: var(--oro); }
+.dim-ficha-grupo td { background: var(--suave); padding: 10px 12px; }
+.dim-ficha-acciones { padding: var(--e4) var(--e5) var(--e5); border-top: 1px solid var(--borde); }
+.dim-ficha-acciones h3 { font-size: 1rem; margin: 0 0 var(--e2); }
+.dim-ficha-acciones ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+@media (max-width: 767px) {
+  .dim-ficha-cabeza { grid-template-columns: 1fr; } .dim-ficha-calif { border-left: 0; border-top: 1px solid var(--borde); }
+  .dim-ficha-tabla { table-layout: auto; min-width: 680px; }
+}
+.dim-ficha .dim-cerrar { position: absolute; float: none; top: var(--e3); right: var(--e3); margin: 0; }
+.dim-ficha-calif { padding-right: 120px; }
+@media (max-width: 767px) { .dim-ficha-calif { padding-right: var(--e5); } .dim-ficha-titulo { padding-top: 64px; } }
+.dim-ficha-cabeza { grid-template-columns: minmax(0, 1fr) 320px; }
+.dim-ficha-calif { padding-right: 112px; }
+.dim-ficha-rotulo, .dim-ficha-nivel { white-space: nowrap; }
+.dim-ficha-grupo td.dim-ficha-estandares { background: var(--fondo); }
+@media (max-width: 767px) { .dim-ficha-cabeza { grid-template-columns: 1fr; } }

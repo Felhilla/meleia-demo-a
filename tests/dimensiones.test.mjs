@@ -36,7 +36,10 @@ async function montar({estado = 'base', guardar = async () => {}, plan = [], bas
   }
   const document = {createElement: t => new Nodo(t), createElementNS: (_,t) => new Nodo(t)};
   document.createTextNode = texto => { const n = new Nodo('#text'); n.textContent = texto; return n; };
-  document.body = new Nodo('body');
+  document.body = new Nodo('body'); document.body.classList = {add() {}, remove() {}};
+  // La ficha del eje es una ventana sobre el documento: escucha Esc y vuelve inertes las regiones.
+  const teclas = []; document.addEventListener = (k, fn) => { if (k === 'keydown') teclas.push(fn); }; document.removeEventListener = () => {};
+  document.querySelectorAll = () => [];
   const contenedor = new Nodo('main'); document.body.append(contenedor);
   const api = {estado, list: async () => base, set: guardar}; let vista, ruta;
   const App = {el: (tag,texto,clase) => {const n = new Nodo(tag); if (texto != null) n.textContent = texto; n.className = clase; return n;}, registrarVista: (_,v) => {vista = v;}, obtenerPlan: () => plan};
@@ -47,7 +50,8 @@ async function montar({estado = 'base', guardar = async () => {}, plan = [], bas
   const buscar = pred => todos.find(n => n.isConnected && pred(n));
   const boton = texto => buscar(n => n.tag === 'button' && n.textContent === texto);
   const campo = id => buscar(n => n.id === 'e3-campo-' + id);
-  return {document, todos, contenedor, limpiar, buscar, boton, campo, ruta:() => ruta};
+  const ficha = () => document.body.querySelector('.dim-ficha');
+  return {document, todos, contenedor, limpiar, buscar, boton, campo, ficha, teclas, ruta:() => ruta};
 }
 
 test('dimensiones: dos grandes y los 16 ejes, síntesis completas y frases de hasta 20 palabras', () => {
@@ -125,39 +129,45 @@ test('vista general: dos tarjetas con hallazgos, araña, brechas y fichas de est
     assert.deepEqual(t.querySelector('.hallazgos').querySelectorAll('li').map(n => n.textContent), info.hallazgos);
     assert.deepEqual(t.querySelector('.brechas').querySelectorAll('li').map(n => n.textContent), info.brechas);
     assert.equal(t.querySelectorAll('.dim-pie').length, 1);
-    assert.deepEqual(t.querySelector('.dim-pie').querySelectorAll('.chip').map(n => n.textContent), info.estandares);
+    assert.deepEqual(t.querySelector('.dim-pie').querySelector('.dim-estandares').querySelectorAll('li').map(n => n.textContent), info.estandares);
   });
 });
-test('vista: ?eje=tema-ddhh-1 sitúa el detalle justo después de la segunda tarjeta', async () => {
+test('vista: ?eje=tema-ddhh-1 abre la ficha en ventana con título, calificación, hallazgos y tabla de cuatro columnas', async () => {
   const v = await montar({filtros:'eje=tema-ddhh-1', plan:[{id:'accion-prueba', titulo:'Acción vinculada', ejes:['tema-ddhh-1'], estado:'en-curso', avance:25}]});
-  const general = v.contenedor.querySelector('.dim-general');
-  assert.equal(general.children.length, 3);
-  const detalle = v.contenedor.querySelector('.dim-detalle');
-  assert.equal(general.children[2], detalle);
-  assert.ok(general.children.slice(0, 2).every(n => n.matches('.dim-tarjeta') && !n.matches('.dim-detalle')));
-  assert.equal(detalle.querySelector('h2').textContent, ejes.find(e => e.id === 'tema-ddhh-1').nombre);
-  assert.equal(detalle.querySelectorAll('.dim-indicador').length, E.indicadoresEje(estandares, 'tema-ddhh-1').length);
-  assert.equal(detalle.querySelector('.dim-acciones').querySelector('a').href, '#/plan?accion=accion-prueba');
+  assert.equal(v.contenedor.querySelectorAll('.dim-tarjeta').length, 2);
+  const ficha = v.ficha();
+  assert.ok(ficha, 'la ficha se abre como ventana');
+  assert.equal(ficha.attrs.role, 'dialog'); assert.equal(ficha.attrs['aria-modal'], 'true');
+  assert.equal(ficha.querySelector('h2').textContent, ejes.find(e => e.id === 'tema-ddhh-1').nombre);
+  assert.match(ficha.querySelector('.dim-ficha-calif').textContent, /Calificación/);
+  assert.deepEqual(ficha.querySelector('.dim-ficha-hallazgos').querySelectorAll('li').map(n => n.textContent), dimensiones.ejes['tema-ddhh-1'].hallazgos);
+  const encabezados = ficha.querySelector('.dim-ficha-tabla').querySelector('thead').querySelectorAll('th').map(n => n.textContent);
+  assert.deepEqual(encabezados, ['Indicador', 'Calificación', 'Brecha específica', 'Estándares relacionados']);
+  const filas = ficha.querySelector('tbody').children;
+  assert.equal(filas.length, E.indicadoresEje(estandares, 'tema-ddhh-1').length);
+  const celda = ficha.querySelector('.dim-ficha-estandares');
+  assert.equal(celda.rowSpan, filas.length);
+  assert.deepEqual(celda.querySelectorAll('li').map(n => n.textContent), dimensiones.ejes['tema-ddhh-1'].estandares);
+  assert.equal(ficha.querySelector('.dim-ficha-acciones').querySelector('a').href, '#/plan?accion=accion-prueba');
   assert.equal(v.ruta(), '#/ddhh/dimensiones?eval=eval-2025-12&eje=tema-ddhh-1');
-  v.boton('Cerrar detalle ×').onclick();
-  assert.equal(v.contenedor.querySelectorAll('.dim-detalle').length, 0);
+  v.teclas.at(-1)({key:'Escape', preventDefault() {}});
+  assert.equal(v.ficha(), null);
   assert.equal(v.ruta(), '#/ddhh/dimensiones?eval=eval-2025-12');
 });
-test('vista: más de 12 indicadores y menos de 3 criterios usa barras ordenadas', async () => {
-  for (const cantidad of [0, 1, 2]) {
-    const datos = structuredClone(estandares), eje = datos.ejes.find(e => e.id === 'tema-ddhh-1');
-    eje.hallazgos = {indicadores:Array.from({length:13}, (_, i) => ({pregunta:`Indicador ${i + 1}`, calificacion:(12 - i) % 6}))};
-    eje.criterios = Array.from({length:cantidad}, (_, i) => ({nombre:`Criterio ${i + 1}`, calificacion:3}));
-    const v = await montar({filtros:'eje=tema-ddhh-1', datos:{estandares:datos}});
-    const detalle = v.contenedor.querySelector('.dim-detalle');
-    assert.equal(detalle.querySelectorAll('.dim-arana').length, 0);
-    const barras = detalle.querySelectorAll('.dim-barras');
-    assert.equal(barras.length, 1); assert.equal(barras[0].children.length, 13);
-    const valores = barras[0].children.map(n => E.parsearPuntaje(n.querySelector('strong').textContent));
-    assert.deepEqual(valores, [...valores].sort((a, b) => a - b));
-    assert.equal(detalle.querySelectorAll('.dim-indicador').length, 13);
-    v.limpiar();
-  }
+test('ficha: las etapas con criterios agrupan sus indicadores y cada indicador lleva su calificación y su brecha', async () => {
+  const v = await montar({filtros:'eje=etapa-ocde-2'});
+  const ficha = v.ficha(), eje = ejes.find(e => e.id === 'etapa-ocde-2');
+  const grupos = ficha.querySelectorAll('.dim-ficha-grupo');
+  assert.equal(grupos.length, eje.hallazgos.grupos.length);
+  const indicadores = E.indicadoresEje(estandares, 'etapa-ocde-2');
+  const filas = ficha.querySelector('tbody').children.filter(n => !n.matches('.dim-ficha-grupo'));
+  assert.equal(filas.length, indicadores.length);
+  filas.forEach((f, k) => {
+    assert.match(f.querySelector('.dim-circulo').textContent, /^\d,\d$|^—$/);
+    assert.equal(f.querySelector('.dim-ficha-brecha').textContent, indicadores[k].brecha || 'Sin brecha registrada');
+  });
+  assert.equal(ficha.querySelector('.dim-ficha-estandares').rowSpan, indicadores.length + grupos.length);
+  v.limpiar();
 });
 test('geometría: las diez etiquetas renderizadas no se solapan ni entran en el círculo de radio 300', async () => {
   // Exponer la función de producción solo en la VM evita modificar la vista.

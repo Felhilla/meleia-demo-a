@@ -115,8 +115,8 @@
   function pie(estandares) {
     const p = el('footer', null, 'dim-pie');
     p.append(el('span', 'Estándares relacionados', 'antetitulo'));
-    const fichas = el('div', null, 'dim-fichas'); estandares.forEach(s => fichas.append(el('span', s, 'chip')));
-    p.append(fichas); return p;
+    const lista = el('ul', null, 'dim-estandares'); estandares.forEach(s => lista.append(el('li', s)));
+    p.append(lista); return p;
   }
   function indicadorCompleto(i) {
     const n = el('article', null, 'dim-indicador');
@@ -138,10 +138,10 @@
       history.replaceState(null, '', '#/ddhh/dimensiones?' + q);
     }
     function avisoBase() { aviso.textContent = sinBase ? respaldo : ''; aviso.hidden = !sinBase; }
+    let cerrarFicha = null, disparador = null;
     function elegir(id) {
-      ejeId = id; url(); dibujar();
-      const det = cuerpo.querySelector('.dim-detalle');
-      if (det) { det.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); det.querySelector('h2')?.focus({preventScroll: true}); }
+      disparador = document.activeElement;
+      ejeId = id; url(); dibujar(); abrirFicha();
     }
     function cabeza(antetitulo, titulo, subtitulo, valor, anterior) {
       const h = el('header', null, 'dim-cabeza'), t = el('div');
@@ -175,49 +175,95 @@
       const det = el('details', null, 'e3-datos dim-tabla'); det.append(el('summary', 'Ver puntajes por eje, de menor a mayor'), tabla); t.append(det);
       return t;
     }
-    function tarjetaDetalle(eje) {
+    /* Ficha del eje en ventana (boceto de Felipe): título | calificación; hallazgos clave en viñetas;
+       tabla Indicador | Calificación | Brecha específica | Estándares relacionados (a más texto, más espacio). */
+    function circulo(valor) {
+      const nivel = (datos.caso?.metodologia?.calificacion?.brechas?.niveles || []).find(n => typeof valor === 'number' && n.valor === Math.floor(valor));
+      return el('span', typeof valor === 'number' ? numero(valor) : '—', 'dim-circulo sem-' + (nivel?.color || 'gris'));
+    }
+    function abrirFicha() {
+      if (cerrarFicha) cerrarFicha(false);
+      const eje = datos.estandares.ejes.find(e => e.id === ejeId);
+      if (!eje) return;
       const g = dims.grandes.find(x => x.id === eje.grafico), info = dims.ejes[eje.id] || {};
       const valor = principal.puntajes[eje.id], antes = comparada?.puntajes[eje.id];
-      const t = el('article', null, 'tarjeta dim-tarjeta dim-detalle');
-      const cerrar = el('button', 'Cerrar detalle ×', 'dim-cerrar'); cerrar.onclick = () => { ejeId = null; url(); dibujar(); cuerpo.querySelector('.dim-tarjeta')?.scrollIntoView({block: 'start'}); };
-      t.append(cerrar, cabeza('Detalle · ' + (g?.titulo || ''), eje.nombre, E.nivelEscala(valor, datos.estandares.escala), valor, antes));
+      const nivel = (datos.caso?.metodologia?.calificacion?.brechas?.niveles || []).find(n => typeof valor === 'number' && n.valor === Math.floor(valor));
+      const fondo = el('div', null, 'fondo-dialogo centrado');
+      const panel = el('section', null, 'panel dim-ficha'); panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-labelledby', 'dim-ficha-titulo'); panel.tabIndex = -1;
+      const cerrar = el('button', 'Cerrar ×', 'dim-cerrar');
+      // Fila 1: título | calificación
+      const cabeza = el('header', null, 'dim-ficha-cabeza');
+      const titulo = el('div', null, 'dim-ficha-titulo');
+      const h2 = el('h2', eje.nombre); h2.id = 'dim-ficha-titulo';
+      titulo.append(el('p', g?.titulo || 'Dimensión', 'antetitulo'), h2, el('p', E.nivelEscala(valor, datos.estandares.escala), 'nota'));
+      const calif = el('div', null, 'dim-ficha-calif sem-fondo-' + (nivel?.color || 'gris'));
+      calif.append(el('span', 'Calificación', 'dim-ficha-rotulo'), el('strong', typeof valor === 'number' ? numero(valor) : '—'), el('span', (nivel ? nivel.nombre + ' · ' : '') + 'sobre 5', 'dim-ficha-nivel'));
+      if (typeof antes === 'number' && typeof valor === 'number') calif.append(el('span', delta(valor - antes) + ' frente a la comparación', 'dim-ficha-nivel'));
+      cabeza.append(titulo, calif);
+      // Fila 2: hallazgos clave
+      const hallazgos = el('section', null, 'dim-ficha-hallazgos');
+      hallazgos.append(el('h3', 'Hallazgos clave'));
+      const ul = el('ul'); (info.hallazgos || []).forEach(h => ul.append(el('li', h))); hallazgos.append(ul);
+      // Fila 3: tabla de indicadores
+      const tabla = el('table', null, 'dim-ficha-tabla');
+      const cols = el('colgroup'); ['indicador', 'calif', 'brecha', 'estandares'].forEach(c => { const col = el('col'); col.className = 'col-' + c; cols.append(col); }); tabla.append(cols);
+      const thead = el('thead'), tr = el('tr');
+      ['Indicador', 'Calificación', 'Brecha específica', 'Estándares relacionados'].forEach(t => { const th = el('th', t); th.scope = 'col'; tr.append(th); });
+      thead.append(tr); tabla.append(thead);
+      const tb = el('tbody');
       const indicadores = E.indicadoresEje(datos.estandares, eje.id);
-      const calificados = indicadores.filter(i => typeof i.calificacion === 'number');
-      const medio = el('div', null, 'dim-centro');
-      const criterios = (eje.criterios || []).filter(c => typeof E.parsearPuntaje(c.calificacion) === 'number');
-      if (calificados.length >= 3 && calificados.length <= 12) {
-        medio.append(arana({ejes: calificados.map(i => ({clave: i.codigo, texto: i.pregunta, partes: [i.codigo]})), valores: calificados.map(i => i.calificacion), rotulo: 'Indicadores de ' + eje.nombre, umbrales: datos.umbrales}));
-        const ley = el('ol', null, 'dim-leyenda'); calificados.forEach(i => { const li = el('li'); li.append(el('strong', i.codigo), document.createTextNode(' ' + i.pregunta)); ley.append(li); });
-        medio.append(ley);
-      } else if (criterios.length >= 3) {
-        medio.append(arana({ejes: criterios.map((c, i) => ({clave: 'C' + (i + 1), texto: c.nombre, partes: ['C' + (i + 1)]})), valores: criterios.map(c => E.parsearPuntaje(c.calificacion)), rotulo: 'Criterios de ' + eje.nombre, umbrales: datos.umbrales}));
-        medio.append(el('p', 'Criterios mínimos de la etapa; los indicadores están en el detalle de abajo.', 'nota dim-ayuda'));
-      } else {
-        medio.append(barras(calificados.map(i => ({codigo: i.codigo, texto: i.pregunta, valor: i.calificacion})), datos.umbrales));
-      }
-      const cuerpoT = el('div', null, 'dim-cuerpo');
-      cuerpoT.append(columna('Hallazgos', info.hallazgos, 'hallazgos'), medio, columna('Brechas', info.brechas, 'brechas'));
-      t.append(cuerpoT, pie(info.estandares || []));
-      const det = el('details', null, 'dim-indicadores'); det.append(el('summary', `Ver los ${indicadores.length} indicadores evaluados`));
-      if (principal.origen !== 'fuente') det.append(el('p', 'Los hallazgos detallados corresponden a la evaluación de diciembre de 2025.', 'nota'));
-      indicadores.forEach(i => det.append(indicadorCompleto(i)));
-      t.append(det);
+      const grupos = eje.hallazgos?.grupos;
+      let primera = true;
+      const celdaEstandares = () => {
+        const td = el('td', null, 'dim-ficha-estandares'); td.rowSpan = indicadores.length + (grupos ? grupos.length : 0);
+        const lista = el('ul'); (info.estandares || []).forEach(x => lista.append(el('li', x))); td.append(lista); return td;
+      };
+      const filaIndicador = i => {
+        const fila = el('tr'), th = el('th'); th.scope = 'row';
+        th.append(el('span', i.codigo, 'dim-codigo'), document.createTextNode(i.pregunta));
+        const tdc = el('td', null, 'dim-ficha-c'); tdc.append(circulo(i.calificacion));
+        const tdb = el('td', i.brecha || 'Sin brecha registrada', i.brecha ? 'dim-ficha-brecha' : 'dim-ficha-brecha vacia');
+        fila.append(th, tdc, tdb);
+        if (primera) { fila.append(celdaEstandares()); primera = false; }
+        tb.append(fila);
+      };
+      if (grupos) {
+        let n = 0;
+        grupos.forEach((gr, k) => {
+          const criterio = eje.criterios?.[k];
+          const fila = el('tr', null, 'dim-ficha-grupo'), td = el('td'); td.colSpan = 3;
+          td.append(el('strong', criterio?.nombre || gr.nombre), el('span', ' · calificación ' + numero(E.parsearPuntaje(criterio?.calificacion)), 'nota'));
+          fila.append(td); if (primera) { fila.append(celdaEstandares()); primera = false; } tb.append(fila);
+          gr.indicadores.forEach(() => filaIndicador(indicadores[n++]));
+        });
+      } else indicadores.forEach(filaIndicador);
+      tabla.append(tb);
+      const envoltura = el('div', null, 'dim-ficha-tabla-env'); envoltura.append(tabla);
+      // Pie: acciones del plan que cierran la brecha (trazabilidad)
       const acciones = App.obtenerPlan().filter(a => a.ejes?.includes(eje.id));
-      const bloque = el('section', null, 'dim-acciones'); bloque.append(el('h3', acciones.length ? `Acciones del plan que cierran esta brecha (${acciones.length})` : 'Aún no hay acciones del plan vinculadas a esta dimensión'));
-      const lista = el('ul');
-      acciones.forEach(a => { const li = el('li'), link = el('a', a.titulo); link.href = '#/plan?accion=' + encodeURIComponent(a.id); li.append(link, el('span', ' · ' + a.estado.replace(/-/g, ' ') + ' · ' + a.avance + ' %', 'nota')); lista.append(li); });
-      bloque.append(lista); t.append(bloque);
-      return t;
+      const pieAcc = el('footer', null, 'dim-ficha-acciones');
+      pieAcc.append(el('h3', acciones.length ? `Acciones del plan que cierran esta brecha (${acciones.length})` : 'Aún no hay acciones del plan vinculadas a esta dimensión'));
+      const la = el('ul'); acciones.forEach(a => { const li = el('li'), link = el('a', a.titulo); link.href = '#/plan?accion=' + encodeURIComponent(a.id); li.append(link, el('span', ' · ' + a.estado.replace(/-/g, ' ') + ' · ' + a.avance + ' %', 'nota')); la.append(li); }); pieAcc.append(la);
+      panel.append(cerrar, cabeza, hallazgos, envoltura, pieAcc);
+      if (principal.origen !== 'fuente') panel.append(el('p', 'Las calificaciones por indicador y las brechas corresponden a la evaluación de diciembre de 2025.', 'nota'));
+      fondo.append(panel); document.body.append(fondo); document.body.classList.add('dialogo-abierto');
+      const regiones = [...document.querySelectorAll('body > header, body > main, body > footer, body > .saltar')]; regiones.forEach(n => { n.inert = true; });
+      const teclado = e => { if (e.key === 'Escape') { e.preventDefault(); cerrarFicha(true); } };
+      document.addEventListener('keydown', teclado);
+      cerrarFicha = (restaurar) => {
+        document.removeEventListener('keydown', teclado); regiones.forEach(n => { n.inert = false; }); fondo.remove(); document.body.classList.remove('dialogo-abierto');
+        cerrarFicha = null;
+        if (restaurar) { ejeId = null; url(); dibujar(); (disparador && disparador.isConnected ? disparador : cuerpo.querySelector('.dim-vertice'))?.focus?.(); }
+      };
+      cerrar.onclick = () => cerrarFicha(true);
+      fondo.addEventListener('click', e => { if (e.target === fondo) cerrarFicha(true); });
+      cerrar.focus();
     }
     function dibujar() {
       cuerpo.replaceChildren();
       if (!dims.grandes.length) { cuerpo.append(el('p', 'Contenido en preparación.', 'en-preparacion')); return; }
       const general = el('section', null, 'dim-general');
-      const eje = datos.estandares.ejes.find(e => e.id === ejeId);
-      dims.grandes.forEach((g, i) => {
-        general.append(tarjetaGeneral(g, i));
-        if (eje && eje.grafico === g.id) general.append(tarjetaDetalle(eje));
-      });
+      dims.grandes.forEach((g, i) => general.append(tarjetaGeneral(g, i)));
       cuerpo.append(general);
       const escala = el('p', 'Escala de 0 a 5: 0 = sin información; 5 = práctica implementada con seguimiento y reporte. Colores de los puntos: por debajo de 3, entre 3 y 4, desde 4.', 'nota dim-escala');
       cuerpo.append(escala);
@@ -309,8 +355,8 @@
       comparada = params.filtros.get('vs') ? evaluaciones.find(e => e.id === params.filtros.get('vs')) || null : null;
       ejeId = datos.estandares.ejes.some(e => e.id === params.filtros.get('eje')) ? params.filtros.get('eje') : null;
       avisoBase(); prepararControles(); url(); dibujar();
-      if (ejeId) cuerpo.querySelector('.dim-detalle')?.scrollIntoView({block: 'start'});
+      if (ejeId) abrirFicha();
     })();
-    return () => { activo = false; if (dialogo) { dialogo.remove(); dialogo = null; } };
+    return () => { activo = false; if (cerrarFicha) cerrarFicha(false); if (dialogo) { dialogo.remove(); dialogo = null; } };
   }});
 }());
