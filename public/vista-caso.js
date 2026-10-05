@@ -137,5 +137,6 @@
     irPregunta.onclick = () => encargoSec.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
   }
 
+  App.icono = icono; // Íconos de línea reutilizables por otros capítulos.
   App.registrarVista('caso', {render});
 }());

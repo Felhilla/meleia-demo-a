@@ -123,73 +123,364 @@
         "sigla": "PRNU",
         "nombre": "Principios Rectores sobre las Empresas y los Derechos Humanos",
         "emisor": "Naciones Unidas",
-        "uso": "Marco de responsabilidad empresarial y de debida diligencia"
+        "uso": "Marco de responsabilidad empresarial y de debida diligencia",
+        "imagen": "img/estandares/prnu.jpg",
+        "porque": "Es el marco global de referencia sobre empresas y derechos humanos: establece que las empresas deben respetar los derechos humanos y que la debida diligencia es el medio para hacerlo.",
+        "requerimientos": [
+          "Un compromiso político aprobado al más alto nivel de la empresa.",
+          "Un proceso de debida diligencia para identificar, prevenir, mitigar y rendir cuentas de los impactos.",
+          "Procesos de reparación y mecanismos de reclamación eficaces (criterios del Principio 31)."
+        ],
+        "relacion": "Es la base de todo el análisis: la Guía OCDE lo convierte en un proceso operativo, el PNA del Perú lo adopta como política pública e IPIECA lo traduce al sector energético."
       },
       {
         "sigla": "OCDE",
         "nombre": "Guía de Debida Diligencia para una Conducta Empresarial Responsable",
         "emisor": "OCDE",
-        "uso": "Seis etapas del proceso de debida diligencia"
+        "uso": "Seis etapas del proceso de debida diligencia",
+        "imagen": "img/estandares/ocde.jpg",
+        "porque": "Convierte la debida diligencia en un proceso de seis etapas que se puede evaluar. Es la estructura con la que se midieron las brechas de gestión.",
+        "requerimientos": [
+          "Incorporar la conducta empresarial responsable en políticas y sistemas de gestión.",
+          "Identificar y evaluar impactos reales y potenciales.",
+          "Cesar, prevenir y mitigar los impactos adversos.",
+          "Hacer seguimiento a la implementación y los resultados.",
+          "Comunicar cómo se abordan los impactos.",
+          "Reparar o cooperar en la reparación cuando corresponda."
+        ],
+        "relacion": "Está alineada con los PRNU; sus seis etapas son los ejes del gráfico de brechas, y GRI 3 y GRI 11 piden reportar este mismo proceso."
       },
       {
         "sigla": "IPIECA",
         "nombre": "Guía de debida diligencia en derechos humanos (2021)",
         "emisor": "IPIECA",
-        "uso": "Referencia sectorial de petróleo y gas"
+        "uso": "Referencia sectorial de petróleo y gas",
+        "imagen": "img/estandares/ipieca.jpg",
+        "porque": "Es la guía sectorial de petróleo, gas y energías alternativas: aterriza la debida diligencia en los riesgos propios del sector.",
+        "requerimientos": [
+          "Integrar los derechos humanos en los sistemas de gestión existentes (seguridad, compras, relacionamiento).",
+          "Evaluar riesgos en contratistas y en la cadena de suministro.",
+          "Relacionarse con las comunidades y habilitar mecanismos de queja."
+        ],
+        "relacion": "Aplica los PRNU y la Guía OCDE al sector y complementa a GRI 11 en la identificación de riesgos y temas."
       },
       {
         "sigla": "PNA",
         "nombre": "Plan Nacional de Acción sobre Empresas y Derechos Humanos 2021–2025",
         "emisor": "Gobierno del Perú",
-        "uso": "Marco nacional de referencia"
+        "uso": "Marco nacional de referencia",
+        "imagen": "img/estandares/pna.jpg",
+        "porque": "Es el marco nacional del país donde opera la empresa: expresa lo que el Estado peruano espera de las empresas en materia de derechos humanos.",
+        "requerimientos": [
+          "Adoptar la debida diligencia en derechos humanos según los PRNU y la Guía OCDE.",
+          "Habilitar mecanismos de reclamación accesibles.",
+          "Prestar atención especial a los grupos en situación de vulnerabilidad."
+        ],
+        "relacion": "Aterriza los PRNU y la Guía OCDE al contexto peruano y da legitimidad local al análisis."
       },
       {
         "sigla": "OIT",
         "nombre": "Convenios fundamentales del trabajo",
         "emisor": "Organización Internacional del Trabajo",
-        "uso": "Temas laborales: trabajo forzoso e infantil, no discriminación, libertad sindical, seguridad y salud"
+        "uso": "Temas laborales: trabajo forzoso e infantil, no discriminación, libertad sindical, seguridad y salud",
+        "imagen": "img/estandares/oit.jpg",
+        "porque": "Define los derechos laborales fundamentales, que concentran buena parte de los riesgos del sector tanto en la operación como en la cadena de valor.",
+        "requerimientos": [
+          "Libertad de asociación y negociación colectiva (C87 y C98).",
+          "Eliminación del trabajo forzoso (C29 y C105).",
+          "Abolición del trabajo infantil (C138 y C182).",
+          "No discriminación en el empleo (C100 y C111).",
+          "Un entorno de trabajo seguro y saludable (C155 y C187)."
+        ],
+        "relacion": "Da contenido a los temas de derechos humanos del gráfico de brechas; la Guía OCDE y GRI 11 remiten a estos convenios."
       },
       {
         "sigla": "GRI 3",
         "nombre": "Temas Materiales 2021",
         "emisor": "Global Reporting Initiative",
-        "uso": "Método de doble materialidad"
+        "uso": "Método de doble materialidad",
+        "imagen": "img/estandares/gri3.jpg",
+        "porque": "Es el estándar universal para determinar los temas materiales y la base del método de doble materialidad.",
+        "requerimientos": [
+          "Entender el contexto de la organización.",
+          "Identificar impactos reales y potenciales.",
+          "Evaluar la importancia de los impactos y priorizar los más significativos.",
+          "Reportar la gestión de cada tema material."
+        ],
+        "relacion": "Recibe los temas sectoriales de GRI 11 y SASB, y usa los riesgos de la debida diligencia (PRNU y OCDE) como evidencia de impacto."
       },
       {
         "sigla": "GRI 11",
         "nombre": "Sector Petróleo y Gas 2021",
         "emisor": "Global Reporting Initiative",
-        "uso": "Temas probables para el sector"
+        "uso": "Temas probables para el sector",
+        "imagen": "img/estandares/gri11.jpg",
+        "porque": "Es el estándar sectorial de petróleo y gas: lista los temas que probablemente son materiales para las empresas del sector.",
+        "requerimientos": [
+          "Revisar los temas sectoriales probables (seguridad, prácticas laborales, comunidades, anticorrupción, emisiones, entre otros).",
+          "Justificar los temas que no se consideren materiales.",
+          "Reportar la gestión de cada tema material."
+        ],
+        "relacion": "Alimenta la lista larga de temas de materialidad y comparte los temas laborales con los convenios de la OIT."
       },
       {
         "sigla": "SASB",
         "nombre": "Gas Utilities & Distributors",
         "emisor": "IFRS · ISSB",
-        "uso": "Temas financieramente relevantes de la industria"
+        "uso": "Temas financieramente relevantes de la industria",
+        "imagen": "img/estandares/sasb.jpg",
+        "porque": "Identifica los temas de sostenibilidad con efecto financiero para los inversionistas de la industria de distribución de gas.",
+        "requerimientos": [
+          "Asequibilidad de la energía.",
+          "Integridad de la infraestructura de entrega de gas.",
+          "Eficiencia en el uso final y emisiones."
+        ],
+        "relacion": "Alimenta la materialidad financiera y complementa la mirada de impacto de los estándares GRI."
       }
     ],
     "actividades": [
       {
         "valor": "267",
         "etiqueta": "actores consultados en el diálogo sobre derechos humanos",
-        "detalle": "Entrevistas, talleres y encuestas con colaboradores, distribuidores, proveedores, clientes, comunidades y autoridades."
+        "detalle": "Entrevistas, talleres y encuestas con colaboradores, distribuidores, proveedores, clientes, comunidades y autoridades.",
+        "icono": "personas",
+        "objetivo": "Escuchar a quienes viven los riesgos para identificarlos, entender su gravedad y validarlos con ellos.",
+        "herramientas": [
+          "Entrevistas semiestructuradas",
+          "Talleres de diálogo",
+          "Encuestas",
+          "Guías de observación en planta"
+        ],
+        "participantes": "Colaboradores, distribuidores, proveedores, clientes, comunidades y autoridades.",
+        "referencia": "Guías CERALC (OCDE, OIT y ACNUDH) y herramientas de Shift para aplicar los PRNU."
       },
       {
         "valor": "4",
         "etiqueta": "empresas pares en el análisis de buenas prácticas",
-        "detalle": "Referentes del sector energético en la región y a nivel global."
+        "detalle": "Referentes del sector energético en la región y a nivel global.",
+        "icono": "empresas",
+        "objetivo": "Comparar la gestión de la empresa con referentes del sector e identificar riesgos y buenas prácticas sectoriales.",
+        "herramientas": [
+          "Análisis documental de informes de sostenibilidad y de derechos humanos",
+          "Matriz comparativa de prácticas",
+          "Revisión de marcos sectoriales (IPIECA y GRI 11)"
+        ],
+        "participantes": "Cuatro referentes del sector energético, en la región y a nivel global.",
+        "referencia": "Guía IPIECA (2021) y GRI 11."
       },
       {
         "valor": "138",
         "etiqueta": "personas en la consulta de materialidad",
-        "detalle": "Seis grupos de interés calificaron el impacto de cada tema."
+        "detalle": "Seis grupos de interés calificaron el impacto de cada tema.",
+        "icono": "encuesta",
+        "objetivo": "Medir la materialidad de impacto desde la mirada de los grupos de interés.",
+        "herramientas": [
+          "Conversación estructurada",
+          "Calificación de 0 a 5 de escala, alcance, irremediabilidad y probabilidad de cada tema"
+        ],
+        "participantes": "Seis grupos de interés: colaboradores, distribuidores, proveedores, clientes, comunidades y autoridades.",
+        "referencia": "GRI 3: Temas Materiales 2021."
       },
       {
         "valor": "5",
         "etiqueta": "funciones en el taller financiero",
-        "detalle": "Finanzas, comercial, operaciones, sostenibilidad y gestión de personas."
+        "detalle": "Finanzas, comercial, operaciones, sostenibilidad y gestión de personas.",
+        "icono": "taller",
+        "objetivo": "Evaluar la materialidad financiera con quienes toman las decisiones del negocio.",
+        "herramientas": [
+          "Taller con el comité de sostenibilidad",
+          "Calificación de 0 a 5 del impacto en la rentabilidad y en el gasto operativo"
+        ],
+        "participantes": "Finanzas, comercial, operaciones, sostenibilidad y gestión de personas.",
+        "referencia": "GRI 3 y SASB Gas Utilities & Distributors."
       }
-    ]
+    ],
+    "flujo": [
+      {
+        "numero": 1,
+        "id": "brechas",
+        "titulo": "Brechas frente a estándares",
+        "pregunta": "¿Qué tan madura es la gestión frente a la Guía OCDE y a los temas de derechos humanos?",
+        "destino": "#/ddhh/dimensiones"
+      },
+      {
+        "numero": 2,
+        "id": "riesgos",
+        "titulo": "Riesgos en DDHH",
+        "pregunta": "¿Qué impactos puede generar la operación y su cadena de valor, y qué tan graves son?",
+        "destino": "#/ddhh/riesgos"
+      },
+      {
+        "numero": 3,
+        "id": "materialidad",
+        "titulo": "Doble materialidad",
+        "pregunta": "Con esa evidencia, ¿qué temas importan para las personas y para el negocio?",
+        "destino": "#/materialidad/doble"
+      },
+      {
+        "numero": 4,
+        "id": "plan",
+        "titulo": "Plan de acción",
+        "pregunta": "¿Qué se hace para cerrar las brechas y gestionar los riesgos, quién lo hace y cuándo?",
+        "destino": "#/plan"
+      }
+    ],
+    "calificacion": {
+      "semaforo": {
+        "rojo": "Rojo",
+        "naranja": "Naranja",
+        "ambar": "Ámbar",
+        "amarillo": "Amarillo",
+        "verde": "Verde",
+        "gris": "Gris"
+      },
+      "brechas": {
+        "titulo": "Brechas frente a estándares",
+        "pregunta": "¿Qué tan madura es la gestión en cada criterio?",
+        "columna": "Nivel de madurez",
+        "niveles": [
+          {
+            "valor": 5,
+            "nombre": "Optimizado",
+            "color": "verde"
+          },
+          {
+            "valor": 4,
+            "nombre": "Gestionado",
+            "color": "verde"
+          },
+          {
+            "valor": 3,
+            "nombre": "En gestión",
+            "color": "ambar"
+          },
+          {
+            "valor": 2,
+            "nombre": "Inicial",
+            "color": "naranja"
+          },
+          {
+            "valor": 1,
+            "nombre": "Declarativo",
+            "color": "rojo"
+          },
+          {
+            "valor": 0,
+            "nombre": "Sin información",
+            "color": "rojo"
+          }
+        ],
+        "nota": "Cada criterio se califica con la evidencia documental y las entrevistas; el puntaje de una dimensión es el promedio de sus criterios."
+      },
+      "riesgos": {
+        "titulo": "Riesgos en derechos humanos",
+        "pregunta": "¿Qué tan grave es cada riesgo y qué tan probable es que ocurra?",
+        "pasos": [
+          {
+            "numero": 1,
+            "titulo": "Se califica la gravedad en tres parámetros",
+            "texto": "Cada riesgo recibe de 1 a 3 en escala (qué tan serio es el daño), alcance (a cuántas personas afecta) e irremediabilidad (qué tan difícil es reparar el daño)."
+          },
+          {
+            "numero": 2,
+            "titulo": "Se promedia y se obtiene el nivel de gravedad",
+            "texto": "El promedio de los tres parámetros define la gravedad: Alta desde 2,5; Media desde 1,5; Baja por debajo de 1,5."
+          },
+          {
+            "numero": 3,
+            "titulo": "Se evalúa la probabilidad según los controles",
+            "texto": "Qué tan probable es que el riesgo se materialice, según los controles que hoy tiene la empresa."
+          },
+          {
+            "numero": 4,
+            "titulo": "Se identifica la vinculación",
+            "texto": "Si la empresa causa, contribuye o está directamente vinculada al impacto. Esto no cambia la gravedad: define qué tipo de respuesta le corresponde."
+          }
+        ],
+        "probabilidad": [
+          {
+            "nivel": "Alta",
+            "color": "rojo",
+            "texto": "No hay un control efectivo ni seguimiento, o la gestión es reactiva y no preventiva; el riesgo tiene alto potencial de materializarse."
+          },
+          {
+            "nivel": "Media",
+            "color": "ambar",
+            "texto": "Hay un control, pero no cubre todo lo necesario para proteger el derecho ni tiene seguimiento desde la gestión de derechos humanos."
+          },
+          {
+            "nivel": "Baja",
+            "color": "amarillo",
+            "texto": "Hay un control efectivo y relevante, aunque todavía no integrado a un sistema de debida diligencia."
+          }
+        ],
+        "vinculacion": [
+          {
+            "tipo": "causa",
+            "nombre": "Causa",
+            "color": "rojo",
+            "texto": "Las actividades de la empresa bastan por sí solas para generar el impacto.",
+            "respuesta": "Cesar, prevenir o mitigar; reparar si el impacto ocurrió."
+          },
+          {
+            "tipo": "contribuye",
+            "nombre": "Contribuye",
+            "color": "ambar",
+            "texto": "Sus actividades, junto con las de otros, causan el impacto, o lo facilitan o incentivan de forma sustancial.",
+            "respuesta": "Cesar la contribución, prevenir, mitigar y usar su influencia; colaborar en la reparación."
+          },
+          {
+            "tipo": "directamente-vinculada",
+            "nombre": "Directamente vinculada",
+            "color": "amarillo",
+            "texto": "El impacto lo causa otra entidad, pero está ligado a sus productos, servicios u operaciones por una relación comercial.",
+            "respuesta": "Usar su influencia para que la otra entidad prevenga o mitigue el impacto."
+          }
+        ],
+        "ejemplo": {
+          "riesgo": "riesgo-15",
+          "texto": "Corrupción o ilícitos corporativos: escala 3, alcance 3, irremediabilidad 3 → promedio 3,0 → gravedad Alta. Sus controles son efectivos (sistema antisoborno certificado) → probabilidad Baja. La empresa lo causaría directamente → vinculación Causa."
+        }
+      },
+      "materialidad": {
+        "titulo": "Doble materialidad",
+        "pregunta": "¿Qué tan importante es cada tema para las personas y para el negocio?",
+        "columna": "Qué significa la calificación",
+        "niveles": [
+          {
+            "valor": 5,
+            "nombre": "Muy alto",
+            "color": "rojo"
+          },
+          {
+            "valor": 4,
+            "nombre": "Alto",
+            "color": "naranja"
+          },
+          {
+            "valor": 3,
+            "nombre": "Medio",
+            "color": "ambar"
+          },
+          {
+            "valor": 2,
+            "nombre": "Bajo",
+            "color": "amarillo"
+          },
+          {
+            "valor": 1,
+            "nombre": "Muy bajo",
+            "color": "verde"
+          },
+          {
+            "valor": 0,
+            "nombre": "Nulo",
+            "color": "gris"
+          }
+        ],
+        "nota": "Los grupos de interés califican el impacto (escala, alcance, irremediabilidad y probabilidad) y el comité califica el efecto financiero (rentabilidad y gasto operativo). Un tema es material si supera el umbral —el promedio de todos los temas— en al menos una de las dos dimensiones."
+      }
+    }
   },
   "resultados": {
     "titular": "La empresa tiene políticas, pero todavía no un sistema de debida diligencia",

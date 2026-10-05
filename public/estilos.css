@@ -24,6 +24,9 @@
   --sobre-principal: #F8F6F1;
   --alta: #8A3F2B; --media: #7A5A12; --baja: #2F5548;
   --alta-fondo: #F5E4DC; --media-fondo: #F1E9D2; --baja-fondo: #DCE7DE;
+  /* Semáforo de los documentos base (sobrio, sin neón). Texto sobre el color: --sobre-semaforo. */
+  --sem-rojo: #B9503A; --sem-naranja: #D27F2F; --sem-ambar: #DDAE3E; --sem-amarillo: #E6D267; --sem-verde: #5A9452; --sem-gris: #AEB5AF;
+  --sem-rojo-fondo: #F6E1DA; --sem-naranja-fondo: #F8E6D3; --sem-ambar-fondo: #F7EDD2; --sem-amarillo-fondo: #F6F1D3; --sem-verde-fondo: #E1EEDD; --sem-gris-fondo: #ECEEEC;
   /* Ritmo */
   --e1: 4px; --e2: 8px; --e3: 16px; --e4: 24px; --e5: 32px; --e6: 48px; --e7: 72px; --e8: 112px;
   --ancho: 1200px; --radio: 14px; --radio-chico: 8px;
@@ -49,6 +52,7 @@
   --texto: #F1EEE6; --texto-suave: #B9C7BD; --linea: #8DA397; --sobre-principal: #0F1D17;
   --alta: #EDB9A3; --media: #E3CD8F; --baja: #B8D6C6;
   --alta-fondo: #3E2A22; --media-fondo: #352F1E; --baja-fondo: #24392F;
+    --sem-rojo-fondo: #43281F; --sem-naranja-fondo: #45311D; --sem-ambar-fondo: #423719; --sem-amarillo-fondo: #3D3A1E; --sem-verde-fondo: #233A24; --sem-gris-fondo: #2A322E;
   --sombra: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 25%);
   --sombra-alta: 0 2px 4px rgb(0 0 0 / 35%), 0 16px 40px rgb(0 0 0 / 35%);
 }
@@ -62,6 +66,7 @@
     --texto: #F1EEE6; --texto-suave: #B9C7BD; --linea: #8DA397; --sobre-principal: #0F1D17;
     --alta: #EDB9A3; --media: #E3CD8F; --baja: #B8D6C6;
     --alta-fondo: #3E2A22; --media-fondo: #352F1E; --baja-fondo: #24392F;
+    --sem-rojo-fondo: #43281F; --sem-naranja-fondo: #45311D; --sem-ambar-fondo: #423719; --sem-amarillo-fondo: #3D3A1E; --sem-verde-fondo: #233A24; --sem-gris-fondo: #2A322E;
     --sombra: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 25%);
     --sombra-alta: 0 2px 4px rgb(0 0 0 / 35%), 0 16px 40px rgb(0 0 0 / 35%);
   }
