@@ -58,89 +58,138 @@
   sistemaTema?.addEventListener?.('change', aplicarTema);
   const el = App.el;
   let limpieza;
-  const pasos = [['estandares', 'Alineación con estándares'], ['materialidad', 'Doble materialidad'], ['riesgos', 'Riesgos'], ['plan', 'Plan de acción']];
-  function portada(contenedor, datos) {
-    const hero = el('section', null, 'hero');
-    hero.append(el('p', 'Sostenibilidad · Riesgo preventivo · Debida diligencia', 'eyebrow'), el('h1', 'Inteligencia para decidir en sostenibilidad'), el('p', 'Del cumplimiento de estándares a las decisiones: conecte brechas, temas materiales, riesgos y acciones en una sola plataforma viva.', 'intro'));
-    contenedor.append(hero);
-    const modulos = el('div', null, 'modulos');
-    const activo = el('section', null, 'modulo activo');
-    const entrada = el('a', 'Demo A · Debida diligencia, estándares y doble materialidad'); entrada.href = '#/ddhh/estandares';
-    const titulo = el('h2'); titulo.append(entrada); activo.append(titulo);
-    const cifras = el('div', null, 'cifras');
-    const plan = App.obtenerPlan();
-    const avance = Plan.resumen(plan, datos.planConfig).avanceGlobal;
-    const evaluada = datos.evaluaciones.slice().sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id.localeCompare(a.id))[0];
-    const valores = [[datos.estandares.ejes.filter(e => typeof evaluada?.puntajes[e.id] === 'number').length, 'ejes de estándares evaluados']];
-    if (Array.isArray(datos.materialidad?.temas) && datos.materialidadConfig && window.Materialidad) {
-      try { valores.push([Materialidad.listaCorta(datos.materialidad.temas, datos.materialidadConfig).length, 'temas materiales']); } catch (error) { /* sin cifra si la configuración es inválida */ }
+
+  /* ---------- Rutas del relato ----------
+     #/                          01 El caso
+     #/metodologia               02 Metodología
+     #/resultados                03 Resultados generales
+     #/ddhh/{dimensiones|riesgos}[/riesgo-xx]           04 Debida diligencia en DDHH
+     #/materialidad/{impacto|financiera|doble}[/tema-xx] 05 Doble materialidad
+     #/plan                      06 Plan de acción
+     Las direcciones anteriores (#/ddhh/estandares, #/ddhh/materialidad, #/ddhh/plan) se redirigen. */
+  const VISTAS = {
+    'caso': 'caso', 'metodologia': 'metodologia', 'resultados': 'resultados',
+    'ddhh/dimensiones': 'estandares', 'ddhh/riesgos': 'riesgos',
+    'materialidad/impacto': 'materialidad-impacto', 'materialidad/financiera': 'materialidad-financiera', 'materialidad/doble': 'materialidad',
+    'plan': 'plan'
+  };
+  const HEREDADAS = [
+    [/^\/ddhh\/estandares(\/.*)?$/, () => '/ddhh/dimensiones'],
+    [/^\/ddhh\/materialidad(\/tema-\d{2})?$/, m => '/materialidad/doble' + (m[1] || '')],
+    [/^\/ddhh\/plan$/, () => '/plan'],
+    [/^\/ddhh\/?$/, () => '/ddhh/dimensiones'],
+    [/^\/materialidad\/?$/, () => '/materialidad/impacto']
+  ];
+  App.resolverRuta = function (hash, datos) {
+    const [crudo, query = ''] = (hash.replace(/^#/, '') || '/').split('?');
+    const ruta = crudo || '/';
+    for (const [patron, destino] of HEREDADAS) {
+      const m = ruta.match(patron);
+      if (m) return {redirigir: '#' + destino(m) + (query ? '?' + query : '')};
     }
-    valores.push([datos.riesgos.length, 'riesgos en DDHH'], [App.numero(avance, {maximumFractionDigits: 1}) + ' %', plan.some(a => a.seguimiento_ejemplo) ? 'avance del plan (ejemplo)' : 'avance del plan']);
-    valores.forEach(([n, t]) => {
-      const c = el('div'); c.append(el('strong', n), el('span', t)); cifras.append(c);
-    });
-    const recorrido = el('ol', null, 'recorrido'); recorrido.setAttribute('aria-label', 'Recorrido del Demo A');
-    pasos.forEach(([ruta], i) => {
-      const item = el('li'), enlace = el('a', ['Estándares', 'Materialidad', 'Riesgos', 'Plan'][i]);
-      enlace.href = '#/ddhh/' + ruta; item.append(enlace); recorrido.append(item);
-    });
-    activo.append(cifras, recorrido); modulos.append(activo);
-    const pendiente = el('section', null, 'modulo pendiente');
-    pendiente.append(el('span', 'En desarrollo', 'eyebrow'), el('h2', 'Demo B · Gestión de riesgos y mapeo de actores'), el('p', 'Una matriz de riesgos corporativos vinculada a los actores que los generan o los sufren.'));
-    modulos.append(pendiente);
-    contenedor.append(modulos);
+    let m;
+    if (ruta === '/') return {capitulo: 'caso', clave: 'caso', query};
+    if ((m = ruta.match(/^\/(metodologia|resultados|plan)$/))) return {capitulo: m[1], clave: m[1], query};
+    if ((m = ruta.match(/^\/ddhh\/(dimensiones|riesgos)(?:\/(riesgo-\d+))?$/))) {
+      if (m[2] && (m[1] !== 'riesgos' || !datos.riesgos.some(r => r.id === m[2]))) return {redirigir: '#/ddhh/riesgos'};
+      return {capitulo: 'ddhh', sub: m[1], clave: 'ddhh/' + m[1], id: m[2], query};
+    }
+    if ((m = ruta.match(/^\/materialidad\/(impacto|financiera|doble)(?:\/(tema-\d{2}))?$/))) {
+      const temas = datos.materialidad?.temas;
+      if (m[2] && Array.isArray(temas) && !temas.some(t => t.id === m[2])) return {redirigir: '#/materialidad/' + m[1]};
+      return {capitulo: 'materialidad', sub: m[1], clave: 'materialidad/' + m[1], id: m[2], query};
+    }
+    return {redirigir: '#/'};
+  };
+  function rutaCapitulo(cap) {
+    if (cap.id === 'caso') return '#/';
+    return '#/' + cap.id + (cap.subcapitulos ? '/' + cap.subcapitulos[0].id : '');
   }
+  function capitulos() { return App.datos.caso?.capitulos || []; }
+
+  function pintarIndice(actual) {
+    const nav = document.getElementById('capitulos');
+    const ol = el('ol');
+    capitulos().forEach(cap => {
+      const li = el('li'), a = el('a');
+      a.href = rutaCapitulo(cap);
+      a.append(el('span', cap.numero), document.createTextNode(cap.titulo));
+      if (cap.id === actual) a.setAttribute('aria-current', 'page');
+      li.append(a); ol.append(li);
+    });
+    nav.replaceChildren(ol); nav.hidden = false;
+    nav.querySelector('[aria-current="page"]')?.scrollIntoView?.({block: 'nearest', inline: 'nearest'});
+  }
+
+  function cabezaCapitulo(cap, sub) {
+    const cabeza = el('header', null, 'capitulo-cabeza');
+    cabeza.append(el('p', 'Capítulo ' + cap.numero, 'antetitulo'), el('h1', cap.titulo), el('p', cap.bajada, 'bajada'));
+    if (cap.subcapitulos) {
+      const subs = el('nav', null, 'subcapitulos'); subs.setAttribute('aria-label', 'Secciones de ' + cap.titulo);
+      cap.subcapitulos.forEach(s => {
+        const a = el('a', s.titulo); a.href = '#/' + cap.id + '/' + s.id;
+        if (s.id === sub) a.setAttribute('aria-current', 'page');
+        subs.append(a);
+      });
+      cabeza.append(subs);
+    }
+    return cabeza;
+  }
+
+  function continuar(cap) {
+    const lista = capitulos(), i = lista.findIndex(c => c.id === cap.id);
+    const nav = el('nav', null, 'continuar'); nav.setAttribute('aria-label', 'Continuar el recorrido');
+    const enlace = (c, rotulo, clase) => {
+      const a = el('a', null, clase); a.href = rutaCapitulo(c);
+      a.append(el('small', rotulo), el('strong', c.numero + ' · ' + c.titulo)); return a;
+    };
+    if (i > 0) nav.append(enlace(lista[i - 1], '← Anterior', 'anterior'));
+    if (i < lista.length - 1) nav.append(enlace(lista[i + 1], 'Siguiente →', 'siguiente'));
+    return nav;
+  }
+
+  // Temporal: las vistas anteriores traen su propio título y «Paso N de 4»; el capítulo ya los da.
+  function depurarVistaHeredada(raiz) {
+    raiz.querySelectorAll?.('h1').forEach((h, i) => { if (i === 0 && !h.closest('.panel')) h.remove(); });
+    raiz.querySelectorAll?.('p').forEach(p => { if (/^Paso \d de 4/.test(p.textContent || '') || /^DEMO A/.test(p.textContent || '')) p.remove(); });
+  }
+
+  function enPreparacion(contenedor, titulo) {
+    const caja = el('section', null, 'en-preparacion');
+    caja.append(el('h2', titulo), el('p', 'Esta sección se está construyendo. Mientras tanto puede continuar el recorrido.'));
+    contenedor.append(caja);
+  }
+
   function enrutar() {
     if (!App.datos) return;
-    const focoAnterior = document.activeElement;
-    const focoId = focoAnterior?.id;
-    const focoRiesgo = focoAnterior?.dataset.riesgo || document.querySelector('[role="dialog"]')?.dataset.riesgo;
     const habiaDialogo = !!document.querySelector('[role="dialog"]');
+    const r = App.resolverRuta(location.hash, App.datos);
+    if (r.redirigir) { location.replace(location.pathname + location.search + r.redirigir); return; }
     if (typeof limpieza === 'function') limpieza();
     limpieza = null;
-    const hash = location.hash.slice(1) || '/';
-    const [ruta, query = ''] = hash.split('?');
-    const match = ruta.match(/^\/ddhh\/(riesgos|estandares|materialidad|plan)(?:\/([^/]+))?$/);
-    const idValido = !match?.[2] || (match[1] === 'riesgos' && /^riesgo-\d+$/.test(match[2]) && App.datos.riesgos.some(r => r.id === match[2])) ||
-      (match[1] === 'materialidad' && (Array.isArray(App.datos.materialidad?.temas) ? App.datos.materialidad.temas.some(t => t.id === match[2]) : /^tema-\d{2}$/.test(match[2])));
-    if (ruta !== '/' && (!match || !idValido)) {
-      location.replace(location.pathname + location.search + '#/'); return;
-    }
-    const contenedor = document.getElementById('contenido');
-    const nav = document.getElementById('pestanas');
-    contenedor.replaceChildren(); nav.replaceChildren(); nav.hidden = !match;
-    if (match) {
-      nav.setAttribute('role', 'tablist');
-      pasos.forEach(([nombre, titulo]) => {
-        const a = el('a', titulo); a.href = '#/ddhh/' + nombre; a.id = 'tab-' + nombre;
-        a.setAttribute('role', 'tab'); a.setAttribute('aria-selected', String(nombre === match[1]));
-        a.setAttribute('aria-controls', 'contenido'); a.tabIndex = nombre === match[1] ? 0 : -1;
-        a.addEventListener('keydown', event => {
-          const tabs = [...nav.children]; let i = tabs.indexOf(a);
-          if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-          event.preventDefault();
-          i = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (i + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-          location.hash = tabs[i].hash;
-        }); nav.append(a);
-      });
-      contenedor.setAttribute('role', 'tabpanel'); contenedor.setAttribute('aria-labelledby', 'tab-' + match[1]);
-      limpieza = vistas.get(match[1]).render(contenedor, App.datos, {id: match[2], filtros: new URLSearchParams(query)});
-      const indice = pasos.findIndex(([nombre]) => nombre === match[1]);
-      const siguiente = el('a', indice < 3 ? 'Siguiente: ' + pasos[indice + 1][1] + ' →' : 'Volver a la portada →', 'siguiente-paso');
-      siguiente.href = indice < 3 ? '#/ddhh/' + pasos[indice + 1][0] : '#/';
-      contenedor.append(siguiente);
+    const contenido = document.getElementById('contenido');
+    contenido.replaceChildren();
+    const cap = capitulos().find(c => c.id === r.capitulo);
+    pintarIndice(r.capitulo);
+    document.title = (cap ? cap.titulo + ' · ' : '') + 'Caso ' + App.datos.empresa.nombre_corto + ' · GH Studio × Meleia';
+    if (cap && cap.id !== 'caso') contenido.append(cabezaCapitulo(cap, r.sub));
+    const cuerpo = el('div', null, 'vista vista-' + r.clave.replace('/', '-'));
+    contenido.append(cuerpo);
+    const nombreVista = VISTAS[r.clave];
+    const vista = vistas.get(nombreVista);
+    if (vista) {
+      limpieza = vista.render(cuerpo, App.datos, {id: r.id, sub: r.sub, capitulo: r.capitulo, filtros: new URLSearchParams(r.query)});
+      if (!['caso', 'metodologia', 'resultados'].includes(nombreVista)) depurarVistaHeredada(cuerpo);
     } else {
-      contenedor.removeAttribute('role'); contenedor.removeAttribute('aria-labelledby'); portada(contenedor, App.datos);
+      enPreparacion(cuerpo, (cap?.subcapitulos?.find(s => s.id === r.sub)?.titulo) || cap?.titulo || 'Sección');
     }
-    if (!document.querySelector('[role="dialog"]')) {
-      const restaurar = focoId?.startsWith('tab-') ? nav.querySelector('[aria-selected="true"]') : focoId && document.getElementById(focoId);
-      const riesgo = focoRiesgo && [...contenedor.querySelectorAll('[data-riesgo]')].find(n => n.dataset.riesgo === focoRiesgo);
-      (restaurar || riesgo || contenedor).focus({preventScroll: !habiaDialogo});
-    }
+    if (cap) contenido.append(continuar(cap));
+    if (!document.querySelector('[role="dialog"]')) contenido.focus({preventScroll: !habiaDialogo});
   }
+
   document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('.saltar').onclick = event => { event.preventDefault(); document.getElementById('contenido').focus(); };
-    const archivos = {empresa: 'config/empresa-config.json', riesgos: 'data/riesgos.json', plan: 'data/plan.json', estandares: 'data/estandares.json', evaluaciones: 'data/evaluaciones.json', criticidad: 'config/criticidad-config.json', umbrales: 'config/umbrales-config.json', planConfig: 'config/plan-config.json'};
+    const archivos = {empresa: 'config/empresa-config.json', caso: 'data/caso.json', riesgos: 'data/riesgos.json', plan: 'data/plan.json', estandares: 'data/estandares.json', evaluaciones: 'data/evaluaciones.json', criticidad: 'config/criticidad-config.json', planConfig: 'config/plan-config.json', umbrales: 'config/umbrales-config.json'};
     try {
       const opcionales = {materialidad: 'data/materialidad.json', materialidadConfig: 'config/materialidad-config.json'};
       App.datos = Object.fromEntries(await Promise.all(Object.entries({...archivos, ...opcionales}).map(async ([clave, ruta]) => {
@@ -153,7 +202,9 @@
           throw error;
         }
       })));
-      document.getElementById('contexto-empresa').textContent = `${App.datos.empresa.nombre} · ${App.datos.empresa.etiqueta_ficticia}`;
+      document.getElementById('caso-nombre').textContent = App.datos.empresa.nombre;
+      document.getElementById('caso-ficticia').textContent = App.datos.empresa.ficticia ? 'Empresa ficticia' : '';
+      document.getElementById('caso-ficticia').title = App.datos.empresa.etiqueta_ficticia;
       const estatico = App.datos.plan;
       let espera;
       try {
@@ -170,7 +221,7 @@
       window.addEventListener('hashchange', enrutar); enrutar();
     } catch (error) {
       const aviso = el('section', null, 'error'); aviso.setAttribute('role', 'alert');
-      aviso.append(el('h1', 'No pudimos cargar la plataforma'), el('p', 'Comprueba la conexión y vuelve a intentarlo. Si el problema continúa, contacta al equipo de GH Estudios.'));
+      aviso.append(el('h1', 'No pudimos cargar la plataforma'), el('p', 'Comprueba la conexión y vuelve a intentarlo. Si el problema continúa, contacta al equipo de GH Studio × Meleia.'));
       const boton = el('button', 'Volver a intentar'); boton.onclick = () => location.reload(); aviso.append(boton);
       document.getElementById('contenido').replaceChildren(aviso);
     }

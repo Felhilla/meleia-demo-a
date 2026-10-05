@@ -136,7 +136,7 @@
     bloque('Medidas de control actuales', r.medidas_control); bloque('Análisis de controles', r.analisis_controles); bloque('Responsables', r.responsables.join(' · '));
     panel.append(el('h3', 'Acciones del plan'));
     Riesgos.accionesDe(r.id, App.obtenerPlan()).forEach(a => {
-      const card = el('article', null, 'accion'); const link = el('a', a.titulo); link.href = '#/ddhh/plan?accion=' + encodeURIComponent(a.id);
+      const card = el('article', null, 'accion'); const link = el('a', a.titulo); link.href = '#/plan?accion=' + encodeURIComponent(a.id);
       card.append(link, el('p', datos.planConfig.componentes.find(c => c.id === a.componente)?.nombre || etiqueta(a.componente)), el('p', `${etiqueta(a.estado)} · Plazo: ${a.plazo}`));
       if (a.campos_propuestos?.length) card.append(aviso('Propuesta', 'Campos propuestos pendientes de validación: ' + a.campos_propuestos.map(etiqueta).join(', ') + '.'));
       if (a.vinculos_estimados) card.append(aviso('Estimado', 'Esta acción contiene vínculos estimados con riesgos o ejes; requieren confirmación.'));

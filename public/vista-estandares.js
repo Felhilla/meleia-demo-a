@@ -64,7 +64,7 @@
     raiz.append(aviso, controles, cuerpo); contenedor.append(raiz);
     function url() {
       const q = new URLSearchParams({eval: principal.id, vs: comparada?.id || '', eje: ejeSeleccionado.id});
-      history.replaceState(null, '', '#/ddhh/estandares?' + q);
+      history.replaceState(null, '', '#/ddhh/dimensiones?' + q);
     }
     function avisoBase() { aviso.textContent = sinBase ? respaldo : ''; aviso.hidden = !sinBase; }
     function seleccionar(eje) {
@@ -154,7 +154,7 @@
           const vinculadas = plan.filter(a => a.ejes?.includes(idEje));
           if (!vinculadas.length) acciones.append(el('p', 'No hay acciones vinculadas a este eje.'));
           vinculadas.forEach(a => {
-            const tarjeta = el('article', null, 'accion'), enlace = el('a', a.titulo); enlace.href = '#/ddhh/plan?accion=' + encodeURIComponent(a.id);
+            const tarjeta = el('article', null, 'accion'), enlace = el('a', a.titulo); enlace.href = '#/plan?accion=' + encodeURIComponent(a.id);
             tarjeta.append(enlace, el('p', `${datos.planConfig.componentes.find(c => c.id === a.componente)?.nombre || a.componente} · Estado: ${a.estado.replace(/-/g, ' ')}`));
             if (a.vinculos_estimados) tarjeta.append(el('span', 'Vínculo estimado', 'aviso')); acciones.append(tarjeta);
           });

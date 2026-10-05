@@ -26,7 +26,7 @@
     const temas = data.temas, query = new URLSearchParams(params.filtros), limites = M.umbrales(temas, cfg);
     const tema = id => temas.find(t => t.id === id);
     const cuadrante = id => cfg.cuadrantes.find(c => c.id === id)?.etiqueta || id;
-    const ruta = (id = '') => '#/ddhh/materialidad' + (id ? '/' + id : '') + (query.size ? '?' + query.toString() : '');
+    const ruta = (id = '') => '#/materialidad/doble' + (id ? '/' + id : '') + (query.size ? '?' + query.toString() : '');
     function cambiar(k, v) {v ? query.set(k, v) : query.delete(k); location.hash = ruta(params.id);}
     function linkTema(t, principal = false) {const a = enlace(t.id.slice(-2) + ' · ' + t.nombre, ruta(t.id)); if (principal) a.id = 'mat-fila-' + t.id; return a;}
     const cruzar = t => M.cruce(t, {riesgos: datos.riesgos, estandares: datos.estandares, plan: App.obtenerPlan()});
@@ -54,7 +54,7 @@
       if (k !== 'orden') opciones = [['', 'Todos'], ...opciones];
       if (query.get(k) && !opciones.some(([v]) => v === query.get(k))) opciones.push([query.get(k), query.get(k)]);
       opciones.forEach(([v, texto]) => {const o = el('option', texto); o.value = v; select.append(o);}); select.value = query.get(k) || (k === 'orden' ? 'impacto' : ''); select.onchange = () => cambiar(k, select.value); label.append(select); filtros.append(label);
-    }); filtros.append(enlace('Limpiar filtros', '#/ddhh/materialidad')); raiz.append(filtros);
+    }); filtros.append(enlace('Limpiar filtros', '#/materialidad/doble')); raiz.append(filtros);
     const visibles = M.ordenar(M.filtrar(filas, temas, Object.fromEntries(query)), query.get('orden'));
     const resultado = el('section', null, 'superficie mat-resultado'); resultado.id = 'mat-resultado'; resultado.tabIndex = -1;
     resultado.append(el('h2', 'Matriz de doble materialidad'));
@@ -95,7 +95,7 @@
     if (activa === 5) {panel.append(el('p', cfg.umbral.metodo === 'fijo' ? 'Método: valor fijo de ' + numero(cfg.umbral.valor_fijo) : 'Método: promedio del universo completo de temas en cada dimensión. Los filtros no cambian los umbrales.'), el('p', regla), el('p', 'Convergencia: ●●○ indica que dos de tres variables (impacto, rentabilidad y gasto operativo) superan sus respectivas medias del universo. Es un indicador de robustez, no otro criterio de materialidad.')); const volver = el('button', 'Volver a la matriz'); volver.onclick = () => {resultado.focus({preventScroll: true}); resultado.scrollIntoView({behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});}; panel.append(volver);}
     if (activa === 6) {
       panel.append(el('p', 'La materialidad de impacto se alimenta de la debida diligencia: los riesgos identificados y calificados sustentan la priorización.'));
-      panel.append(tabla('De los temas materiales a la acción', ['Tema', 'Riesgos', 'Ejes', 'Acciones'], filas.filter(f => f.material).map(f => {const t = tema(f.id), c = cruzar(t); return [linkTema(t), ...['riesgos', 'ejes', 'acciones'].map(k => {const caja = el('div'); caja.append(enlace(`${c[k].length} ${k}: ver cruce`, ruta(t.id))); c[k].forEach(v => caja.append(enlace(v.nombre || v.titulo, k === 'riesgos' ? '#/ddhh/riesgos/' + v.id : k === 'ejes' ? '#/ddhh/estandares?eje=' + encodeURIComponent(v.id) : '#/ddhh/plan?accion=' + encodeURIComponent(v.id)))); return caja;})];})));
+      panel.append(tabla('De los temas materiales a la acción', ['Tema', 'Riesgos', 'Ejes', 'Acciones'], filas.filter(f => f.material).map(f => {const t = tema(f.id), c = cruzar(t); return [linkTema(t), ...['riesgos', 'ejes', 'acciones'].map(k => {const caja = el('div'); caja.append(enlace(`${c[k].length} ${k}: ver cruce`, ruta(t.id))); c[k].forEach(v => caja.append(enlace(v.nombre || v.titulo, k === 'riesgos' ? '#/ddhh/riesgos/' + v.id : k === 'ejes' ? '#/ddhh/dimensiones?eje=' + encodeURIComponent(v.id) : '#/plan?accion=' + encodeURIComponent(v.id)))); return caja;})];})));
     }
     proceso.append(tabs, panel); raiz.append(proceso);
     if (render.etapaPendiente) {panel.classList.add('mat-cambio'); render.etapaPendiente = false;}
@@ -108,8 +108,8 @@
     dialogo.append(el('h3', 'Importancia del impacto por grupo')); const grupos = M.porGrupo(t, cfg); data.grupos.forEach(g => dialogo.append(barra(g.nombre, grupos[g.id])));
     dialogo.append(el('h3', 'Riesgos en DDHH'), riesgos(t), el('h3', 'Ejes de estándares'));
     const cruce = cruzar(t), ultima = [...datos.evaluaciones].sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id.localeCompare(a.id))[0];
-    cruce.ejes.forEach(e => {const puntaje = ultima?.puntajes[e.id]; dialogo.append(enlace(e.nombre + ' · ' + (Number.isFinite(puntaje) ? numero(puntaje) : 'Sin puntaje') + (ultima ? ' · ' + ultima.fecha : ''), '#/ddhh/estandares?eje=' + encodeURIComponent(e.id)));});
-    dialogo.append(el('h3', 'Acciones del plan')); cruce.acciones.forEach(a => {const c = el('article', null, 'mat-tarjeta'); c.append(enlace(a.titulo, '#/ddhh/plan?accion=' + encodeURIComponent(a.id)), el('p', a.estado.replaceAll('_', ' ') + ' · Avance: ' + numero(a.avance) + ' %')); dialogo.append(c);});
+    cruce.ejes.forEach(e => {const puntaje = ultima?.puntajes[e.id]; dialogo.append(enlace(e.nombre + ' · ' + (Number.isFinite(puntaje) ? numero(puntaje) : 'Sin puntaje') + (ultima ? ' · ' + ultima.fecha : ''), '#/ddhh/dimensiones?eje=' + encodeURIComponent(e.id)));});
+    dialogo.append(el('h3', 'Acciones del plan')); cruce.acciones.forEach(a => {const c = el('article', null, 'mat-tarjeta'); c.append(enlace(a.titulo, '#/plan?accion=' + encodeURIComponent(a.id)), el('p', a.estado.replaceAll('_', ' ') + ' · Avance: ' + numero(a.avance) + ' %')); dialogo.append(c);});
     if (!cruce.acciones.length) dialogo.append(el('p', 'Sin acciones vinculadas.'));
     if (t.sasb) dialogo.append(el('h3', 'Referencia SASB'), el('p', typeof t.sasb === 'string' ? t.sasb : Object.values(t.sasb).join(' · ')));
     const anterior = document.activeElement, regiones = [...document.querySelectorAll('body > header, body > main, body > footer, body > .saltar')], inertes = regiones.map(n => n.inert);

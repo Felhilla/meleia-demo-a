@@ -32,7 +32,7 @@
     function ruta(cambios) {
       const q = new URLSearchParams(filtros);
       Object.entries(cambios).forEach(([k, v]) => v ? q.set(k, v) : q.delete(k));
-      return '#/ddhh/plan' + (q.size ? '?' + q.toString() : '');
+      return '#/plan' + (q.size ? '?' + q.toString() : '');
     }
     function propuesta(a, campo, nodo) {
       if ((a.campos_propuestos || []).includes(campo)) nodo.append(el('span', 'Propuesta', 'aviso'));
@@ -49,7 +49,7 @@
     });
     const buscar = el('label', 'Buscar en título y descripción'); const entrada = el('input'); entrada.type = 'search'; entrada.id = 'plan-buscar'; entrada.value = filtros.get('q') || '';
     entrada.onchange = () => { location.hash = ruta({q: entrada.value}); }; buscar.append(entrada); controles.append(buscar);
-    const limpiar = el('a', 'Limpiar filtros', 'boton'); limpiar.href = '#/ddhh/plan'; controles.append(limpiar);
+    const limpiar = el('a', 'Limpiar filtros', 'boton'); limpiar.href = '#/plan'; controles.append(limpiar);
     raiz.append(controles, lista);
     function estadoGuardado(id) {
       const mensaje = el('p', mensajes.get(id) || '', 'plan-guardado'); mensaje.setAttribute('role', 'status'); mensaje.setAttribute('aria-live', 'polite'); mensaje.dataset.guardado = id; return mensaje;
@@ -158,7 +158,7 @@
         detalle.append(propuesta(a, 'indicador', el('p', 'Indicador: ' + a.indicador)));
         const vinculos = el('div', null, 'plan-vinculos');
         (a.riesgos || []).forEach(id => { const r = datos.riesgos.find(r => r.id === id); const l = el('a', r?.nombre || id); l.href = '#/ddhh/riesgos/' + encodeURIComponent(id); vinculos.append(l); });
-        (a.ejes || []).forEach(id => { const eje = datos.estandares.ejes.find(e => e.id === id); const l = el('a', eje?.nombre || id); l.href = '#/ddhh/estandares?eje=' + encodeURIComponent(id); vinculos.append(l); });
+        (a.ejes || []).forEach(id => { const eje = datos.estandares.ejes.find(e => e.id === id); const l = el('a', eje?.nombre || id); l.href = '#/ddhh/dimensiones?eje=' + encodeURIComponent(id); vinculos.append(l); });
         if (a.vinculos_estimados) vinculos.append(el('span', 'Vínculo estimado', 'aviso'));
         detalle.append(vinculos);
         if (a.actualizado) detalle.append(el('small', 'Actualizado el ' + fecha(a.actualizado)));
@@ -189,7 +189,7 @@
           }
         };
         detalle.addEventListener('keydown', teclado); actualizarDetalle(); cerrar.focus();
-        limpiarDialogo = () => { fondo.remove(); inertes.forEach(([n, previo]) => { n.inert = previo; }); document.body.classList.remove('dialogo-abierto'); queueMicrotask(() => { if (location.hash.startsWith('#/ddhh/plan') && !new URLSearchParams(location.hash.split('?')[1]).has('accion')) document.getElementById('plan-abrir-' + accionId)?.focus(); }); };
+        limpiarDialogo = () => { fondo.remove(); inertes.forEach(([n, previo]) => { n.inert = previo; }); document.body.classList.remove('dialogo-abierto'); queueMicrotask(() => { if (location.hash.startsWith('#/plan') && !new URLSearchParams(location.hash.split('?')[1]).has('accion')) document.getElementById('plan-abrir-' + accionId)?.focus(); }); };
       }
     }
     return () => { vivo = false; limpiarDialogo(); };
