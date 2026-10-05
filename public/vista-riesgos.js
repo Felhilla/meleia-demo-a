@@ -37,7 +37,7 @@
       if (valor) q.set(clave, valor); else q.delete(clave);
       location.hash = '#/ddhh/riesgos' + (q.size ? '?' + q : '');
     }
-    contenedor.append(el('p', 'D1 · DEBIDA DILIGENCIA Y DDHH', 'eyebrow'), el('h1', 'Riesgos en derechos humanos'), el('p', 'Identifica prioridades y sigue el vínculo entre evaluación, controles y acciones.', 'intro'));
+    contenedor.append(el('p', 'DEMO A · DEBIDA DILIGENCIA Y DDHH', 'eyebrow'), el('h1', 'Riesgos en derechos humanos'), el('p', 'Paso 3 de 4 · Riesgos', 'ayuda'), el('p', 'Decida qué riesgos atender primero y conecte su evaluación con controles y acciones.', 'intro'));
     const resumen = Riesgos.resumen(datos.riesgos, cfg);
     const tarjetas = el('div', null, 'resumen');
     [['', datos.riesgos.length, 'Total de riesgos'], ...Object.entries(resumen).reverse().map(([nivel, n]) => [nivel, n, 'Criticidad ' + nivel])].forEach(([nivel, n, titulo]) => {

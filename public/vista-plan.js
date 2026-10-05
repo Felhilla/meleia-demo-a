@@ -27,7 +27,7 @@
     const lista = el('section');
     const aviso = el('p', 'No hay conexión con la base de datos: se muestran los datos de respaldo y no se pueden guardar cambios ahora.', 'plan-conexion');
     aviso.setAttribute('role', 'status'); aviso.hidden = App.estadoBase() === 'base';
-    raiz.append(el('h1', 'Plan de acción'), ejemplo, aviso, el('p', 'Demostración pública: los cambios se guardan y los ve cualquiera con el enlace.', 'ayuda'), resumen);
+    raiz.append(el('h1', 'Plan de acción'), el('p', 'Paso 4 de 4 · Plan de acción', 'ayuda'), el('p', 'Convierta las prioridades en compromisos y decida dónde acelerar el avance.', 'intro'), ejemplo, aviso, el('p', 'Demostración pública: los cambios se guardan y los ve cualquiera con el enlace.', 'ayuda'), resumen);
     contenedor.append(raiz);
     function ruta(cambios) {
       const q = new URLSearchParams(filtros);

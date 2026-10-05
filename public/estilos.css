@@ -97,3 +97,8 @@ ol.texto-dato { padding-inline-start:24px; }
   .eje-columnas { min-width:552px; }
   .cifras { gap:16px; }
 }
+
+/* Recorrido de los dos demos; atenuación mediante colores con contraste AA. */
+.modulos { grid-template-columns:1fr; }
+.recorrido { display:flex; flex-wrap:wrap; gap:16px 36px; padding-left:24px; }
+.siguiente-paso { display:inline-block; margin-top:28px; font-weight:600; }

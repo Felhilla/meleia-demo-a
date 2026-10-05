@@ -68,3 +68,6 @@
 @media(min-width:1200px) and (max-width:1350px) {
   .e3-etiqueta,.e3-nivel,.e3-puntaje { font-size:18px; }
 }
+
+/* La geometría reserva 22 px por línea y hasta 18 px por carácter. */
+.e3-etiqueta { dominant-baseline:alphabetic; }

@@ -1,5 +1,23 @@
 (function () {
   'use strict';
+  // Cajas conservadoras: hasta 18 px por carácter, líneas de 22 px.
+  // La proyección radial de la caja queda fuera del círculo y sus puntajes.
+  function posicionesArana(indice, total, partes, nivel = 5) {
+    const angulo = 2 * Math.PI * indice / total - Math.PI / 2;
+    const ux = Math.cos(angulo), uy = Math.sin(angulo);
+    const ancho = Math.max(...partes.map(p => p.length), 1) * 18;
+    const alto = partes.length * 22;
+    const distancia = 240 + 36 + Math.abs(ux) * ancho / 2 + Math.abs(uy) * alto / 2;
+    const x = 360 + ux * distancia, y = 350 + uy * distancia;
+    const anguloNumero = -Math.PI / 2 + Math.PI / total;
+    const nx = 360 + Math.cos(anguloNumero) * 240 * nivel / 5;
+    const ny = 350 + Math.sin(anguloNumero) * 240 * nivel / 5;
+    return {
+      etiqueta: {x, y: y - alto / 2 + 17, caja: {x: x - ancho / 2, y: y - alto / 2, ancho, alto}},
+      numero: {x: nx, y: ny, caja: {x: nx - 3, y: ny - 20, ancho: 24, alto: 26}}
+    };
+  }
+  if (typeof module === 'object' && module.exports) { module.exports = {posicionesArana}; return; }
   const E = window.Estandares, el = App.el;
   const graficos = [['etapas-ocde', 'Etapas de la debida diligencia (Guía OCDE)'], ['temas-ddhh', 'Temas de DDHH']];
   const respaldo = 'No hay conexión con la base de datos: se muestran los datos de respaldo; las evaluaciones nuevas no se pueden guardar ahora.';
@@ -34,7 +52,7 @@
   App.registrarVista('estandares', {render(contenedor, datos, params) {
     let activo = true, dialogo, evaluaciones = [], principal, comparada, ejeSeleccionado, sinBase = false;
     const raiz = el('section', null, 'e3');
-    raiz.append(el('h1', 'Alineación con estándares'), el('p', 'Brechas de gestión frente a los estándares. Escala de 0 a 5; 0 significa sin información.', 'intro'));
+    raiz.append(el('h1', 'Alineación con estándares'), el('p', 'Paso 1 de 4 · Alineación con estándares', 'ayuda'), el('p', 'Dónde está la gestión frente a los estándares y qué brechas cerrar primero. Escala de 0 a 5; 0 significa sin información.', 'intro'));
     const aviso = el('p', 'Cargando evaluaciones…', 'e3-aviso'); aviso.setAttribute('role', 'status');
     const controles = el('div', null, 'e3-controles'), cuerpo = el('div');
     raiz.append(aviso, controles, cuerpo); contenedor.append(raiz);
@@ -50,13 +68,23 @@
     function grafico(tipo, titulo) {
       const ejes = E.ejesDe(tipo, datos.estandares), filas = E.comparar(principal, comparada, ejes);
       const seccion = el('section', null, 'superficie e3-grafico'); seccion.append(el('h2', titulo));
-      const dibujo = svg('svg', {viewBox: '0 0 720 700', role: 'group', 'aria-label': titulo});
+      const etiquetas = ejes.map((eje, i) => {
+        const partes = lineas(eje.nombre, 16);
+        return {partes, posicion: posicionesArana(i, ejes.length, partes).etiqueta};
+      });
+      const cajas = etiquetas.map(e => e.posicion.caja);
+      const izquierda = Math.min(0, ...cajas.map(c => c.x)) - 24;
+      const arriba = Math.min(0, ...cajas.map(c => c.y)) - 24;
+      const derecha = Math.max(720, ...cajas.map(c => c.x + c.ancho)) + 24;
+      const abajo = Math.max(700, ...cajas.map(c => c.y + c.alto)) + 24;
+      const dibujo = svg('svg', {viewBox: `${izquierda} ${arriba} ${derecha - izquierda} ${abajo - arriba}`, role: 'group', 'aria-label': titulo});
       const centro = [360, 350], radio = 240;
       const puntos = valores => E.puntosPoligono(valores, radio, centro);
       const cadena = ps => ps.map(p => p.map(n => n.toFixed(2)).join(',')).join(' ');
       for (let nivel = 0; nivel <= 5; nivel++) {
         dibujo.append(svg('polygon', {points: cadena(puntos(ejes.map(() => nivel))), class: 'e3-anillo'}));
-        dibujo.append(svg('text', {x: 366, y: 350 - radio * nivel / 5 - 4, class: 'e3-nivel'}, String(nivel)));
+        const posicion = posicionesArana(0, ejes.length, [''], nivel).numero;
+        dibujo.append(svg('text', {x: posicion.x, y: posicion.y, class: 'e3-nivel'}, String(nivel)));
       }
       const extremos = puntos(ejes.map(() => 5));
       extremos.forEach(([x, y]) => dibujo.append(svg('line', {x1: 360, y1: 350, x2: x, y2: y, class: 'e3-anillo'})));
@@ -64,15 +92,14 @@
       if (comparada && filas.every(f => f.b !== null)) dibujo.append(svg('polygon', {points: cadena(puntos(filas.map(f => f.b))), class: 'e3-comparada'}));
       const posiciones = puntos(filas.map(f => f.a ?? 0));
       filas.forEach((f, i) => {
-        const [x, y] = posiciones[i], [ex, ey] = extremos[i];
+        const [x, y] = posiciones[i];
         const diferencia = f.diferencia === null ? '' : ` (${f.diferencia >= 0 ? '+' : ''}${numero(f.diferencia)})`;
         const texto = comparada ? `${f.eje.nombre}: ${numero(f.b)} → ${numero(f.a)}${diferencia}` : `${f.eje.nombre}: ${numero(f.a)}`;
         const grupo = svg('g', {tabindex: 0, role: 'button', 'aria-label': texto, 'aria-pressed': String(ejeSeleccionado.id === f.eje.id), class: 'e3-vertice'});
         grupo.append(svg('title', {}, texto), svg('circle', {cx: x, cy: y, r: 6, fill: E.colorPara(f.a, datos.umbrales) || 'var(--secundario)'}), svg('text', {x: x + 10, y: y - 9, class: 'e3-puntaje'}, numero(f.a)));
-        const lx = 360 + (ex - 360) * 1.18, ly = 350 + (ey - 350) * 1.18;
-        const partes = lineas(f.eje.nombre, 16), anchor = 'middle';
-        const label = svg('text', {x: lx, y: ly - (partes.length - 1) * 9, 'text-anchor': anchor, class: 'e3-etiqueta'});
-        partes.forEach((p, j) => label.append(svg('tspan', {x: lx, dy: j ? 18 : 0}, p))); grupo.append(label);
+        const {partes, posicion} = etiquetas[i];
+        const label = svg('text', {x: posicion.x, y: posicion.y, 'text-anchor': 'middle', class: 'e3-etiqueta'});
+        partes.forEach((p, j) => label.append(svg('tspan', {x: posicion.x, dy: j ? 22 : 0}, p))); grupo.append(label);
         grupo.addEventListener('click', () => seleccionar(f.eje));
         grupo.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); seleccionar(f.eje); } });
         grupo.addEventListener('focus', () => { lectura.textContent = texto; });

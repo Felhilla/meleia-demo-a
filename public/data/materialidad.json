@@ -1,0 +1,1445 @@
+{
+  "origen": "ilustrativo",
+  "grupos": [
+    {
+      "id": "gi-colaboradores",
+      "nombre": "Colaboradores de planta y administrativos",
+      "mecanismo": "encuesta",
+      "participantes": 36,
+      "descripcion": "Perspectiva ilustrativa de las condiciones laborales y la exposición en planta.",
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "gi-distribuidores",
+      "nombre": "Distribuidores y transportistas",
+      "mecanismo": "taller",
+      "participantes": 18,
+      "descripcion": "Perspectiva ilustrativa de la distribución, transporte y manipulación de cilindros.",
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "gi-proveedores",
+      "nombre": "Proveedores y contratistas",
+      "mecanismo": "entrevista",
+      "participantes": 12,
+      "descripcion": "Perspectiva ilustrativa del abastecimiento y los servicios contratados.",
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "gi-clientes",
+      "nombre": "Clientes de hogares y comerciales",
+      "mecanismo": "encuesta",
+      "participantes": 40,
+      "descripcion": "Perspectiva ilustrativa de la seguridad y continuidad del suministro.",
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "gi-comunidades",
+      "nombre": "Comunidades vecinas a plantas y rutas",
+      "mecanismo": "taller",
+      "participantes": 24,
+      "descripcion": "Perspectiva ilustrativa de la convivencia y las afectaciones ambientales.",
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "gi-autoridades",
+      "nombre": "Autoridades del sector y locales",
+      "mecanismo": "entrevista",
+      "participantes": 8,
+      "descripcion": "Perspectiva ilustrativa del cumplimiento y la protección de derechos.",
+      "origen": "ilustrativo"
+    }
+  ],
+  "evaluadores_financieros": [
+    {
+      "id": "ef-finanzas",
+      "nombre": "Finanzas",
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "ef-comercial",
+      "nombre": "Comercial",
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "ef-operaciones",
+      "nombre": "Operaciones",
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "ef-sostenibilidad",
+      "nombre": "Sostenibilidad",
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "ef-personas",
+      "nombre": "Gerencia de Personas",
+      "origen": "ilustrativo"
+    }
+  ],
+  "temas": [
+    {
+      "id": "tema-01",
+      "nombre": "Ética, anticorrupción y cumplimiento",
+      "dimension_esg": "gobernanza",
+      "descripcion": "Tema ilustrativo sobre ética, anticorrupción y cumplimiento, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-15"
+      ],
+      "ejes": [
+        "etapa-ocde-1"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 5,
+          "alcance": 5,
+          "irremediabilidad": 5,
+          "probabilidad": 1.7,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 5,
+          "alcance": 5,
+          "irremediabilidad": 5,
+          "probabilidad": 1.5,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 5,
+          "alcance": 5,
+          "irremediabilidad": 5,
+          "probabilidad": 1.7,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 5,
+          "alcance": 5,
+          "irremediabilidad": 5,
+          "probabilidad": 1.5,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 5,
+          "alcance": 5,
+          "irremediabilidad": 5,
+          "probabilidad": 1.5,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 5,
+          "alcance": 5,
+          "irremediabilidad": 5,
+          "probabilidad": 2.0,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 4.6,
+          "gasto_operativo": 4.0,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 4.5,
+          "gasto_operativo": 3.9,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 4.3,
+          "gasto_operativo": 4.2,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 4.3,
+          "gasto_operativo": 4.0,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 4.3,
+          "gasto_operativo": 3.9,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-02",
+      "nombre": "Salud y seguridad en el trabajo",
+      "dimension_esg": "social",
+      "descripcion": "Tema ilustrativo sobre salud y seguridad en el trabajo, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-03",
+        "riesgo-06"
+      ],
+      "ejes": [
+        "tema-ddhh-6"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 3.3,
+          "alcance": 3.3,
+          "irremediabilidad": 3.3,
+          "probabilidad": 2.3,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 3.0,
+          "alcance": 3.0,
+          "irremediabilidad": 3.0,
+          "probabilidad": 2.0,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 2.9,
+          "alcance": 2.9,
+          "irremediabilidad": 2.9,
+          "probabilidad": 1.9,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 2.3,
+          "alcance": 2.3,
+          "irremediabilidad": 2.3,
+          "probabilidad": 1.3,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 2.3,
+          "alcance": 2.3,
+          "irremediabilidad": 2.3,
+          "probabilidad": 1.3,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 2.7,
+          "alcance": 2.7,
+          "irremediabilidad": 2.7,
+          "probabilidad": 1.7,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 3.8,
+          "gasto_operativo": 4.0,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 3.7,
+          "gasto_operativo": 3.9,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 3.5,
+          "gasto_operativo": 4.2,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 3.5,
+          "gasto_operativo": 4.0,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 3.5,
+          "gasto_operativo": 3.9,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-03",
+      "nombre": "Seguridad de procesos e integridad de instalaciones y cilindros",
+      "dimension_esg": "social",
+      "descripcion": "Tema ilustrativo sobre seguridad de procesos e integridad de instalaciones y cilindros, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "sector",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-05"
+      ],
+      "ejes": [
+        "tema-ddhh-6"
+      ],
+      "sasb": "SASB: integridad de la infraestructura de gas",
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 3.8,
+          "alcance": 3.8,
+          "irremediabilidad": 3.8,
+          "probabilidad": 3.5,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 4.0,
+          "alcance": 4.0,
+          "irremediabilidad": 4.0,
+          "probabilidad": 3.7,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 3.6,
+          "alcance": 3.6,
+          "irremediabilidad": 3.6,
+          "probabilidad": 3.3,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 3.8,
+          "alcance": 3.8,
+          "irremediabilidad": 3.8,
+          "probabilidad": 3.5,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 3.9,
+          "alcance": 3.9,
+          "irremediabilidad": 3.9,
+          "probabilidad": 3.6,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 3.8,
+          "alcance": 3.8,
+          "irremediabilidad": 3.8,
+          "probabilidad": 3.5,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 5,
+          "gasto_operativo": 4.6,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 4.9,
+          "gasto_operativo": 4.5,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 4.7,
+          "gasto_operativo": 4.8,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 4.7,
+          "gasto_operativo": 4.6,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 4.7,
+          "gasto_operativo": 4.5,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-04",
+      "nombre": "Jornada, remuneración y condiciones de trabajo",
+      "dimension_esg": "social",
+      "descripcion": "Tema ilustrativo sobre jornada, remuneración y condiciones de trabajo, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-01",
+        "riesgo-04"
+      ],
+      "ejes": [
+        "tema-ddhh-7",
+        "tema-ddhh-8",
+        "tema-ddhh-9"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 3.0,
+          "alcance": 3.0,
+          "irremediabilidad": 3.0,
+          "probabilidad": 3.8,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 2.6,
+          "alcance": 2.6,
+          "irremediabilidad": 2.6,
+          "probabilidad": 3.4,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 2.5,
+          "alcance": 2.5,
+          "irremediabilidad": 2.5,
+          "probabilidad": 3.3,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 1.9,
+          "alcance": 1.9,
+          "irremediabilidad": 1.9,
+          "probabilidad": 2.7,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 1.9,
+          "alcance": 1.9,
+          "irremediabilidad": 1.9,
+          "probabilidad": 2.7,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 2.4,
+          "alcance": 2.4,
+          "irremediabilidad": 2.4,
+          "probabilidad": 3.2,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 2.2,
+          "gasto_operativo": 2.4,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 2.1,
+          "gasto_operativo": 2.3,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.6,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.4,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.3,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-05",
+      "nombre": "Derechos laborales en la cadena de suministro y distribución",
+      "dimension_esg": "social",
+      "descripcion": "Tema ilustrativo sobre derechos laborales en la cadena de suministro y distribución, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-08",
+        "riesgo-10",
+        "riesgo-11",
+        "riesgo-18"
+      ],
+      "ejes": [
+        "tema-ddhh-5",
+        "tema-ddhh-9"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 3.0,
+          "alcance": 3.0,
+          "irremediabilidad": 3.0,
+          "probabilidad": 4.0,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 3.5,
+          "alcance": 3.5,
+          "irremediabilidad": 3.5,
+          "probabilidad": 4.5,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 3.5,
+          "alcance": 3.5,
+          "irremediabilidad": 3.5,
+          "probabilidad": 4.5,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 2.6,
+          "alcance": 2.6,
+          "irremediabilidad": 2.6,
+          "probabilidad": 3.5,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 2.8,
+          "alcance": 2.8,
+          "irremediabilidad": 2.8,
+          "probabilidad": 3.8,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 3.2,
+          "alcance": 3.2,
+          "irremediabilidad": 3.2,
+          "probabilidad": 4.2,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 3.2,
+          "gasto_operativo": 3.2,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 3.1,
+          "gasto_operativo": 3.1,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 2.9,
+          "gasto_operativo": 3.4,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 2.9,
+          "gasto_operativo": 3.2,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 2.9,
+          "gasto_operativo": 3.1,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-06",
+      "nombre": "Trabajo infantil y trabajo forzoso en la cadena de valor",
+      "dimension_esg": "social",
+      "descripcion": "Tema ilustrativo sobre trabajo infantil y trabajo forzoso en la cadena de valor, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-07"
+      ],
+      "ejes": [
+        "tema-ddhh-1",
+        "tema-ddhh-2"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 2.4,
+          "alcance": 2.4,
+          "irremediabilidad": 2.4,
+          "probabilidad": 4.7,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 2.8,
+          "alcance": 2.8,
+          "irremediabilidad": 2.8,
+          "probabilidad": 5,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 2.8,
+          "alcance": 2.8,
+          "irremediabilidad": 2.8,
+          "probabilidad": 5,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 2.2,
+          "alcance": 2.2,
+          "irremediabilidad": 2.2,
+          "probabilidad": 4.5,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 2.4,
+          "alcance": 2.4,
+          "irremediabilidad": 2.4,
+          "probabilidad": 4.7,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 2.7,
+          "alcance": 2.7,
+          "irremediabilidad": 2.7,
+          "probabilidad": 5,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 2.4,
+          "gasto_operativo": 2.4,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 2.3,
+          "gasto_operativo": 2.3,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 2.1,
+          "gasto_operativo": 2.6,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 2.1,
+          "gasto_operativo": 2.4,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 2.1,
+          "gasto_operativo": 2.3,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-07",
+      "nombre": "Igualdad, inclusión y prevención del acoso",
+      "dimension_esg": "social",
+      "descripcion": "Tema ilustrativo sobre igualdad, inclusión y prevención del acoso, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-02",
+        "riesgo-09",
+        "riesgo-14"
+      ],
+      "ejes": [
+        "tema-ddhh-3",
+        "tema-ddhh-4"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 2.9,
+          "alcance": 2.9,
+          "irremediabilidad": 2.9,
+          "probabilidad": 3.2,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 2.6,
+          "alcance": 2.6,
+          "irremediabilidad": 2.6,
+          "probabilidad": 2.9,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 2.6,
+          "alcance": 2.6,
+          "irremediabilidad": 2.6,
+          "probabilidad": 2.9,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 2.2,
+          "alcance": 2.2,
+          "irremediabilidad": 2.2,
+          "probabilidad": 2.5,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 2.2,
+          "alcance": 2.2,
+          "irremediabilidad": 2.2,
+          "probabilidad": 2.5,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 2.4,
+          "alcance": 2.4,
+          "irremediabilidad": 2.4,
+          "probabilidad": 2.7,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 2.0,
+          "gasto_operativo": 2.2,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.1,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 1.7,
+          "gasto_operativo": 2.4,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 1.7,
+          "gasto_operativo": 2.2,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 1.7,
+          "gasto_operativo": 2.1,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-08",
+      "nombre": "Acceso y continuidad del suministro de energía",
+      "dimension_esg": "social",
+      "descripcion": "Tema ilustrativo sobre acceso y continuidad del suministro de energía, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "sector",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-12"
+      ],
+      "ejes": [],
+      "sasb": "SASB: asequibilidad de la energía",
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 3.9,
+          "alcance": 3.9,
+          "irremediabilidad": 3.9,
+          "probabilidad": 1.5,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 4.3,
+          "alcance": 4.3,
+          "irremediabilidad": 4.3,
+          "probabilidad": 1.9,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 3.9,
+          "alcance": 3.9,
+          "irremediabilidad": 3.9,
+          "probabilidad": 1.5,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 4.7,
+          "alcance": 4.7,
+          "irremediabilidad": 4.7,
+          "probabilidad": 2.3,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 4.7,
+          "alcance": 4.7,
+          "irremediabilidad": 4.7,
+          "probabilidad": 2.3,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 4.4,
+          "alcance": 4.4,
+          "irremediabilidad": 4.4,
+          "probabilidad": 2.0,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 4.7,
+          "gasto_operativo": 4.3,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 4.6,
+          "gasto_operativo": 4.2,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 4.4,
+          "gasto_operativo": 4.5,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 4.4,
+          "gasto_operativo": 4.3,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 4.4,
+          "gasto_operativo": 4.2,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-09",
+      "nombre": "Convivencia con comunidades y seguridad vial",
+      "dimension_esg": "social",
+      "descripcion": "Tema ilustrativo sobre convivencia con comunidades y seguridad vial, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-13"
+      ],
+      "ejes": [
+        "tema-ddhh-10"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 1.7,
+          "alcance": 1.7,
+          "irremediabilidad": 1.7,
+          "probabilidad": 1.5,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 2.2,
+          "alcance": 2.2,
+          "irremediabilidad": 2.2,
+          "probabilidad": 2.0,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 1.8,
+          "alcance": 1.8,
+          "irremediabilidad": 1.8,
+          "probabilidad": 1.6,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 1.9,
+          "alcance": 1.9,
+          "irremediabilidad": 1.9,
+          "probabilidad": 1.7,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 2.7,
+          "alcance": 2.7,
+          "irremediabilidad": 2.7,
+          "probabilidad": 2.5,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 2.3,
+          "alcance": 2.3,
+          "irremediabilidad": 2.3,
+          "probabilidad": 2.1,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 2.2,
+          "gasto_operativo": 2.4,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 2.1,
+          "gasto_operativo": 2.3,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.6,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.4,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.3,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-10",
+      "nombre": "Transparencia y diálogo con grupos de interés",
+      "dimension_esg": "gobernanza",
+      "descripcion": "Tema ilustrativo sobre transparencia y diálogo con grupos de interés, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-16"
+      ],
+      "ejes": [
+        "etapa-ocde-5"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 4.1,
+          "alcance": 4.1,
+          "irremediabilidad": 4.1,
+          "probabilidad": 4.7,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 4.3,
+          "alcance": 4.3,
+          "irremediabilidad": 4.3,
+          "probabilidad": 4.9,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 4.3,
+          "alcance": 4.3,
+          "irremediabilidad": 4.3,
+          "probabilidad": 4.9,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 4.2,
+          "alcance": 4.2,
+          "irremediabilidad": 4.2,
+          "probabilidad": 4.8,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 4.5,
+          "alcance": 4.5,
+          "irremediabilidad": 4.5,
+          "probabilidad": 5,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 4.3,
+          "alcance": 4.3,
+          "irremediabilidad": 4.3,
+          "probabilidad": 4.9,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 2.0,
+          "gasto_operativo": 2.0,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 1.9,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 1.7,
+          "gasto_operativo": 2.2,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 1.7,
+          "gasto_operativo": 2.0,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 1.7,
+          "gasto_operativo": 1.9,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-11",
+      "nombre": "Mecanismos de queja y remediación",
+      "dimension_esg": "gobernanza",
+      "descripcion": "Tema ilustrativo sobre mecanismos de queja y remediación, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-17"
+      ],
+      "ejes": [
+        "etapa-ocde-6"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 2.2,
+          "alcance": 2.2,
+          "irremediabilidad": 2.2,
+          "probabilidad": 3.0,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 2.2,
+          "alcance": 2.2,
+          "irremediabilidad": 2.2,
+          "probabilidad": 3.0,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 2.2,
+          "alcance": 2.2,
+          "irremediabilidad": 2.2,
+          "probabilidad": 3.0,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 2.0,
+          "alcance": 2.0,
+          "irremediabilidad": 2.0,
+          "probabilidad": 2.8,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 2.3,
+          "alcance": 2.3,
+          "irremediabilidad": 2.3,
+          "probabilidad": 3.1,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 2.0,
+          "alcance": 2.0,
+          "irremediabilidad": 2.0,
+          "probabilidad": 2.8,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 2.0,
+          "gasto_operativo": 2.2,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.1,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 1.7,
+          "gasto_operativo": 2.4,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 1.7,
+          "gasto_operativo": 2.2,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 1.7,
+          "gasto_operativo": 2.1,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-12",
+      "nombre": "Gestión de la debida diligencia en DDHH",
+      "dimension_esg": "gobernanza",
+      "descripcion": "Tema ilustrativo sobre gestión de la debida diligencia en DDHH, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-17"
+      ],
+      "ejes": [
+        "etapa-ocde-1",
+        "etapa-ocde-2",
+        "etapa-ocde-3",
+        "etapa-ocde-4"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 2.0,
+          "alcance": 2.0,
+          "irremediabilidad": 2.0,
+          "probabilidad": 2.8,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 1.9,
+          "alcance": 1.9,
+          "irremediabilidad": 1.9,
+          "probabilidad": 2.7,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 1.9,
+          "alcance": 1.9,
+          "irremediabilidad": 1.9,
+          "probabilidad": 2.7,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 1.7,
+          "alcance": 1.7,
+          "irremediabilidad": 1.7,
+          "probabilidad": 2.5,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 1.9,
+          "alcance": 1.9,
+          "irremediabilidad": 1.9,
+          "probabilidad": 2.7,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 2.1,
+          "alcance": 2.1,
+          "irremediabilidad": 2.1,
+          "probabilidad": 2.9,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 2.2,
+          "gasto_operativo": 2.2,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 2.1,
+          "gasto_operativo": 2.1,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.4,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.2,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.1,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-13",
+      "nombre": "Abastecimiento responsable y gestión de contratistas",
+      "dimension_esg": "gobernanza",
+      "descripcion": "Tema ilustrativo sobre abastecimiento responsable y gestión de contratistas, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-10",
+        "riesgo-11"
+      ],
+      "ejes": [
+        "etapa-ocde-2"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 2.9,
+          "alcance": 2.9,
+          "irremediabilidad": 2.9,
+          "probabilidad": 4.6,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 3.3,
+          "alcance": 3.3,
+          "irremediabilidad": 3.3,
+          "probabilidad": 5,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 3.5,
+          "alcance": 3.5,
+          "irremediabilidad": 3.5,
+          "probabilidad": 5,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 2.6,
+          "alcance": 2.6,
+          "irremediabilidad": 2.6,
+          "probabilidad": 4.3,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 2.8,
+          "alcance": 2.8,
+          "irremediabilidad": 2.8,
+          "probabilidad": 4.5,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 3.1,
+          "alcance": 3.1,
+          "irremediabilidad": 3.1,
+          "probabilidad": 4.8,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 2.8,
+          "gasto_operativo": 2.8,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 2.7,
+          "gasto_operativo": 2.7,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 2.5,
+          "gasto_operativo": 3.0,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 2.5,
+          "gasto_operativo": 2.8,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 2.5,
+          "gasto_operativo": 2.7,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-14",
+      "nombre": "Emisiones y cambio climático",
+      "dimension_esg": "ambiental",
+      "descripcion": "Tema ilustrativo sobre emisiones y cambio climático, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "estandares",
+        "sector",
+        "grupos"
+      ],
+      "riesgos": [],
+      "ejes": [
+        "tema-ddhh-10"
+      ],
+      "sasb": "SASB: emisiones de gases de efecto invernadero",
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 1.2,
+          "alcance": 1.2,
+          "irremediabilidad": 1.2,
+          "probabilidad": 1.2,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 1.4,
+          "alcance": 1.4,
+          "irremediabilidad": 1.4,
+          "probabilidad": 1.4,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 1.3,
+          "alcance": 1.3,
+          "irremediabilidad": 1.3,
+          "probabilidad": 1.3,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 1.4,
+          "alcance": 1.4,
+          "irremediabilidad": 1.4,
+          "probabilidad": 1.4,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 1.9,
+          "alcance": 1.9,
+          "irremediabilidad": 1.9,
+          "probabilidad": 1.9,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 1.8,
+          "alcance": 1.8,
+          "irremediabilidad": 1.8,
+          "probabilidad": 1.8,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 4.2,
+          "gasto_operativo": 4.2,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 4.1,
+          "gasto_operativo": 4.1,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 3.9,
+          "gasto_operativo": 4.4,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 3.9,
+          "gasto_operativo": 4.2,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 3.9,
+          "gasto_operativo": 4.1,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    },
+    {
+      "id": "tema-15",
+      "nombre": "Gestión ambiental de residuos y sustancias",
+      "dimension_esg": "ambiental",
+      "descripcion": "Tema ilustrativo sobre gestión ambiental de residuos y sustancias, derivado de los riesgos o ejes vinculados. No representa una consulta ni una medición real de la empresa.",
+      "fuentes": [
+        "riesgos",
+        "estandares",
+        "grupos"
+      ],
+      "riesgos": [
+        "riesgo-06"
+      ],
+      "ejes": [
+        "tema-ddhh-10"
+      ],
+      "sasb": null,
+      "evaluacion_impacto": {
+        "gi-colaboradores": {
+          "escala": 2.2,
+          "alcance": 2.2,
+          "irremediabilidad": 2.2,
+          "probabilidad": 2.0,
+          "origen": "ilustrativo"
+        },
+        "gi-distribuidores": {
+          "escala": 2.0,
+          "alcance": 2.0,
+          "irremediabilidad": 2.0,
+          "probabilidad": 1.8,
+          "origen": "ilustrativo"
+        },
+        "gi-proveedores": {
+          "escala": 2.2,
+          "alcance": 2.2,
+          "irremediabilidad": 2.2,
+          "probabilidad": 2.0,
+          "origen": "ilustrativo"
+        },
+        "gi-clientes": {
+          "escala": 1.7,
+          "alcance": 1.7,
+          "irremediabilidad": 1.7,
+          "probabilidad": 1.5,
+          "origen": "ilustrativo"
+        },
+        "gi-comunidades": {
+          "escala": 2.4,
+          "alcance": 2.4,
+          "irremediabilidad": 2.4,
+          "probabilidad": 2.2,
+          "origen": "ilustrativo"
+        },
+        "gi-autoridades": {
+          "escala": 2.2,
+          "alcance": 2.2,
+          "irremediabilidad": 2.2,
+          "probabilidad": 2.0,
+          "origen": "ilustrativo"
+        }
+      },
+      "evaluacion_financiera": {
+        "ef-finanzas": {
+          "rentabilidad": 2.2,
+          "gasto_operativo": 2.6,
+          "origen": "ilustrativo"
+        },
+        "ef-comercial": {
+          "rentabilidad": 2.1,
+          "gasto_operativo": 2.5,
+          "origen": "ilustrativo"
+        },
+        "ef-operaciones": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.8,
+          "origen": "ilustrativo"
+        },
+        "ef-sostenibilidad": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.6,
+          "origen": "ilustrativo"
+        },
+        "ef-personas": {
+          "rentabilidad": 1.9,
+          "gasto_operativo": 2.5,
+          "origen": "ilustrativo"
+        }
+      },
+      "origen": "ilustrativo"
+    }
+  ]
+}
