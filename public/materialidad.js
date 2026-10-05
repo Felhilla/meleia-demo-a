@@ -79,5 +79,40 @@
     return { riesgos: unicos(riesgos.filter(r => rs.has(r.id))), ejes: unicos(estandares.ejes.filter(e => es.has(e.id))),
       acciones: unicos(plan.filter(a => (a.riesgos || []).some(id => rs.has(id)) || (a.ejes || []).some(id => es.has(id)))) };
   }
-  return { severidad, importanciaImpacto, puntajeFinanciero, umbrales, clasificar, listaCorta, cruce, porGrupo };
+  // Coordenadas reales y desplazadas; búsqueda radial estable, independiente del orden.
+  function posicionesMatriz(clasificados, ancho, alto, margen) {
+    exigir([ancho, alto, margen].every(Number.isFinite) && margen >= 0 && ancho > 2 * margen && alto > 2 * margen, 'Área de matriz inválida');
+    const puestos = [];
+    const limitar = (v, max) => Math.max(margen, Math.min(max - margen, v));
+    [...clasificados].sort((a, b) => a.id.localeCompare(b.id)).forEach(f => {
+      const realX = margen + f.impacto / 5 * (ancho - 2 * margen);
+      const realY = alto - margen - f.financiera / 5 * (alto - 2 * margen);
+      let x = limitar(realX, ancho), y = limitar(realY, alto), encontrado = false;
+      for (let radio = 0; radio <= Math.hypot(ancho, alto) && !encontrado; radio += 15) {
+        const pasos = Math.max(1, Math.ceil(2 * Math.PI * radio / 7));
+        for (let j = 0; j < pasos; j++) {
+          const cx = limitar(realX + radio * Math.cos(j * 2 * Math.PI / pasos), ancho);
+          const cy = limitar(realY + radio * Math.sin(j * 2 * Math.PI / pasos), alto);
+          if (puestos.every(p => Math.hypot(cx - p.x, cy - p.y) >= 14)) { x = cx; y = cy; encontrado = true; break; }
+        }
+      }
+      exigir(encontrado, 'Área insuficiente para separar los temas');
+      puestos.push({...f, x, y, realX, realY});
+    });
+    return puestos;
+  }
+  function resumen(temas, cfg) {
+    const filas = clasificar(temas, cfg);
+    const porCuadrante = Object.fromEntries(['doble', 'impacto', 'financiera', 'no-material'].map(k => [k, filas.filter(f => f.cuadrante === k).length]));
+    return {evaluados: filas.length, materiales: filas.filter(f => f.material).length, noMateriales: filas.filter(f => !f.material).length, porCuadrante, umbrales: umbrales(temas, cfg)};
+  }
+  function filtrar(clasificados, temas, filtros = {}) {
+    const dimensiones = new Map(temas.map(t => [t.id, t.dimension_esg]));
+    return clasificados.filter(f => (!filtros.cuadrante || f.cuadrante === filtros.cuadrante) && (!filtros.dimension || dimensiones.get(f.id) === filtros.dimension) && (![true, '1', 'true'].includes(filtros.materiales) || f.material));
+  }
+  function ordenar(clasificados, criterio = 'impacto') {
+    const clave = criterio === 'financiera' ? criterio : 'impacto';
+    return [...clasificados].sort((a, b) => b[clave] - a[clave] || a.id.localeCompare(b.id));
+  }
+  return { severidad, importanciaImpacto, puntajeFinanciero, umbrales, clasificar, listaCorta, cruce, porGrupo, posicionesMatriz, resumen, filtrar, ordenar };
 }));

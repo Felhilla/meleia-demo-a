@@ -1,1 +1,57 @@
-/* Estilos reservados para la vista de doble materialidad del encargo E9. */
+.materialidad { min-width:0; color:var(--texto); }
+.materialidad .mat-banda { display:block; padding:12px 16px; font-size:1rem; color:var(--texto); background:var(--suave); }
+.mat-filtros { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; align-items:end; }
+.mat-filtros label,.mat-filtros select { display:block; width:100%; }
+.mat-svg { display:block; width:100%; max-width:1000px; margin:auto; overflow:visible; }
+.mat-svg text { fill:var(--texto); font-size:14px; }
+.mat-svg .mat-etiqueta { font-size:12px; }
+.mat-cuadrante { fill:var(--suave); stroke:var(--borde); }
+.mat-doble { fill:color-mix(in srgb,var(--principal) 12%,var(--fondo)); }
+.mat-impacto { fill:color-mix(in srgb,var(--principal) 5%,var(--fondo)); }
+.mat-financiera { fill:color-mix(in srgb,var(--acento) 8%,var(--fondo)); }
+.mat-no-material { fill:var(--fondo); }
+.mat-umbral { stroke:var(--principal); stroke-width:2; stroke-dasharray:6 5; }
+.mat-punto { cursor:pointer; }
+.mat-punto circle { fill:var(--fondo); stroke:var(--principal); stroke-width:2; }
+.mat-punto text { fill:var(--texto); font-size:10px; font-weight:700; }
+.mat-punto:hover circle,.mat-punto:focus circle { stroke-width:4; }
+.materialidad :focus-visible { outline:3px solid var(--principal); outline-offset:4px; }
+.mat-detalle { min-height:3em; }
+.materialidad table { width:100%; table-layout:fixed; overflow-wrap:anywhere; }
+.materialidad caption { text-align:left; font-weight:700; padding:12px 0; }
+.materialidad th,.materialidad td { padding:10px 8px; }
+#mat-tabla th:nth-child(2) { width:28%; }
+#mat-tabla tbody tr { cursor:pointer; }
+.mat-etapas { display:flex; gap:8px; margin:20px 0; }
+.mat-etapas button { flex:1; min-width:0; font-size:.85rem; padding:12px 8px; color:var(--texto); background:var(--fondo); border:1px solid var(--borde); }
+.mat-etapas [aria-selected="true"] { border:2px solid var(--principal); background:var(--suave); font-weight:700; }
+.mat-tarjetas { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.mat-tarjeta { display:block; border:1px solid var(--borde); border-radius:8px; padding:16px; margin:10px 0; overflow-wrap:anywhere; }
+.mat-tarjeta span,.mat-etapa td a,.mat-dialogo > a { display:block; margin:6px 0; }
+.mat-material { border-left:5px solid var(--principal); background:var(--suave); }
+.mat-barra { display:grid; grid-template-columns:minmax(0,1fr) minmax(100px,1fr); gap:12px; align-items:center; margin:10px 0; }
+.mat-barra meter { width:100%; accent-color:var(--principal); }
+.mat-calor { display:block; padding:12px 4px; text-align:center; background:var(--suave); }
+.mat-calor > span { background:var(--fondo); color:var(--texto); padding:3px 6px; border-radius:3px; }
+.mat-fondo { background:color-mix(in srgb,var(--texto) 40%,var(--fondo) 0%); }
+.mat-dialogo { background:var(--fondo); animation:mat-abrir 180ms ease-out; }
+.mat-cambio { animation:mat-etapa 180ms ease-out; }
+@keyframes mat-abrir { from { opacity:0; transform:translateX(24px); } to { opacity:1; transform:translateX(0); } }
+@keyframes mat-etapa { from { opacity:.5; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+@media(max-width:767px) {
+  .mat-filtros,.mat-tarjetas,.mat-barra { grid-template-columns:1fr; }
+  .mat-etapas { flex-direction:column; }
+  .materialidad table,.materialidad tbody,.materialidad tr,.materialidad td { display:block; width:100%; }
+  .materialidad thead { display:none; }
+  .materialidad td::before { content:attr(data-etiqueta); display:block; font-weight:700; margin-bottom:4px; }
+  .materialidad tr { border-bottom:2px solid var(--borde); margin-bottom:12px; }
+  .mat-dialogo { width:100%; padding:20px; }
+}
+@media(prefers-reduced-motion:reduce) { .mat-dialogo,.mat-cambio { animation:none; transition:none; } }
+/* Chrome y Safari ignoran accent-color en <meter>: se pinta con los tokens de marca. */
+.mat-barra meter { -webkit-appearance:none; appearance:none; height:8px; border-radius:4px; background:var(--suave); }
+.mat-barra meter::-webkit-meter-bar { background:var(--suave); border:0; border-radius:4px; height:8px; }
+.mat-barra meter::-webkit-meter-optimum-value,
+.mat-barra meter::-webkit-meter-suboptimum-value,
+.mat-barra meter::-webkit-meter-even-less-good-value { background:var(--principal); border-radius:4px; }
+.mat-barra meter::-moz-meter-bar { background:var(--principal); border-radius:4px; }

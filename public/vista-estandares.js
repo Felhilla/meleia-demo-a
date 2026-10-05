@@ -5,7 +5,7 @@
   function posicionesArana(indice, total, partes, nivel = 5) {
     const angulo = 2 * Math.PI * indice / total - Math.PI / 2;
     const ux = Math.cos(angulo), uy = Math.sin(angulo);
-    const ancho = Math.max(...partes.map(p => p.length), 1) * 18;
+    const ancho = Math.max(...partes.map(p => [...p].reduce((ancho, letra) => ancho + (/[MWmw]/.test(letra) ? 18 : 12), 0)), 12);
     const alto = partes.length * 22;
     const distancia = 240 + 36 + Math.abs(ux) * ancho / 2 + Math.abs(uy) * alto / 2;
     const x = 360 + ux * distancia, y = 350 + uy * distancia;
@@ -41,6 +41,12 @@
       else r[r.length - 1] += ' ' + palabra;
       return r;
     }, []);
+  }
+  const coloresUmbral = ['var(--alta)', 'var(--media)', 'var(--baja)'];
+  function colorUmbral(valor, umbrales) {
+    if (valor === null || valor === undefined) return 'var(--texto-suave)';
+    const indice = umbrales.cortes.findIndex(c => c.menor_que === null || valor < c.menor_que);
+    return coloresUmbral[indice] || 'var(--principal)';
   }
   function indicador(i) {
     const n = el('article', null, 'e3-indicador');
@@ -96,7 +102,7 @@
         const diferencia = f.diferencia === null ? '' : ` (${f.diferencia >= 0 ? '+' : ''}${numero(f.diferencia)})`;
         const texto = comparada ? `${f.eje.nombre}: ${numero(f.b)} → ${numero(f.a)}${diferencia}` : `${f.eje.nombre}: ${numero(f.a)}`;
         const grupo = svg('g', {tabindex: 0, role: 'button', 'aria-label': texto, 'aria-pressed': String(ejeSeleccionado.id === f.eje.id), class: 'e3-vertice'});
-        grupo.append(svg('title', {}, texto), svg('circle', {cx: x, cy: y, r: 6, fill: E.colorPara(f.a, datos.umbrales) || 'var(--secundario)'}), svg('text', {x: x + 10, y: y - 9, class: 'e3-puntaje'}, numero(f.a)));
+        grupo.append(svg('title', {}, texto), svg('circle', {cx: x, cy: y, r: 6, fill: colorUmbral(f.a, datos.umbrales)}), svg('text', {x: x + 10, y: y - 9, class: 'e3-puntaje'}, numero(f.a)));
         const {partes, posicion} = etiquetas[i];
         const label = svg('text', {x: posicion.x, y: posicion.y, 'text-anchor': 'middle', class: 'e3-etiqueta'});
         partes.forEach((p, j) => label.append(svg('tspan', {x: posicion.x, dy: j ? 22 : 0}, p))); grupo.append(label);
@@ -124,7 +130,7 @@
       datos.umbrales.cortes.forEach((c, i) => {
         const desde = i ? datos.umbrales.cortes[i - 1].menor_que : datos.umbrales.escala.minimo;
         const item = el('span', `${c.nombre}: ${numero(desde)} ${c.menor_que === null ? 'a ' + numero(datos.umbrales.escala.maximo) : 'a menos de ' + numero(c.menor_que)}`);
-        const punto = el('span', '● '); punto.style.color = c.color; item.prepend(punto); colores.append(item);
+        const punto = el('span', '● '); punto.style.color = coloresUmbral[i] || 'var(--principal)'; item.prepend(punto); colores.append(item);
       }); cuerpo.append(colores);
       if (datos.umbrales.hipotesis) cuerpo.append(el('p', datos.umbrales.nota, 'ayuda'));
       const charts = el('div', null, 'e3-graficos'); graficos.forEach(([g, t]) => charts.append(grafico(g, t))); cuerpo.append(charts);

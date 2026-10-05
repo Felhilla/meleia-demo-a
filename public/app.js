@@ -36,7 +36,26 @@
       return nodo;
     }
   };
-  document.documentElement.dataset.paleta = new URLSearchParams(location.search).get('paleta') === 'b' ? 'b' : 'a';
+  const sistemaTema = window.matchMedia?.('(prefers-color-scheme: dark)');
+  let temaElegido;
+  try { temaElegido = localStorage.getItem('gh-meleia-tema'); } catch (_) { /* Almacenamiento restringido. */ }
+  function aplicarTema() {
+    const oscuro = temaElegido === 'oscuro' || (temaElegido !== 'claro' && !!sistemaTema?.matches);
+    document.documentElement.dataset.tema = oscuro ? 'oscuro' : 'claro';
+    const boton = document.getElementById('tema');
+    if (boton) {
+      boton.textContent = oscuro ? '☀' : '☾';
+      boton.setAttribute('aria-label', oscuro ? 'Activar tema claro' : 'Activar tema oscuro');
+      boton.setAttribute('aria-pressed', String(oscuro));
+      boton.onclick = () => {
+        temaElegido = document.documentElement.dataset.tema === 'oscuro' ? 'claro' : 'oscuro';
+        try { localStorage.setItem('gh-meleia-tema', temaElegido); } catch (_) { /* La elección dura esta sesión. */ }
+        aplicarTema();
+      };
+    }
+  }
+  aplicarTema();
+  sistemaTema?.addEventListener?.('change', aplicarTema);
   const el = App.el;
   let limpieza;
   const pasos = [['estandares', 'Alineación con estándares'], ['materialidad', 'Doble materialidad'], ['riesgos', 'Riesgos'], ['plan', 'Plan de acción']];
