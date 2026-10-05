@@ -14,11 +14,11 @@
   function texto(s, x, y, t, attrs = {}) {
     s.append(svg('text', {x, y, fill: 'var(--texto)', 'font-size': 16, ...attrs}, t));
   }
-  function estandares(c, d) {
+  function estandares(c, dt, d) {
     const evaluacion = Estandares.ordenar(d.evaluaciones.filter(e => ['fuente', 'cargada'].includes(e.origen)))[0];
     if (!evaluacion) { c.append(App.el('p', 'No hay evaluaciones reales disponibles.', 'nota')); return; }
-    c.append(App.el('h4', 'Madurez de gestión · ' + evaluacion.fecha));
-    const grupos = [['etapas-ocde', 'Proceso OCDE'], ['temas-ddhh', 'Temas de DDHH']];
+    c.append(App.el('h4', 'Madurez de gestión · ' + new Intl.DateTimeFormat('es-CO', {month: 'long', year: 'numeric'}).format(new Date(evaluacion.fecha + '-01T12:00:00'))));
+    const grupos = [['etapas-ocde', 'Implementación de la debida diligencia'], ['temas-ddhh', 'Gestión DDHH']];
     const max = d.umbrales.escala.maximo, umbral = d.umbrales.cortes[0].menor_que;
     grupos.forEach(([id, nombre]) => {
       const valores = Estandares.comparar(evaluacion, null, Estandares.ejesDe(id, d.estandares)).map(f => f.a).filter(v => v !== null);
@@ -31,12 +31,15 @@
       s.append(svg('line', {x1: 400 * umbral / max, x2: 400 * umbral / max, y1: 30, y2: 65, stroke: 'var(--texto)', 'stroke-width': 2}));
       texto(s, 0, 82, '0'); texto(s, 400, 82, String(max), {'text-anchor': 'end'}); c.append(s);
     });
-    c.append(App.el('p', 'Cómo leerlo: una barra más larga indica mayor madurez. El filete marca el umbral ' + numero(umbral) + '.', 'nota'), App.el('h4', 'Tres dimensiones con menor puntaje'));
+    c.append(App.el('p', 'Cómo leerlo: una barra más larga indica mayor madurez. El filete marca el umbral ' + numero(umbral) + '.', 'nota'));
+    dt.append(App.el('h4', 'Las tres dimensiones con menor puntaje'));
     const lista = App.el('ol', null, 'relato-brechas');
-    Estandares.comparar(evaluacion, null, d.estandares.ejes).filter(f => f.a !== null).sort((a, b) => a.a - b.a || a.eje.id.localeCompare(b.eje.id)).slice(0, 3).forEach(f => lista.append(App.el('li', f.eje.nombre + ' · ' + numero(f.a))));
-    c.append(lista);
+    Estandares.comparar(evaluacion, null, d.estandares.ejes).filter(f => f.a !== null).sort((a, b) => a.a - b.a || a.eje.id.localeCompare(b.eje.id)).slice(0, 3).forEach(f => {
+      const li = App.el('li'); li.append(App.el('span', f.eje.nombre), App.el('strong', numero(f.a), 'res-puntaje')); lista.append(li);
+    });
+    dt.append(lista);
   }
-  function riesgos(c, d) {
+  function riesgos(c, dt, d) {
     const ubicacion = Riesgos.ubicar(d.riesgos, d.criticidad);
     const niveles = d.criticidad.gravedad.cortes.map(corte => corte.nivel).reverse();
     const probabilidades = d.criticidad.probabilidad.slice().reverse();
@@ -54,15 +57,17 @@
     });
     probabilidades.forEach((p, col) => texto(s, 129 + col * 105, 214, p, {'text-anchor': 'middle'}));
     texto(s, 235, 248, 'Probabilidad', {'text-anchor': 'middle'}); c.append(s);
-    c.append(App.el('p', ubicacion.sinProbabilidad.length + ' sin probabilidad: se conserva fuera de la matriz, sin asignarle un valor supuesto.', 'nota relato-sin-probabilidad'));
+    c.append(App.el('p', 'Cómo leerlo: cada riesgo cuenta una vez, según su evaluación de mayor gravedad. ' + ubicacion.sinProbabilidad.length + ' riesgo sin probabilidad asignada queda fuera de la matriz.', 'nota relato-sin-probabilidad'));
     const cadena = d.riesgos.filter(r => r.ambitos.some(a => a !== 'operacion-propia')).length, propia = d.riesgos.length - cadena;
     const etiqueta = 'Solo operación propia: ' + propia + '. Con algún ámbito en cadena de valor: ' + cadena + '.';
-    c.append(App.el('h4', 'Dónde se concentran los riesgos'), App.el('p', etiqueta));
+    dt.append(App.el('h4', 'Dónde se concentran los riesgos'));
+    const cifras = App.el('div', null, 'res-cifras');
+    [[d.riesgos.length, 'riesgos identificados'], [cadena, 'involucran la cadena de valor'], [propia, 'solo en la operación propia']].forEach(([n, t]) => { const x = App.el('div'); x.append(App.el('strong', String(n)), App.el('span', t)); cifras.append(x); });
+    dt.append(cifras);
     const barra = grafico(400, 32, etiqueta), ancho = d.riesgos.length ? propia / d.riesgos.length * 400 : 0;
-    barra.append(svg('rect', {x: 0, y: 0, width: ancho, height: 28, fill: 'var(--secundario)'}), svg('rect', {x: ancho, y: 0, width: d.riesgos.length ? 400 - ancho : 0, height: 28, fill: 'var(--principal)'})); c.append(barra);
-    c.append(App.el('p', 'Cómo leerlo: cada riesgo cuenta una vez, según su evaluación de mayor gravedad. El color indica gravedad; la barra separa solo operación propia de cualquier presencia en la cadena.', 'nota'));
+    barra.append(svg('rect', {x: 0, y: 0, width: ancho, height: 28, rx: 4, fill: 'var(--secundario)'}), svg('rect', {x: ancho, y: 0, width: d.riesgos.length ? 400 - ancho : 0, height: 28, rx: 4, fill: 'var(--principal)'})); dt.append(barra);
   }
-  function materialidad(c, d) {
+  function materialidad(c, dt, d) {
     c.append(App.el('h4', 'Prioridades por impacto y efecto financiero'));
     if (!d.materialidad?.temas?.length || !d.materialidadConfig) { c.append(App.el('p', 'Materialidad en preparación: todavía no hay datos disponibles.', 'nota')); return; }
     const temas = d.materialidad.temas, cfg = d.materialidadConfig, filas = Materialidad.clasificar(temas, cfg), limites = Materialidad.umbrales(temas, cfg);
@@ -75,11 +80,14 @@
     filas.forEach(f => s.append(svg('circle', {cx: x(f.impacto), cy: y(f.financiera), r: 5, fill: f.material ? 'var(--principal)' : 'var(--superficie)', stroke: f.material ? 'var(--principal)' : 'var(--linea)'})));
     texto(s, 48, 304, '0'); texto(s, 328, 304, String(cfg.escala.maximo)); texto(s, 20, 55, String(cfg.escala.maximo));
     texto(s, 190, 333, 'Impacto', {'text-anchor': 'middle'}); texto(s, 48, 22, 'Financiera');
+    panel.append(s); c.append(panel, App.el('p', 'Cómo leerlo: los puntos rellenos superan al menos uno de los umbrales discontinuos (impacto ' + numero(limites.impacto) + ' y financiera ' + numero(limites.financiera) + ').', 'nota'));
+    const corta = Materialidad.listaCorta(temas, cfg);
+    dt.append(App.el('h4', 'Temas materiales (' + corta.length + ' de ' + temas.length + ')'));
     const lista = App.el('ol', null, 'relato-lista-corta');
-    Materialidad.listaCorta(temas, cfg).forEach(f => lista.append(App.el('li', nombre(f.id))));
-    panel.append(s, lista); c.append(panel, App.el('p', 'Cómo leerlo: los puntos rellenos superan al menos un umbral discontinuo. Los umbrales son los promedios del universo: impacto ' + numero(limites.impacto) + ' y financiera ' + numero(limites.financiera) + '. La lista ordena los temas materiales.', 'nota'));
+    corta.forEach(f => lista.append(App.el('li', nombre(f.id))));
+    dt.append(lista);
   }
-  function plan(c, d) {
+  function plan(c, dt, d) {
     const acciones = App.obtenerPlan(), fecha = new Date(), hoy = [fecha.getFullYear(), String(fecha.getMonth() + 1).padStart(2, '0'), String(fecha.getDate()).padStart(2, '0')].join('-');
     const resumen = Plan.resumen(acciones, d.planConfig, hoy), avance = resumen.avanceGlobal;
     c.append(App.el('h4', 'Avance global del plan'));
@@ -87,9 +95,11 @@
     const longitud = 2 * Math.PI * 90;
     s.append(svg('circle', {cx: 120, cy: 120, r: 90, fill: 'none', stroke: 'var(--suave)', 'stroke-width': 16}), svg('circle', {cx: 120, cy: 120, r: 90, fill: 'none', stroke: 'var(--principal)', 'stroke-width': 16, 'stroke-dasharray': `${longitud * avance / 100} ${longitud}`, transform: 'rotate(-90 120 120)', 'data-avance': avance}));
     texto(s, 120, 127, numero(avance) + ' %', {'text-anchor': 'middle', 'font-size': 32}); s.setAttribute('class', 'relato-anillo'); c.append(s);
-    const lista = App.el('ul', null, 'relato-estados');
-    Object.entries(resumen.porEstado).forEach(([estado, cantidad]) => lista.append(App.el('li', estado.replace(/-/g, ' ') + ': ' + cantidad)));
-    lista.append(App.el('li', 'Vencidas: ' + resumen.vencidas)); c.append(lista, App.el('p', 'Cómo leerlo: el anillo muestra el promedio de avance de todas las acciones. Las vencidas tienen plazo anterior a hoy y aún no están cumplidas.', 'nota'));
+    c.append(App.el('p', 'Cómo leerlo: el anillo muestra el promedio de avance de las ' + acciones.length + ' acciones.', 'nota'));
+    dt.append(App.el('h4', 'Estado de las acciones'));
+    const lista = App.el('ul', null, 'relato-estados res-cifras');
+    Object.entries(resumen.porEstado).forEach(([estado, cantidad]) => { const li = App.el('li'); li.append(App.el('strong', String(cantidad)), App.el('span', estado.replace(/-/g, ' '))); lista.append(li); });
+    const v = App.el('li', null, 'vencidas'); v.append(App.el('strong', String(resumen.vencidas)), App.el('span', 'vencidas')); lista.append(v); dt.append(lista);
     return acciones.some(a => a.seguimiento_ejemplo);
   }
   function render(contenedor, datos) {
@@ -98,12 +108,16 @@
     const evidencias = {Estándares: estandares, Riesgos: riesgos, Materialidad: materialidad, Plan: plan};
     let ejemplo = false;
     datos.caso.resultados.mensajes.forEach((mensaje, i) => {
-      const s = el('section', null, 'seccion relato-mensaje'), relato = el('div', null, 'relato-texto'), evidencia = el('div', null, 'relato-evidencia');
+      // Boceto de Felipe: arriba título | gráfico; abajo descripción | datos relevantes.
+      const s = el('section', null, 'seccion tarjeta res-tarjeta relato-mensaje');
+      const titulo = el('div', null, 'res-titulo'), evidencia = el('div', null, 'res-grafico relato-evidencia'), relato = el('div', null, 'res-descripcion relato-texto'), datosRel = el('div', null, 'res-datos');
       evidencia.setAttribute('tabindex', '0'); evidencia.setAttribute('role', 'region'); evidencia.setAttribute('aria-label', 'Evidencia: ' + mensaje.tema);
-      const enlace = el('a', 'Ver detalle →'); enlace.href = mensaje.destino;
-      relato.append(el('p', String(i + 1).padStart(2, '0') + ' · ' + mensaje.tema, 'antetitulo'), el('h3', mensaje.titulo), el('p', mensaje.texto), enlace);
-      if (evidencias[mensaje.tema](evidencia, datos)) ejemplo = true;
-      s.append(relato, evidencia); contenedor.append(s);
+      const enlace = el('a', 'Ver detalle →', 'boton secundario'); enlace.href = mensaje.destino;
+      titulo.append(el('p', String(i + 1).padStart(2, '0') + ' · ' + mensaje.tema, 'antetitulo'), el('h3', mensaje.titulo));
+      relato.append(el('p', mensaje.texto), enlace);
+      datosRel.append(el('p', 'Datos relevantes', 'antetitulo'));
+      if (evidencias[mensaje.tema](evidencia, datosRel, datos)) ejemplo = true;
+      s.append(titulo, evidencia, relato, datosRel); contenedor.append(s);
     });
     contenedor.append(el('p', 'La materialidad es ilustrativa.' + (ejemplo ? ' El seguimiento del plan incluye avances de ejemplo.' : ''), 'nota'));
     const cierre = el('nav', null, 'seccion relato-cierre'); cierre.setAttribute('aria-label', 'Explorar los resultados');

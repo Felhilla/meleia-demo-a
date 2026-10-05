@@ -487,8 +487,8 @@
     "mensajes": [
       {
         "tema": "Estándares",
-        "titulo": "La gestión de los temas de derechos humanos es sólida; el proceso de debida diligencia, no",
-        "texto": "Los temas de derechos humanos promedian 4,0 sobre 5, mientras las etapas del proceso OCDE promedian 3,1. La brecha mayor está en el seguimiento de la implementación y los resultados (2,8).",
+        "titulo": "La gestión de los derechos humanos es sólida; la implementación de la debida diligencia, no",
+        "texto": "La gestión DDHH promedia 4,0 sobre 5, mientras la implementación de la debida diligencia promedia 3,1. La brecha mayor está en el seguimiento de la implementación y los resultados (2,8).",
         "destino": "#/ddhh/dimensiones"
       },
       {

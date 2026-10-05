@@ -130,13 +130,13 @@ test('resultados: cuatro mensajes, 17 riesgos ubicados más uno sin probabilidad
   assert.deepEqual(raiz.querySelectorAll('.relato-mensaje').map(n => n.querySelectorAll('a')[0].href), datos.caso.resultados.mensajes.map(m => m.destino));
   const celdas = raiz.querySelectorAll('text').filter(n => Object.hasOwn(n.attrs, 'data-riesgos'));
   assert.equal(celdas.length, 9); assert.equal(celdas.reduce((s,n) => s + Number(n.textContent), 0), 17);
-  assert.match(raiz.querySelectorAll('.relato-sin-probabilidad')[0].textContent, /^1 sin probabilidad/);
+  assert.match(raiz.querySelectorAll('.relato-sin-probabilidad')[0].textContent, /1 riesgo sin probabilidad/);
   assert.equal(raiz.querySelectorAll('.relato-lista-corta')[0].children.length, 9);
   const anillo = raiz.querySelectorAll('circle').find(n => n.attrs['data-avance']);
   assert.equal(Number(anillo.attrs['data-avance']), Plan.resumen(datos.plan, datos.planConfig).avanceGlobal);
   assert.match(raiz.textContent, /avances de ejemplo/);
   assert.match(raiz.textContent, /3,1/); assert.match(raiz.textContent, /4,0/);
-  assert.match(raiz.textContent, /Solo operación propia: 5/); assert.match(raiz.textContent, /cadena de valor: 13/);
+  assert.match(raiz.textContent, /5 solo en la operación propia/); assert.match(raiz.textContent, /13 involucran la cadena de valor/);
   assert.ok(raiz.querySelectorAll('svg').every(n => n.attrs['aria-label'] && n.attrs.role === 'img'));
   assert.ok(raiz.querySelectorAll('text').every(n => Number(n.attrs['font-size']) >= 14));
 });
@@ -149,9 +149,9 @@ test('resultados recalcula evidencia al cambiar datos y usa la última evaluaci�
     d.materialidad = null;
     d.riesgos = d.riesgos.slice(0, 2);
   });
-  assert.match(raiz.textContent, /2098-01/); assert.doesNotMatch(raiz.textContent, /2099-01/);
+  assert.match(raiz.textContent, /enero de 2098/); assert.doesNotMatch(raiz.textContent, /2099/);
   assert.match(raiz.textContent, /2,0/); assert.match(raiz.textContent, /100,0 %/);
-  assert.match(raiz.textContent, /Vencidas: 0/); assert.doesNotMatch(raiz.textContent, /avances de ejemplo/);
+  assert.match(raiz.textContent, /0 vencidas/); assert.doesNotMatch(raiz.textContent, /avances de ejemplo/);
   assert.match(raiz.textContent, /Materialidad en preparación/);
 });
 test('index carga scripts locales diferidos y en orden válido para los nueve destinos', () => {

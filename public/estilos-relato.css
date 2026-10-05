@@ -130,3 +130,38 @@
 @media (min-width: 768px) and (max-width: 900px) {
   .relato-fases { grid-template-columns: 1fr; }
 }
+
+/* Capítulo 03 · Tarjeta de mensaje (boceto de Felipe): título | gráfico / descripción | datos relevantes. */
+.res-tarjeta { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-areas: "titulo grafico" "descripcion datos"; padding: 0; overflow: hidden; }
+.res-titulo { grid-area: titulo; padding: var(--e5); align-self: center; }
+.res-titulo h3 { font-size: var(--t-h2); line-height: 1.2; }
+.res-grafico { grid-area: grafico; margin: var(--e4) var(--e4) var(--e4) 0; padding: var(--e4); border: 1px solid var(--borde); border-radius: var(--radio-chico); background: var(--fondo); }
+.res-grafico h4 { font-size: 1rem; margin: 0 0 var(--e3); }
+.res-grafico .nota { margin: var(--e3) 0 0; }
+.res-descripcion { grid-area: descripcion; padding: var(--e5); border-top: 1px solid var(--borde); }
+.res-descripcion p { font-size: 1.1rem; line-height: 1.6; color: var(--texto); }
+.res-datos { grid-area: datos; padding: var(--e5); border-top: 1px solid var(--borde); border-left: 1px solid var(--borde); background: var(--fondo-alterno); }
+.res-datos h4 { font-size: 1.05rem; margin: 0 0 var(--e3); }
+.res-datos ol { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+.relato-brechas li { display: flex; justify-content: space-between; gap: var(--e3); }
+.res-puntaje { color: var(--alta); font-size: 1.1rem; }
+.res-cifras { list-style: none; padding: 0; margin: 0 0 var(--e3); display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: var(--e3); }
+.res-cifras strong { display: block; font-size: 2rem; line-height: 1; color: var(--principal); }
+.res-cifras span { display: block; margin-top: 6px; font-size: var(--t-chico); color: var(--texto-suave); text-transform: lowercase; }
+.res-cifras .vencidas strong { color: var(--alta); }
+.relato-lista-corta { columns: 2; column-gap: var(--e4); display: block !important; }
+.relato-lista-corta li { break-inside: avoid; margin-bottom: 6px; }
+@media (max-width: 900px) {
+  .res-tarjeta { grid-template-columns: 1fr; grid-template-areas: "titulo" "grafico" "descripcion" "datos"; }
+  .res-grafico { margin: 0 var(--e4) var(--e4); }
+  .res-datos { border-left: 0; }
+  .relato-lista-corta { columns: 1; }
+}
+/* Las cuatro tarjetas comparten la misma proporción de columnas. */
+.res-tarjeta > * { min-width: 0; }
+.res-tarjeta .relato-materialidad { display: block; }
+.res-tarjeta .relato-grafico { width: 100%; height: auto; }
+.res-tarjeta.relato-mensaje, .res-tarjeta.relato-mensaje:has(.relato-materialidad) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 0; align-items: stretch; }
+.res-tarjeta .relato-texto { order: 0; }
+@media (max-width: 900px) { .res-tarjeta.relato-mensaje, .res-tarjeta.relato-mensaje:has(.relato-materialidad) { grid-template-columns: 1fr; } }
+.res-tarjeta .relato-lista-corta { columns: 1; }
