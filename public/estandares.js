@@ -54,5 +54,20 @@
       return [cx + radio * v / 5 * Math.cos(angulo), cy + radio * v / 5 * Math.sin(angulo)];
     });
   }
-  return {combinar, ordenar, ejesDe, comparar, colorPara, validarEvaluacion, parsearPuntaje, puntosPoligono};
+  function promedioDimension(evaluacion, ejes) {
+    const valores = comparar(evaluacion, null, ejes).map(f => f.a).filter(n => n !== null && n >= 0 && n <= 5);
+    return valores.length ? valores.reduce((a, b) => a + b, 0) / valores.length : null;
+  }
+  function indicadoresEje(estandares, ejeId) {
+    const h = estandares.ejes.find(e => e.id === ejeId)?.hallazgos;
+    const indicadores = h?.indicadores || h?.grupos?.flatMap(g => g.indicadores) || [];
+    return indicadores.map((i, n) => ({...i, codigo: `I${n + 1}`, calificacion: parsearPuntaje(i.calificacion)}));
+  }
+  // El nivel inferior evita presentar como alcanzado el siguiente nivel de madurez.
+  function nivelEscala(valor, escala) {
+    const n = parsearPuntaje(valor);
+    if (n === null || n < 0 || n > 5) return 'Sin información';
+    return escala.filter(e => e.valor <= n).sort((a, b) => b.valor - a.valor)[0]?.descripcion || 'Sin información';
+  }
+  return {promedioDimension, indicadoresEje, nivelEscala, combinar, ordenar, ejesDe, comparar, colorPara, validarEvaluacion, parsearPuntaje, puntosPoligono};
 }));

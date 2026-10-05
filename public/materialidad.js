@@ -114,5 +114,37 @@
     const clave = criterio === 'financiera' ? criterio : 'impacto';
     return [...clasificados].sort((a, b) => b[clave] - a[clave] || a.id.localeCompare(b.id));
   }
-  return { severidad, importanciaImpacto, puntajeFinanciero, umbrales, clasificar, listaCorta, cruce, porGrupo, posicionesMatriz, resumen, filtrar, ordenar };
+  // Cada mapa es un arreglo de puntos con .umbrales = {x, y}; los cortes
+  // geométricos son medias del universo, independientes del criterio material.
+  function mapaDimension(temas, cfg, dimension) {
+    const cortes = umbrales(temas, cfg);
+    const puntos = temas.map(t => {
+      const evs = Object.values(t.evaluacion_impacto);
+      const fin = variablesFinancieras(t, cfg);
+      return {id: t.id,
+        x: dimension === 'impacto' ? promedio(evs.map(e => valor(e, 'probabilidad', cfg))) : fin.gasto_operativo,
+        y: dimension === 'impacto' ? promedio(evs.map(e => severidad(e, cfg))) : fin.rentabilidad,
+        material: (dimension === 'impacto' ? importanciaImpacto(t, cfg) : puntajeFinanciero(t, cfg)) > cortes[dimension]};
+    });
+    puntos.umbrales = {x: promedio(puntos.map(p => p.x)), y: promedio(puntos.map(p => p.y))};
+    return puntos;
+  }
+  function mapaImpacto(temas, cfg) { return mapaDimension(temas, cfg, 'impacto'); }
+  function mapaFinanciero(temas, cfg) { return mapaDimension(temas, cfg, 'financiera'); }
+  function matrizGrupos(temas, cfg) {
+    puntajes(temas, cfg);
+    return temas.map(t => ({id: t.id, celdas: porGrupo(t, cfg), total: importanciaImpacto(t, cfg)}))
+      .sort((a, b) => b.total - a.total || a.id.localeCompare(b.id));
+  }
+  function matrizEvaluadores(temas, cfg) {
+    puntajes(temas, cfg);
+    return temas.map(t => ({id: t.id, celdas: Object.fromEntries(evaluaciones(t, 'evaluacion_financiera')
+      .map(([id, ev]) => [id, promedio(cfg.financiera.variables.map(k => valor(ev, k, cfg)))])), total: puntajeFinanciero(t, cfg)}))
+      .sort((a, b) => b.total - a.total || a.id.localeCompare(b.id));
+  }
+  function tonoCalor(valor, min, max) {
+    exigir([valor, min, max].every(Number.isFinite) && max >= min, 'Escala de calor inválida');
+    return max === min ? 0 : Math.max(0, Math.min(4, Math.floor((valor - min) / (max - min) * 5)));
+  }
+  return { mapaImpacto, mapaFinanciero, matrizGrupos, matrizEvaluadores, tonoCalor, severidad, importanciaImpacto, puntajeFinanciero, umbrales, clasificar, listaCorta, cruce, porGrupo, posicionesMatriz, resumen, filtrar, ordenar };
 }));

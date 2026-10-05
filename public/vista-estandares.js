@@ -18,12 +18,15 @@
     };
   }
   if (typeof module === 'object' && module.exports) { module.exports = {posicionesArana}; return; }
+  /* Capítulo 04 · Resultados por dimensión. Boceto de Felipe: una tarjeta por dimensión con
+     encabezado (dimensión), cuerpo en tres columnas (hallazgos · araña · brechas) y pie de estándares relacionados.
+     Dos niveles: las dos grandes dimensiones y, al elegir un eje, su tarjeta de detalle con sus indicadores. */
   const E = window.Estandares, el = App.el;
-  const graficos = [['etapas-ocde', 'Etapas de la debida diligencia (Guía OCDE)'], ['temas-ddhh', 'Temas de DDHH']];
   const respaldo = 'No hay conexión con la base de datos: se muestran los datos de respaldo; las evaluaciones nuevas no se pueden guardar ahora.';
+  const graficos = [['etapas-ocde', 'Etapas de la debida diligencia (Guía OCDE)'], ['temas-ddhh', 'Temas de DDHH']];
   const formato = new Intl.NumberFormat('es-CO', {minimumFractionDigits: 1, maximumFractionDigits: 1});
-  const numero = n => n === null || n === undefined ? 'Sin información' : formato.format(n);
-  const delta = n => n === null ? '—' : `${Math.abs(n) < 0.05 ? '=' : n > 0 ? '▲' : '▼'} ${n > 0.049 ? '+' : ''}${numero(Math.abs(n) < 0.05 ? 0 : n)}`;
+  const numero = n => n === null || n === undefined || Number.isNaN(n) ? 'Sin información' : formato.format(n);
+  const delta = n => n === null || n === undefined ? '' : `${Math.abs(n) < 0.05 ? '=' : n > 0 ? '▲' : '▼'} ${n > 0.049 ? '+' : ''}${formato.format(Math.abs(n) < 0.05 ? 0 : n)}`;
   const etiqueta = e => {
     const nombre = e.nombre.replace(e.fecha, '').replace(new RegExp('\\s+' + e.fecha.slice(0, 4) + '$'), '').replace(/\s*\(ejemplo\)\s*/gi, '').trim();
     const fecha = new Intl.DateTimeFormat('es-CO', {month: 'short', year: 'numeric'}).format(new Date(e.fecha + '-01T12:00:00')).replace(' de ', ' ');
@@ -42,124 +45,182 @@
       return r;
     }, []);
   }
-  const coloresUmbral = ['var(--alta)', 'var(--media)', 'var(--baja)'];
-  function colorUmbral(valor, umbrales) {
+  const TONOS = ['var(--alta)', 'var(--media)', 'var(--baja)'];
+  function tono(valor, umbrales) {
     if (valor === null || valor === undefined) return 'var(--texto-suave)';
-    const indice = umbrales.cortes.findIndex(c => c.menor_que === null || valor < c.menor_que);
-    return coloresUmbral[indice] || 'var(--principal)';
+    const i = umbrales.cortes.findIndex(c => c.menor_que === null || valor < c.menor_que);
+    return TONOS[i] || 'var(--principal)';
   }
-  function indicador(i) {
-    const n = el('article', null, 'e3-indicador');
-    n.append(el('h4', i.pregunta), el('p', `Incorporado: ${i.incorporado === 'si' ? 'Sí' : i.incorporado === 'no' ? 'No' : 'Sin información'} · Calificación: ${numero(i.calificacion)}`));
-    const detalle = el('details'); detalle.append(el('summary', 'Descripción'), el('p', i.descripcion || 'Sin descripción registrada', 'texto-dato'));
-    n.append(detalle, el('p', i.brecha ? `Brecha identificada: ${i.brecha}` : 'Sin brecha registrada', 'e3-brecha texto-dato'), el('p', `Documentos analizados: ${i.documentos || 'Sin documentos registrados'}`, 'ayuda texto-dato'));
+  const promedio = vs => { const v = vs.filter(n => typeof n === 'number'); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+
+  /* Geometría de etiquetas para tipografía de 24 px: caja conservadora por carácter y por línea,
+     proyectada fuera del círculo para que nunca toque anillos, valores ni puntos. */
+  const R = 300, CX = 0, CY = 0, CHAR = 14, LINEA = 28, HOLGURA = 40;
+  function ubicarEtiqueta(indice, total, partes) {
+    const angulo = 2 * Math.PI * indice / total - Math.PI / 2, ux = Math.cos(angulo), uy = Math.sin(angulo);
+    const ancho = Math.max(...partes.map(p => p.length * CHAR), CHAR), alto = partes.length * LINEA;
+    const d = R + HOLGURA + Math.abs(ux) * ancho / 2 + Math.abs(uy) * alto / 2;
+    const x = CX + ux * d, y = CY + uy * d;
+    return {x, y: y - alto / 2 + 21, caja: {x: x - ancho / 2, y: y - alto / 2, ancho, alto}};
+  }
+  /* Araña genérica: ejes = [{clave, texto, partes}], valores y comparación alineados con ejes. */
+  function arana({ejes, valores, comparacion, seleccionado, rotulo, umbrales, alElegir}) {
+    const total = ejes.length, centro = [CX, CY], radio = R;
+    const posiciones = ejes.map((e, i) => ubicarEtiqueta(i, total, e.partes));
+    const cajas = posiciones.map(p => p.caja);
+    const x0 = Math.min(-R, ...cajas.map(c => c.x)) - 12, y0 = Math.min(-R, ...cajas.map(c => c.y)) - 12;
+    const x1 = Math.max(R, ...cajas.map(c => c.x + c.ancho)) + 12, y1 = Math.max(R, ...cajas.map(c => c.y + c.alto)) + 12;
+    const dibujo = svg('svg', {viewBox: `${x0} ${y0} ${x1 - x0} ${y1 - y0}`, role: 'group', 'aria-label': rotulo, class: 'dim-arana'});
+    const puntos = vals => E.puntosPoligono(vals, radio, centro);
+    const cadena = ps => ps.map(p => p.map(n => n.toFixed(1)).join(',')).join(' ');
+    for (let nivel = 1; nivel <= 5; nivel++) dibujo.append(svg('polygon', {points: cadena(puntos(ejes.map(() => nivel))), class: 'dim-anillo' + (nivel === 5 ? ' borde' : '')}));
+    puntos(ejes.map(() => 5)).forEach(([x, y], i) => dibujo.append(svg('line', {x1: centro[0], y1: centro[1], x2: x, y2: y, class: 'dim-radio' + (ejes[i].clave === seleccionado ? ' activo' : '')})));
+    const angNivel = -Math.PI / 2 + Math.PI / total;
+    [1, 3, 5].forEach(nivel => dibujo.append(svg('text', {x: CX + Math.cos(angNivel) * R * nivel / 5 + 6, y: CY + Math.sin(angNivel) * R * nivel / 5, class: 'dim-nivel'}, String(nivel))));
+    if (comparacion && comparacion.every(v => typeof v === 'number')) dibujo.append(svg('polygon', {points: cadena(puntos(comparacion)), class: 'dim-comparada'}));
+    if (valores.every(v => typeof v === 'number')) dibujo.append(svg('polygon', {points: cadena(puntos(valores)), class: 'dim-principal'}));
+    const vertices = puntos(valores.map(v => v ?? 0));
+    ejes.forEach((eje, i) => {
+      const [x, y] = vertices[i], v = valores[i], c = comparacion?.[i];
+      const lectura = `${eje.texto}: ${numero(v)}${typeof c === 'number' ? ` (antes ${numero(c)}, ${delta(v - c)})` : ''}`;
+      const g = svg('g', {class: 'dim-vertice' + (eje.clave === seleccionado ? ' activo' : ''), tabindex: alElegir ? 0 : -1, role: alElegir ? 'button' : 'img', 'aria-label': lectura});
+      g.append(svg('title', {}, lectura));
+      const p = posiciones[i], texto = svg('text', {x: p.x, y: p.y, 'text-anchor': 'middle', class: 'dim-etiqueta'});
+      eje.partes.forEach((parte, j) => texto.append(svg('tspan', {x: p.x, dy: j ? LINEA : 0}, parte)));
+      g.append(texto, svg('circle', {cx: x, cy: y, r: 9, fill: tono(v, umbrales), class: 'dim-punto'}), svg('text', {x: x + 14, y: y - 12, class: 'dim-valor'}, numero(v)));
+      if (alElegir) {
+        g.addEventListener('click', () => alElegir(eje.clave));
+        g.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); alElegir(eje.clave); } });
+      }
+      dibujo.append(g);
+    });
+    return dibujo;
+  }
+  function barras(items, umbrales) {
+    const lista = el('ol', null, 'dim-barras');
+    items.slice().sort((a, b) => (a.valor ?? -1) - (b.valor ?? -1)).forEach(it => {
+      const li = el('li'), pista = el('span', null, 'pista'), relleno = el('span', null, 'relleno');
+      relleno.style.width = ((it.valor ?? 0) / 5 * 100) + '%'; relleno.style.background = tono(it.valor, umbrales);
+      pista.append(relleno); li.append(el('span', it.codigo, 'codigo'), el('span', it.texto, 'texto'), pista, el('strong', numero(it.valor)));
+      lista.append(li);
+    });
+    return lista;
+  }
+  function columna(titulo, frases, clase) {
+    const c = el('div', null, 'dim-col ' + clase);
+    c.append(el('h3', titulo));
+    const ul = el('ul'); (frases || []).forEach(f => ul.append(el('li', f))); c.append(ul);
+    return c;
+  }
+  function pie(estandares) {
+    const p = el('footer', null, 'dim-pie');
+    p.append(el('span', 'Estándares relacionados', 'antetitulo'));
+    const fichas = el('div', null, 'dim-fichas'); estandares.forEach(s => fichas.append(el('span', s, 'chip')));
+    p.append(fichas); return p;
+  }
+  function indicadorCompleto(i) {
+    const n = el('article', null, 'dim-indicador');
+    n.append(el('h4', `${i.codigo} · ${i.pregunta}`), el('p', `Calificación: ${numero(i.calificacion)} · Incorporado: ${i.incorporado === 'si' ? 'sí' : i.incorporado === 'no' ? 'no' : 'sin información'}`, 'nota'));
+    if (i.descripcion) n.append(el('p', i.descripcion, 'texto-dato'));
+    n.append(el('p', i.brecha ? 'Brecha: ' + i.brecha : 'Sin brecha registrada', 'dim-brecha texto-dato'));
     return n;
   }
+
   App.registrarVista('estandares', {render(contenedor, datos, params) {
-    let activo = true, dialogo, evaluaciones = [], principal, comparada, ejeSeleccionado, sinBase = false;
-    const raiz = el('section', null, 'e3');
-    raiz.append(el('h1', 'Alineación con estándares'), el('p', 'Paso 1 de 4 · Alineación con estándares', 'ayuda'), el('p', 'Dónde está la gestión frente a los estándares y qué brechas cerrar primero. Escala de 0 a 5; 0 significa sin información.', 'intro'));
-    const aviso = el('p', 'Cargando evaluaciones…', 'e3-aviso'); aviso.setAttribute('role', 'status');
-    const controles = el('div', null, 'e3-controles'), cuerpo = el('div');
-    raiz.append(aviso, controles, cuerpo); contenedor.append(raiz);
+    let activo = true, dialogo, evaluaciones = [], principal, comparada, ejeId = null, sinBase = false;
+    const dims = datos.dimensiones || {grandes: [], ejes: {}};
+    const raiz = el('div', null, 'dim');
+    const aviso = el('p', 'Cargando evaluaciones…', 'nota dim-aviso'); aviso.setAttribute('role', 'status');
+    const controles = el('div', null, 'dim-barra'), cuerpo = el('div');
+    raiz.append(controles, aviso, cuerpo); contenedor.append(raiz);
     function url() {
-      const q = new URLSearchParams({eval: principal.id, vs: comparada?.id || '', eje: ejeSeleccionado.id});
+      const q = new URLSearchParams({eval: principal.id}); if (comparada) q.set('vs', comparada.id); if (ejeId) q.set('eje', ejeId);
       history.replaceState(null, '', '#/ddhh/dimensiones?' + q);
     }
     function avisoBase() { aviso.textContent = sinBase ? respaldo : ''; aviso.hidden = !sinBase; }
-    function seleccionar(eje) {
-      ejeSeleccionado = eje; url(); dibujar();
-      const titulo = cuerpo.querySelector('#e3-eje-titulo'); titulo.focus({preventScroll: true}); titulo.scrollIntoView({block: 'nearest'});
+    function elegir(id) {
+      ejeId = id; url(); dibujar();
+      const det = cuerpo.querySelector('.dim-detalle');
+      if (det) { det.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); det.querySelector('h2')?.focus({preventScroll: true}); }
     }
-    function grafico(tipo, titulo) {
-      const ejes = E.ejesDe(tipo, datos.estandares), filas = E.comparar(principal, comparada, ejes);
-      const seccion = el('section', null, 'superficie e3-grafico'); seccion.append(el('h2', titulo));
-      const etiquetas = ejes.map((eje, i) => {
-        const partes = lineas(eje.nombre, 16);
-        return {partes, posicion: posicionesArana(i, ejes.length, partes).etiqueta};
+    function cabeza(antetitulo, titulo, subtitulo, valor, anterior) {
+      const h = el('header', null, 'dim-cabeza'), t = el('div');
+      const h2 = el('h2', titulo); h2.tabIndex = -1;
+      t.append(el('p', antetitulo, 'antetitulo'), h2, el('p', subtitulo, 'dim-pregunta'));
+      const c = el('div', null, 'dim-puntaje');
+      c.append(el('span', numero(valor), 'cifra'), el('span', 'sobre 5', 'cifra-etiqueta'));
+      if (typeof anterior === 'number' && typeof valor === 'number') c.append(el('span', delta(valor - anterior) + ' frente a ' + etiqueta(comparada).split(' · ')[0].toLowerCase(), 'dim-delta'));
+      h.append(t, c); return h;
+    }
+    function tarjetaGeneral(g, indice) {
+      const ejes = E.ejesDe(g.id, datos.estandares), filas = E.comparar(principal, comparada, ejes);
+      const t = el('article', null, 'tarjeta dim-tarjeta');
+      t.append(cabeza(`Dimensión ${indice + 1} de 2`, g.titulo, g.pregunta, promedio(filas.map(f => f.a)), comparada ? promedio(filas.map(f => f.b)) : null));
+      const medio = el('div', null, 'dim-centro');
+      medio.append(arana({ejes: ejes.map(e => ({clave: e.id, texto: e.nombre, partes: lineas(dims.ejes[e.id]?.corto || e.nombre, 13)})), valores: filas.map(f => f.a), comparacion: comparada ? filas.map(f => f.b) : null,
+        seleccionado: ejeId, rotulo: g.titulo, umbrales: datos.umbrales, alElegir: elegir}), el('p', 'Toque un eje para ver su detalle.', 'nota dim-ayuda'));
+      const cuerpoT = el('div', null, 'dim-cuerpo');
+      cuerpoT.append(columna('Hallazgos', g.hallazgos, 'hallazgos'), medio, columna('Brechas', g.brechas, 'brechas'));
+      t.append(cuerpoT, pie(g.estandares));
+      const tabla = el('table'), thead = el('thead'), tr = el('tr');
+      ['Eje', 'Puntaje', comparada ? 'Comparación' : null, comparada ? 'Diferencia' : null].filter(Boolean).forEach(x => { const th = el('th', x); th.scope = 'col'; tr.append(th); });
+      thead.append(tr); tabla.append(thead);
+      const tb = el('tbody');
+      filas.slice().sort((a, b) => (a.a ?? 0) - (b.a ?? 0)).forEach(f => {
+        const fila = el('tr'), th = el('th'), b = el('button', f.eje.nombre, 'enlace'); th.scope = 'row'; b.onclick = () => elegir(f.eje.id); th.append(b); fila.append(th);
+        fila.append(el('td', numero(f.a))); if (comparada) fila.append(el('td', numero(f.b)), el('td', delta(f.diferencia)));
+        tb.append(fila);
       });
-      const cajas = etiquetas.map(e => e.posicion.caja);
-      const izquierda = Math.min(0, ...cajas.map(c => c.x)) - 24;
-      const arriba = Math.min(0, ...cajas.map(c => c.y)) - 24;
-      const derecha = Math.max(720, ...cajas.map(c => c.x + c.ancho)) + 24;
-      const abajo = Math.max(700, ...cajas.map(c => c.y + c.alto)) + 24;
-      const dibujo = svg('svg', {viewBox: `${izquierda} ${arriba} ${derecha - izquierda} ${abajo - arriba}`, role: 'group', 'aria-label': titulo});
-      const centro = [360, 350], radio = 240;
-      const puntos = valores => E.puntosPoligono(valores, radio, centro);
-      const cadena = ps => ps.map(p => p.map(n => n.toFixed(2)).join(',')).join(' ');
-      for (let nivel = 0; nivel <= 5; nivel++) {
-        dibujo.append(svg('polygon', {points: cadena(puntos(ejes.map(() => nivel))), class: 'e3-anillo'}));
-        const posicion = posicionesArana(0, ejes.length, [''], nivel).numero;
-        dibujo.append(svg('text', {x: posicion.x, y: posicion.y, class: 'e3-nivel'}, String(nivel)));
+      tabla.append(tb);
+      const det = el('details', null, 'e3-datos dim-tabla'); det.append(el('summary', 'Ver puntajes por eje, de menor a mayor'), tabla); t.append(det);
+      return t;
+    }
+    function tarjetaDetalle(eje) {
+      const g = dims.grandes.find(x => x.id === eje.grafico), info = dims.ejes[eje.id] || {};
+      const valor = principal.puntajes[eje.id], antes = comparada?.puntajes[eje.id];
+      const t = el('article', null, 'tarjeta dim-tarjeta dim-detalle');
+      const cerrar = el('button', 'Cerrar detalle ×', 'dim-cerrar'); cerrar.onclick = () => { ejeId = null; url(); dibujar(); cuerpo.querySelector('.dim-tarjeta')?.scrollIntoView({block: 'start'}); };
+      t.append(cerrar, cabeza('Detalle · ' + (g?.titulo || ''), eje.nombre, E.nivelEscala(valor, datos.estandares.escala), valor, antes));
+      const indicadores = E.indicadoresEje(datos.estandares, eje.id);
+      const calificados = indicadores.filter(i => typeof i.calificacion === 'number');
+      const medio = el('div', null, 'dim-centro');
+      const criterios = (eje.criterios || []).filter(c => typeof E.parsearPuntaje(c.calificacion) === 'number');
+      if (calificados.length >= 3 && calificados.length <= 12) {
+        medio.append(arana({ejes: calificados.map(i => ({clave: i.codigo, texto: i.pregunta, partes: [i.codigo]})), valores: calificados.map(i => i.calificacion), rotulo: 'Indicadores de ' + eje.nombre, umbrales: datos.umbrales}));
+        const ley = el('ol', null, 'dim-leyenda'); calificados.forEach(i => { const li = el('li'); li.append(el('strong', i.codigo), document.createTextNode(' ' + i.pregunta)); ley.append(li); });
+        medio.append(ley);
+      } else if (criterios.length >= 3) {
+        medio.append(arana({ejes: criterios.map((c, i) => ({clave: 'C' + (i + 1), texto: c.nombre, partes: ['C' + (i + 1)]})), valores: criterios.map(c => E.parsearPuntaje(c.calificacion)), rotulo: 'Criterios de ' + eje.nombre, umbrales: datos.umbrales}));
+        medio.append(el('p', 'Criterios mínimos de la etapa; los indicadores están en el detalle de abajo.', 'nota dim-ayuda'));
+      } else {
+        medio.append(barras(calificados.map(i => ({codigo: i.codigo, texto: i.pregunta, valor: i.calificacion})), datos.umbrales));
       }
-      const extremos = puntos(ejes.map(() => 5));
-      extremos.forEach(([x, y]) => dibujo.append(svg('line', {x1: 360, y1: 350, x2: x, y2: y, class: 'e3-anillo'})));
-      if (filas.every(f => f.a !== null)) dibujo.append(svg('polygon', {points: cadena(puntos(filas.map(f => f.a))), class: 'e3-principal'}));
-      if (comparada && filas.every(f => f.b !== null)) dibujo.append(svg('polygon', {points: cadena(puntos(filas.map(f => f.b))), class: 'e3-comparada'}));
-      const posiciones = puntos(filas.map(f => f.a ?? 0));
-      filas.forEach((f, i) => {
-        const [x, y] = posiciones[i];
-        const diferencia = f.diferencia === null ? '' : ` (${f.diferencia >= 0 ? '+' : ''}${numero(f.diferencia)})`;
-        const texto = comparada ? `${f.eje.nombre}: ${numero(f.b)} → ${numero(f.a)}${diferencia}` : `${f.eje.nombre}: ${numero(f.a)}`;
-        const grupo = svg('g', {tabindex: 0, role: 'button', 'aria-label': texto, 'aria-pressed': String(ejeSeleccionado.id === f.eje.id), class: 'e3-vertice'});
-        grupo.append(svg('title', {}, texto), svg('circle', {cx: x, cy: y, r: 6, fill: colorUmbral(f.a, datos.umbrales)}), svg('text', {x: x + 10, y: y - 9, class: 'e3-puntaje'}, numero(f.a)));
-        const {partes, posicion} = etiquetas[i];
-        const label = svg('text', {x: posicion.x, y: posicion.y, 'text-anchor': 'middle', class: 'e3-etiqueta'});
-        partes.forEach((p, j) => label.append(svg('tspan', {x: posicion.x, dy: j ? 22 : 0}, p))); grupo.append(label);
-        grupo.addEventListener('click', () => seleccionar(f.eje));
-        grupo.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); seleccionar(f.eje); } });
-        grupo.addEventListener('focus', () => { lectura.textContent = texto; });
-        grupo.addEventListener('mouseenter', () => { lectura.textContent = texto; });
-        dibujo.append(grupo);
-      });
-      const lectura = el('p', 'Enfoca o señala un eje para ver su comparación.', 'e3-lectura'); lectura.setAttribute('aria-live', 'polite');
-      seccion.append(dibujo, lectura, el('p', `Área rellena: ${etiqueta(principal)}`, 'e3-leyenda-principal'));
-      if (comparada) seccion.append(el('p', `Línea discontinua: ${etiqueta(comparada)}`, 'e3-leyenda-comparada'));
-      const tabla = el('table', null, 'e3-tabla'); tabla.append(el('caption', 'Puntajes por eje · Diferencia = evaluación principal menos comparación'));
-      const head = el('thead'), tr = el('tr'); ['Eje', 'Puntaje', 'Comparación', 'Diferencia'].forEach(t => { const th = el('th', t); th.scope = 'col'; tr.append(th); }); head.append(tr); tabla.append(head);
-      const body = el('tbody');
-      filas.forEach(f => {
-        const fila = el('tr'), celda = el('th'), boton = el('button', f.eje.nombre); celda.scope = 'row';
-        boton.setAttribute('aria-pressed', String(ejeSeleccionado.id === f.eje.id)); boton.onclick = () => seleccionar(f.eje); celda.append(boton); fila.append(celda);
-        [numero(f.a), comparada ? numero(f.b) : '—', delta(f.diferencia)].forEach((t, j) => { const td = el('td', t); td.dataset.etiqueta = ['Puntaje', 'Comparación', 'Diferencia'][j]; fila.append(td); }); body.append(fila);
-      }); tabla.append(body); const detalleTabla = el('details', null, 'e3-datos'); detalleTabla.append(el('summary', 'Ver puntajes por eje'), tabla); seccion.append(detalleTabla); return seccion;
+      const cuerpoT = el('div', null, 'dim-cuerpo');
+      cuerpoT.append(columna('Hallazgos', info.hallazgos, 'hallazgos'), medio, columna('Brechas', info.brechas, 'brechas'));
+      t.append(cuerpoT, pie(info.estandares || []));
+      const det = el('details', null, 'dim-indicadores'); det.append(el('summary', `Ver los ${indicadores.length} indicadores evaluados`));
+      if (principal.origen !== 'fuente') det.append(el('p', 'Los hallazgos detallados corresponden a la evaluación de diciembre de 2025.', 'nota'));
+      indicadores.forEach(i => det.append(indicadorCompleto(i)));
+      t.append(det);
+      const acciones = App.obtenerPlan().filter(a => a.ejes?.includes(eje.id));
+      const bloque = el('section', null, 'dim-acciones'); bloque.append(el('h3', acciones.length ? `Acciones del plan que cierran esta brecha (${acciones.length})` : 'Aún no hay acciones del plan vinculadas a esta dimensión'));
+      const lista = el('ul');
+      acciones.forEach(a => { const li = el('li'), link = el('a', a.titulo); link.href = '#/plan?accion=' + encodeURIComponent(a.id); li.append(link, el('span', ' · ' + a.estado.replace(/-/g, ' ') + ' · ' + a.avance + ' %', 'nota')); lista.append(li); });
+      bloque.append(lista); t.append(bloque);
+      return t;
     }
     function dibujar() {
       cuerpo.replaceChildren();
-      const colores = el('div', null, 'e3-colores');
-      datos.umbrales.cortes.forEach((c, i) => {
-        const desde = i ? datos.umbrales.cortes[i - 1].menor_que : datos.umbrales.escala.minimo;
-        const item = el('span', `${c.nombre}: ${numero(desde)} ${c.menor_que === null ? 'a ' + numero(datos.umbrales.escala.maximo) : 'a menos de ' + numero(c.menor_que)}`);
-        const punto = el('span', '● '); punto.style.color = coloresUmbral[i] || 'var(--principal)'; item.prepend(punto); colores.append(item);
-      }); cuerpo.append(colores);
-      if (datos.umbrales.hipotesis) cuerpo.append(el('p', datos.umbrales.nota, 'ayuda'));
-      const charts = el('div', null, 'e3-graficos'); graficos.forEach(([g, t]) => charts.append(grafico(g, t))); cuerpo.append(charts);
-      const panel = el('section', null, 'superficie e3-detalle'), titulo = el('h2', ejeSeleccionado.nombre); titulo.id = 'e3-eje-titulo'; titulo.tabIndex = -1;
-      panel.append(titulo, el('p', `Evaluación: ${etiqueta(principal)} · Puntaje: ${numero(principal.puntajes[ejeSeleccionado.id])}`));
-      const h = ejeSeleccionado.hallazgos;
-      if (principal.id !== h.evaluacion || principal.origen !== 'fuente') panel.append(el('p', 'Esta evaluación solo registra puntajes; los hallazgos detallados corresponden al análisis de diciembre de 2025'));
-      else if (h.grupos) h.grupos.forEach((g, i) => {
-        const criterio = ejeSeleccionado.criterios[i], bloque = el('section', null, 'e3-criterio');
-        bloque.append(el('h3', `${criterio.nombre} · Calificación: ${numero(criterio.calificacion)}`), el('p', g.nombre));
-        g.indicadores.forEach(ind => bloque.append(indicador(ind))); panel.append(bloque);
+      if (!dims.grandes.length) { cuerpo.append(el('p', 'Contenido en preparación.', 'en-preparacion')); return; }
+      const general = el('section', null, 'dim-general');
+      const eje = datos.estandares.ejes.find(e => e.id === ejeId);
+      dims.grandes.forEach((g, i) => {
+        general.append(tarjetaGeneral(g, i));
+        if (eje && eje.grafico === g.id) general.append(tarjetaDetalle(eje));
       });
-      else h.indicadores.forEach(ind => panel.append(indicador(ind)));
-      const acciones = el('section'); acciones.append(el('h3', 'Acciones del plan que cierran este eje'), el('p', 'Cargando acciones…')); panel.append(acciones); cuerpo.append(panel);
-      const idEje = ejeSeleccionado.id;
-      (async () => {
-        try {
-          const plan = await Promise.resolve(App.obtenerPlan());
-          if (!activo || !acciones.isConnected) return;
-          acciones.lastChild.remove();
-          const vinculadas = plan.filter(a => a.ejes?.includes(idEje));
-          if (!vinculadas.length) acciones.append(el('p', 'No hay acciones vinculadas a este eje.'));
-          vinculadas.forEach(a => {
-            const tarjeta = el('article', null, 'accion'), enlace = el('a', a.titulo); enlace.href = '#/plan?accion=' + encodeURIComponent(a.id);
-            tarjeta.append(enlace, el('p', `${datos.planConfig.componentes.find(c => c.id === a.componente)?.nombre || a.componente} · Estado: ${a.estado.replace(/-/g, ' ')}`));
-            if (a.vinculos_estimados) tarjeta.append(el('span', 'Vínculo estimado', 'aviso')); acciones.append(tarjeta);
-          });
-        } catch (_) { if (activo && acciones.isConnected) acciones.lastChild.textContent = 'No se pudieron cargar las acciones del plan.'; }
-      })();
+      cuerpo.append(general);
+      const escala = el('p', 'Escala de 0 a 5: 0 = sin información; 5 = práctica implementada con seguimiento y reporte. Colores de los puntos: por debajo de 3, entre 3 y 4, desde 4.', 'nota dim-escala');
+      cuerpo.append(escala);
     }
     function prepararControles() {
       controles.replaceChildren();
@@ -170,7 +231,10 @@
         select.onchange = () => { if (vs) comparada = evaluaciones.find(e => e.id === select.value) || null; else principal = evaluaciones.find(e => e.id === select.value); url(); dibujar(); };
         label.append(select); controles.append(label);
       });
-      const cargar = el('button', 'Cargar nueva evaluación'); cargar.onclick = () => abrirFormulario(cargar); controles.append(cargar);
+      const leyenda = el('p', null, 'dim-leyenda-poligonos');
+      leyenda.append(el('span', 'Evaluación', 'muestra principal'), el('span', 'Comparación', 'muestra comparada'));
+      const cargar = el('button', 'Cargar nueva evaluación', 'boton secundario'); cargar.onclick = () => abrirFormulario(cargar);
+      controles.append(leyenda, cargar);
     }
     function abrirFormulario(disparador) {
       dialogo = el('dialog', null, 'e3-dialogo'); dialogo.setAttribute('role', 'dialog'); dialogo.setAttribute('aria-labelledby', 'e3-form-titulo');
@@ -240,10 +304,12 @@
       catch (_) { sinBase = true; }
       if (!activo) return;
       evaluaciones = E.combinar(datos.evaluaciones, base);
-      principal = evaluaciones.find(e => e.id === params.filtros.get('eval')) || evaluaciones[0];
-      comparada = params.filtros.has('vs') ? evaluaciones.find(e => e.id === params.filtros.get('vs')) || null : evaluaciones[evaluaciones.indexOf(principal) + 1] || null;
-      ejeSeleccionado = datos.estandares.ejes.find(e => e.id === params.filtros.get('eje')) || datos.estandares.ejes[0];
+      const real = evaluaciones.find(e => e.origen === 'fuente') || evaluaciones[0];
+      principal = evaluaciones.find(e => e.id === params.filtros.get('eval')) || real;
+      comparada = params.filtros.get('vs') ? evaluaciones.find(e => e.id === params.filtros.get('vs')) || null : null;
+      ejeId = datos.estandares.ejes.some(e => e.id === params.filtros.get('eje')) ? params.filtros.get('eje') : null;
       avisoBase(); prepararControles(); url(); dibujar();
+      if (ejeId) cuerpo.querySelector('.dim-detalle')?.scrollIntoView({block: 'start'});
     })();
     return () => { activo = false; if (dialogo) { dialogo.remove(); dialogo = null; } };
   }});

@@ -1,0 +1,287 @@
+{
+  "origen": "sintesis",
+  "grandes": [
+    {
+      "id": "etapas-ocde",
+      "titulo": "Proceso de debida diligencia (Guía OCDE)",
+      "pregunta": "¿La empresa tiene un proceso para identificar, prevenir y remediar impactos?",
+      "hallazgos": [
+        "Las políticas definen responsables y procedimientos de debida diligencia.",
+        "Existen mecanismos de quejas y acciones correctivas.",
+        "El informe de sostenibilidad comunica compromisos públicamente."
+      ],
+      "brechas": [
+        "Falta integrar un enfoque específico de derechos humanos en la gestión.",
+        "No se acredita seguimiento sistemático de impactos en toda la cadena.",
+        "Faltan indicadores y evidencia de eficacia de las medidas en derechos humanos."
+      ],
+      "estandares": [
+        "Guía OCDE de Debida Diligencia",
+        "PRNU",
+        "PNA Perú 2021–2025",
+        "IPIECA"
+      ]
+    },
+    {
+      "id": "temas-ddhh",
+      "titulo": "Gestión de los derechos humanos",
+      "pregunta": "¿Cómo gestiona la empresa cada derecho en su operación y su cadena?",
+      "hallazgos": [
+        "Las políticas reconocen derechos laborales y prohíben discriminación y trabajo infantil.",
+        "La seguridad ocupacional cuenta con certificación y controles operativos.",
+        "Existen reglas salariales, de jornada y de negociación colectiva."
+      ],
+      "brechas": [
+        "Falta evidencia de verificación de derechos laborales en contratistas y proveedores.",
+        "No se acredita análisis sistemático de salario digno por región.",
+        "Faltan metas de participación femenina y monitoreo ambiental participativo."
+      ],
+      "estandares": [
+        "Convenios de la OIT",
+        "PRNU",
+        "GRI 403",
+        "GRI 11",
+        "ODS 5",
+        "PIDESC art. 12"
+      ]
+    }
+  ],
+  "ejes": {
+    "etapa-ocde-1": {
+      "corto": "Incorporar en políticas",
+      "hallazgos": [
+        "Las políticas aprobadas definen responsables y revisiones de debida diligencia.",
+        "Los contratos exigen compromisos éticos a proveedores."
+      ],
+      "brechas": [
+        "Falta un enfoque específico de derechos humanos en la gestión de riesgos.",
+        "No se evidencia capacitación especializada ni verificación de la comunicación en toda la cadena."
+      ],
+      "estandares": [
+        "Guía OCDE · Paso 1",
+        "PRNU · Principio 16"
+      ]
+    },
+    "etapa-ocde-2": {
+      "corto": "Identificar impactos",
+      "hallazgos": [
+        "Se identifican riesgos ambientales y de seguridad mediante metodologías estructuradas.",
+        "Existe un canal de denuncias para comunicar vulneraciones de derechos humanos."
+      ],
+      "brechas": [
+        "Falta priorizar impactos en derechos humanos con indicadores y responsables.",
+        "No se evidencia evaluación de derechos humanos más allá de proveedores de primer nivel."
+      ],
+      "estandares": [
+        "Guía OCDE · Paso 2",
+        "PRNU · Principios 17–18"
+      ]
+    },
+    "etapa-ocde-3": {
+      "corto": "Prevenir y mitigar",
+      "hallazgos": [
+        "La gestión de no conformidades establece acciones correctivas, responsables y plazos.",
+        "Se registran causas y evidencias para evaluar la eficacia de las mejoras."
+      ],
+      "brechas": [
+        "Falta un plan específico de prevención y mitigación de impactos en derechos humanos.",
+        "No se documentan capacitación ni acompañamiento activo a proveedores en derechos humanos."
+      ],
+      "estandares": [
+        "Guía OCDE · Paso 3",
+        "PRNU · Principio 19"
+      ]
+    },
+    "etapa-ocde-4": {
+      "corto": "Hacer seguimiento",
+      "hallazgos": [
+        "Se revisan auditorías, denuncias y acciones correctivas.",
+        "El análisis de causas permite identificar mejoras organizacionales."
+      ],
+      "brechas": [
+        "Faltan indicadores sociales y evaluación de eficacia de las medidas en derechos humanos.",
+        "No se evidencian auditorías específicas de derechos humanos en proveedores."
+      ],
+      "estandares": [
+        "Guía OCDE · Paso 4",
+        "PRNU · Principio 20"
+      ]
+    },
+    "etapa-ocde-5": {
+      "corto": "Comunicar",
+      "hallazgos": [
+        "El informe de sostenibilidad está disponible públicamente.",
+        "El protocolo de asuntos corporativos define responsables y canales de comunicación."
+      ],
+      "brechas": [
+        "No se evidencian informes periódicos sobre daños reales o potenciales a los derechos humanos.",
+        "Falta información sobre medidas de prevención, mitigación y reparación."
+      ],
+      "estandares": [
+        "Guía OCDE · Paso 5",
+        "PRNU · Principio 21",
+        "GRI 3"
+      ]
+    },
+    "etapa-ocde-6": {
+      "corto": "Remediar",
+      "hallazgos": [
+        "Existen canales presenciales, verbales y escritos para recibir quejas.",
+        "Los procedimientos asignan responsables para investigar y dar seguimiento a las respuestas."
+      ],
+      "brechas": [
+        "Falta un enfoque específico para investigar y resolver afectaciones a derechos humanos.",
+        "No se acredita protección contra represalias ni capacitación periódica especializada en derechos humanos."
+      ],
+      "estandares": [
+        "Guía OCDE · Paso 6",
+        "PRNU · Principios 22, 29 y 31"
+      ]
+    },
+    "tema-ddhh-1": {
+      "corto": "Trabajo forzoso",
+      "hallazgos": [
+        "El acceso a zonas críticas tiene controles y responsables definidos.",
+        "La contratación incorpora filtros de antecedentes y declaraciones para trabajadores y terceros."
+      ],
+      "brechas": [
+        "Faltan auditorías documentadas sobre cobros indebidos en el reclutamiento.",
+        "No se acredita monitoreo específico en zonas con mayor riesgo de trabajo forzoso."
+      ],
+      "estandares": [
+        "OIT C29 y C105",
+        "Protocolo de 2014"
+      ]
+    },
+    "tema-ddhh-2": {
+      "corto": "Trabajo infantil",
+      "hallazgos": [
+        "Los contratos exigen a proveedores erradicar el trabajo infantil.",
+        "La contratación incluye documentación y filtros que permiten controlar la edad mínima."
+      ],
+      "brechas": [
+        "No se acredita verificación sistemática de edad en toda la cadena.",
+        "Faltan protocolos de atención y protección ante la detección de trabajo infantil."
+      ],
+      "estandares": [
+        "OIT C138 y C182"
+      ]
+    },
+    "tema-ddhh-3": {
+      "corto": "Discriminación y acoso",
+      "hallazgos": [
+        "Las políticas prohíben discriminación, acoso y violencia.",
+        "Existe un canal anónimo con confidencialidad y protección frente a represalias."
+      ],
+      "brechas": [
+        "Falta evidencia de supervisión laboral en operaciones remotas y tercerizadas.",
+        "No se aportaron indicadores de cumplimiento ni evidencia de aplicación de sanciones."
+      ],
+      "estandares": [
+        "OIT C100, C111 y C190"
+      ]
+    },
+    "tema-ddhh-4": {
+      "corto": "Igualdad de género",
+      "hallazgos": [
+        "Se reportan indicadores de género y revisiones de brechas salariales.",
+        "Se establecen licencias parentales y protección de trabajadoras embarazadas."
+      ],
+      "brechas": [
+        "Faltan metas y medidas para aumentar la participación femenina en cargos técnicos y directivos.",
+        "No se acredita seguimiento del impacto de la maternidad en la progresión profesional."
+      ],
+      "estandares": [
+        "OIT C100 y C111",
+        "ODS 5"
+      ]
+    },
+    "tema-ddhh-5": {
+      "corto": "Libertad de asociación",
+      "hallazgos": [
+        "Se reconoce la libertad sindical y la negociación colectiva sin represalias.",
+        "Existen mesas sindicales y cobertura de convenios colectivos para parte del personal."
+      ],
+      "brechas": [
+        "No se acreditan mecanismos de verificación de libertad sindical en contratistas.",
+        "Faltan protocolos documentados de protección de representantes laborales ante intimidación."
+      ],
+      "estandares": [
+        "OIT C87 y C98"
+      ]
+    },
+    "tema-ddhh-6": {
+      "corto": "Salud y seguridad",
+      "hallazgos": [
+        "La organización cuenta con certificación ISO 45001 y controles de seguridad operativa.",
+        "Se documentan equipos de protección, mantenimiento, capacitaciones y simulacros."
+      ],
+      "brechas": [
+        "Falta trazabilidad de inspecciones y cierre de hallazgos en la cadena extendida.",
+        "No se aportan resultados desagregados por instalación ni seguimiento individual de formación."
+      ],
+      "estandares": [
+        "OIT C155 y C187",
+        "GRI 403"
+      ]
+    },
+    "tema-ddhh-7": {
+      "corto": "Salario digno",
+      "hallazgos": [
+        "La política salarial considera estudios de mercado y equidad interna.",
+        "Se comunica la estructura salarial y se revisan brechas de género."
+      ],
+      "brechas": [
+        "No se acredita un análisis sistemático de suficiencia salarial por región u operación.",
+        "Falta evidencia del control salarial en tercerizados y del pago de horas extras."
+      ],
+      "estandares": [
+        "OIT C131 y C95"
+      ]
+    },
+    "tema-ddhh-8": {
+      "corto": "Horario de trabajo",
+      "hallazgos": [
+        "El reglamento establece jornada máxima, pausas y descanso semanal.",
+        "Las horas extras deben ser excepcionales, voluntarias, autorizadas y registradas."
+      ],
+      "brechas": [
+        "Faltan reportes de cumplimiento horario en actividades tercerizadas y de mayor riesgo.",
+        "No se acredita un vínculo claro entre control del sobretiempo y prevención de coerción laboral."
+      ],
+      "estandares": [
+        "OIT C1 y C30"
+      ]
+    },
+    "tema-ddhh-9": {
+      "corto": "Condiciones laborales",
+      "hallazgos": [
+        "Las políticas exigen respeto a los derechos laborales en la cadena.",
+        "La homologación de proveedores contempla cumplimiento legal y estándares laborales."
+      ],
+      "brechas": [
+        "Falta evidencia de monitoreo contractual periódico en campo.",
+        "No se acredita igualdad de condiciones para trabajadores temporales ni límites explícitos a contratos eventuales."
+      ],
+      "estandares": [
+        "Declaración de la OIT de 1998 (enmendada en 2022)",
+        "GRI 11"
+      ]
+    },
+    "tema-ddhh-10": {
+      "corto": "Derechos ambientales",
+      "hallazgos": [
+        "Se identifican riesgos ambientales y se establecen medidas preventivas y planes de contingencia.",
+        "Se realizan talleres informativos y consultas con actores comunitarios."
+      ],
+      "brechas": [
+        "Faltan mecanismos permanentes de monitoreo ambiental participativo.",
+        "No se aportan evaluaciones específicas de impacto en derechos humanos ni indicadores agregados de cumplimiento de proveedores."
+      ],
+      "estandares": [
+        "GRI 11",
+        "PIDESC art. 12"
+      ]
+    }
+  }
+}
