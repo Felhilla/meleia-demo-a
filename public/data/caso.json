@@ -5,81 +5,281 @@
     "lema": "Energía que llega a cada hogar",
     "perfil": "Altiplano Gas distribuye gas licuado de petróleo (GLP) envasado y a granel para hogares, comercios e industrias del Perú. Su operación va desde el envasado en planta hasta la entrega en la puerta de cada cliente, a través de una red extensa de distribuidores independientes.",
     "hechos": [
-      {"valor": "3", "etiqueta": "plantas de envasado"},
-      {"valor": "≈ 400", "etiqueta": "distribuidores independientes"},
-      {"valor": "≈ 1.200", "etiqueta": "colaboradores directos"},
-      {"valor": "2", "etiqueta": "regiones de operación: costa norte y centro"}
+      {
+        "valor": "3",
+        "etiqueta": "plantas de envasado",
+        "icono": "planta"
+      },
+      {
+        "valor": "≈ 400",
+        "etiqueta": "distribuidores independientes",
+        "icono": "camion"
+      },
+      {
+        "valor": "≈ 1.200",
+        "etiqueta": "colaboradores directos",
+        "icono": "casco"
+      },
+      {
+        "valor": "2",
+        "etiqueta": "regiones de operación: costa norte y centro",
+        "icono": "mapa"
+      }
     ],
     "cadena": [
-      {"id": "suministro", "nombre": "Suministro", "descripcion": "Proveedores de GLP, cilindros, válvulas y servicios; contratistas de obras y mantenimiento."},
-      {"id": "operacion", "nombre": "Operación propia", "descripcion": "Recepción, almacenamiento y envasado en planta; despacho y administración."},
-      {"id": "distribucion", "nombre": "Distribución", "descripcion": "Transportistas y distribuidores independientes que llevan los cilindros a hogares y comercios."},
-      {"id": "clientes", "nombre": "Clientes y comunidades", "descripcion": "Hogares, comercios e industrias; comunidades vecinas a plantas y rutas de reparto."}
+      {
+        "id": "suministro",
+        "nombre": "Suministro",
+        "descripcion": "Proveedores de GLP, cilindros, válvulas y servicios; contratistas de obras y mantenimiento."
+      },
+      {
+        "id": "operacion",
+        "nombre": "Operación propia",
+        "descripcion": "Recepción, almacenamiento y envasado en planta; despacho y administración."
+      },
+      {
+        "id": "distribucion",
+        "nombre": "Distribución",
+        "descripcion": "Transportistas y distribuidores independientes que llevan los cilindros a hogares y comercios."
+      },
+      {
+        "id": "clientes",
+        "nombre": "Clientes y comunidades",
+        "descripcion": "Hogares, comercios e industrias; comunidades vecinas a plantas y rutas de reparto."
+      }
     ]
   },
   "encargo": {
     "pregunta": "¿Dónde están nuestros riesgos en derechos humanos, qué tan preparados estamos frente a los estándares y qué temas debemos priorizar?",
     "motivos": [
-      {"titulo": "Anticiparse a la regulación", "texto": "El Plan Nacional de Acción sobre Empresas y Derechos Humanos y las nuevas exigencias de debida diligencia de clientes y financiadores piden demostrar, con evidencia, cómo se gestionan los impactos."},
-      {"titulo": "Conocer la cadena de valor", "texto": "La mayor parte de la operación ocurre fuera de las plantas: en proveedores, transportistas y distribuidores, donde la empresa tenía poca visibilidad de las condiciones de trabajo y de los riesgos."},
-      {"titulo": "Decidir con prioridades claras", "texto": "Preparar el reporte de sostenibilidad bajo GRI exigía definir qué temas son materiales y convertir los hallazgos en un plan de acción con responsables y seguimiento."}
+      {
+        "titulo": "Anticiparse a la regulación",
+        "texto": "El Plan Nacional de Acción sobre Empresas y Derechos Humanos y las nuevas exigencias de debida diligencia de clientes y financiadores piden demostrar, con evidencia, cómo se gestionan los impactos."
+      },
+      {
+        "titulo": "Conocer la cadena de valor",
+        "texto": "La mayor parte de la operación ocurre fuera de las plantas: en proveedores, transportistas y distribuidores, donde la empresa tenía poca visibilidad de las condiciones de trabajo y de los riesgos."
+      },
+      {
+        "titulo": "Decidir con prioridades claras",
+        "texto": "Preparar el reporte de sostenibilidad bajo GRI exigía definir qué temas son materiales y convertir los hallazgos en un plan de acción con responsables y seguimiento."
+      }
     ],
     "alcance": "Operación propia, cadena de suministro y cadena de distribución.",
     "entregables": [
-      {"titulo": "Alineación con estándares", "texto": "Brechas de gestión frente a la Guía OCDE y a los temas de derechos humanos.", "destino": "#/ddhh/dimensiones"},
-      {"titulo": "Riesgos en derechos humanos", "texto": "Riesgos identificados y calificados por gravedad y probabilidad.", "destino": "#/ddhh/riesgos"},
-      {"titulo": "Doble materialidad", "texto": "Temas materiales por su impacto en las personas y por su efecto financiero.", "destino": "#/materialidad/doble"},
-      {"titulo": "Plan de acción", "texto": "Acciones con responsable, plazo, indicador y seguimiento en vivo.", "destino": "#/plan"}
+      {
+        "titulo": "Alineación con estándares",
+        "texto": "Brechas de gestión frente a la Guía OCDE y a los temas de derechos humanos.",
+        "destino": "#/ddhh/dimensiones"
+      },
+      {
+        "titulo": "Riesgos en derechos humanos",
+        "texto": "Riesgos identificados y calificados por gravedad y probabilidad.",
+        "destino": "#/ddhh/riesgos"
+      },
+      {
+        "titulo": "Doble materialidad",
+        "texto": "Temas materiales por su impacto en las personas y por su efecto financiero.",
+        "destino": "#/materialidad/doble"
+      },
+      {
+        "titulo": "Plan de acción",
+        "texto": "Acciones con responsable, plazo, indicador y seguimiento en vivo.",
+        "destino": "#/plan"
+      }
     ]
   },
   "metodologia": {
     "enfoque": "Un solo proceso conecta la debida diligencia con la materialidad: lo que se aprende de los riesgos y de las brechas alimenta la definición de los temas materiales, y ambos se traducen en un plan de acción.",
     "fases": [
-      {"numero": 1, "titulo": "Contexto y alcance", "texto": "Revisión del marco corporativo, la cadena de valor y los grupos de interés; definición del alcance del análisis."},
-      {"numero": 2, "titulo": "Brechas frente a estándares", "texto": "Evaluación de 159 indicadores agrupados en 16 dimensiones: las seis etapas de la Guía OCDE y diez temas de derechos humanos, en una escala de 0 a 5."},
-      {"numero": 3, "titulo": "Riesgos en derechos humanos", "texto": "Identificación de riesgos con los grupos de interés y calificación por gravedad (escala, alcance e irremediabilidad), vinculación y probabilidad según los controles existentes."},
-      {"numero": 4, "titulo": "Doble materialidad", "texto": "Consulta a grupos de interés (materialidad de impacto) y taller con el comité de sostenibilidad (materialidad financiera); umbrales y principio de doble entrada."},
-      {"numero": 5, "titulo": "Plan de acción", "texto": "Acciones por componente estratégico, con responsables, plazos, indicadores y un mecanismo de seguimiento."}
+      {
+        "numero": 1,
+        "titulo": "Contexto y alcance",
+        "texto": "Revisión del marco corporativo, la cadena de valor y los grupos de interés; definición del alcance del análisis."
+      },
+      {
+        "numero": 2,
+        "titulo": "Brechas frente a estándares",
+        "texto": "Evaluación de 159 indicadores agrupados en 16 dimensiones: las seis etapas de la Guía OCDE y diez temas de derechos humanos, en una escala de 0 a 5."
+      },
+      {
+        "numero": 3,
+        "titulo": "Riesgos en derechos humanos",
+        "texto": "Identificación de riesgos con los grupos de interés y calificación por gravedad (escala, alcance e irremediabilidad), vinculación y probabilidad según los controles existentes."
+      },
+      {
+        "numero": 4,
+        "titulo": "Doble materialidad",
+        "texto": "Consulta a grupos de interés (materialidad de impacto) y taller con el comité de sostenibilidad (materialidad financiera); umbrales y principio de doble entrada."
+      },
+      {
+        "numero": 5,
+        "titulo": "Plan de acción",
+        "texto": "Acciones por componente estratégico, con responsables, plazos, indicadores y un mecanismo de seguimiento."
+      }
     ],
     "estandares": [
-      {"sigla": "PRNU", "nombre": "Principios Rectores sobre las Empresas y los Derechos Humanos", "emisor": "Naciones Unidas", "uso": "Marco de responsabilidad empresarial y de debida diligencia"},
-      {"sigla": "OCDE", "nombre": "Guía de Debida Diligencia para una Conducta Empresarial Responsable", "emisor": "OCDE", "uso": "Seis etapas del proceso de debida diligencia"},
-      {"sigla": "IPIECA", "nombre": "Guía de debida diligencia en derechos humanos (2021)", "emisor": "IPIECA", "uso": "Referencia sectorial de petróleo y gas"},
-      {"sigla": "PNA", "nombre": "Plan Nacional de Acción sobre Empresas y Derechos Humanos 2021–2025", "emisor": "Gobierno del Perú", "uso": "Marco nacional de referencia"},
-      {"sigla": "OIT", "nombre": "Convenios fundamentales del trabajo", "emisor": "Organización Internacional del Trabajo", "uso": "Temas laborales: trabajo forzoso e infantil, no discriminación, libertad sindical, seguridad y salud"},
-      {"sigla": "GRI 3", "nombre": "Temas Materiales 2021", "emisor": "Global Reporting Initiative", "uso": "Método de doble materialidad"},
-      {"sigla": "GRI 11", "nombre": "Sector Petróleo y Gas 2021", "emisor": "Global Reporting Initiative", "uso": "Temas probables para el sector"},
-      {"sigla": "SASB", "nombre": "Gas Utilities & Distributors", "emisor": "IFRS · ISSB", "uso": "Temas financieramente relevantes de la industria"}
+      {
+        "sigla": "PRNU",
+        "nombre": "Principios Rectores sobre las Empresas y los Derechos Humanos",
+        "emisor": "Naciones Unidas",
+        "uso": "Marco de responsabilidad empresarial y de debida diligencia"
+      },
+      {
+        "sigla": "OCDE",
+        "nombre": "Guía de Debida Diligencia para una Conducta Empresarial Responsable",
+        "emisor": "OCDE",
+        "uso": "Seis etapas del proceso de debida diligencia"
+      },
+      {
+        "sigla": "IPIECA",
+        "nombre": "Guía de debida diligencia en derechos humanos (2021)",
+        "emisor": "IPIECA",
+        "uso": "Referencia sectorial de petróleo y gas"
+      },
+      {
+        "sigla": "PNA",
+        "nombre": "Plan Nacional de Acción sobre Empresas y Derechos Humanos 2021–2025",
+        "emisor": "Gobierno del Perú",
+        "uso": "Marco nacional de referencia"
+      },
+      {
+        "sigla": "OIT",
+        "nombre": "Convenios fundamentales del trabajo",
+        "emisor": "Organización Internacional del Trabajo",
+        "uso": "Temas laborales: trabajo forzoso e infantil, no discriminación, libertad sindical, seguridad y salud"
+      },
+      {
+        "sigla": "GRI 3",
+        "nombre": "Temas Materiales 2021",
+        "emisor": "Global Reporting Initiative",
+        "uso": "Método de doble materialidad"
+      },
+      {
+        "sigla": "GRI 11",
+        "nombre": "Sector Petróleo y Gas 2021",
+        "emisor": "Global Reporting Initiative",
+        "uso": "Temas probables para el sector"
+      },
+      {
+        "sigla": "SASB",
+        "nombre": "Gas Utilities & Distributors",
+        "emisor": "IFRS · ISSB",
+        "uso": "Temas financieramente relevantes de la industria"
+      }
     ],
     "actividades": [
-      {"valor": "267", "etiqueta": "actores consultados en el diálogo sobre derechos humanos", "detalle": "Entrevistas, talleres y encuestas con colaboradores, distribuidores, proveedores, clientes, comunidades y autoridades."},
-      {"valor": "4", "etiqueta": "empresas pares en el análisis de buenas prácticas", "detalle": "Referentes del sector energético en la región y a nivel global."},
-      {"valor": "138", "etiqueta": "personas en la consulta de materialidad", "detalle": "Seis grupos de interés calificaron el impacto de cada tema."},
-      {"valor": "5", "etiqueta": "funciones en el taller financiero", "detalle": "Finanzas, comercial, operaciones, sostenibilidad y gestión de personas."}
+      {
+        "valor": "267",
+        "etiqueta": "actores consultados en el diálogo sobre derechos humanos",
+        "detalle": "Entrevistas, talleres y encuestas con colaboradores, distribuidores, proveedores, clientes, comunidades y autoridades."
+      },
+      {
+        "valor": "4",
+        "etiqueta": "empresas pares en el análisis de buenas prácticas",
+        "detalle": "Referentes del sector energético en la región y a nivel global."
+      },
+      {
+        "valor": "138",
+        "etiqueta": "personas en la consulta de materialidad",
+        "detalle": "Seis grupos de interés calificaron el impacto de cada tema."
+      },
+      {
+        "valor": "5",
+        "etiqueta": "funciones en el taller financiero",
+        "detalle": "Finanzas, comercial, operaciones, sostenibilidad y gestión de personas."
+      }
     ]
   },
   "resultados": {
     "titular": "La empresa tiene políticas, pero todavía no un sistema de debida diligencia",
     "mensajes": [
-      {"tema": "Estándares", "titulo": "La gestión de los temas de derechos humanos es sólida; el proceso de debida diligencia, no", "texto": "Los temas de derechos humanos promedian 4,0 sobre 5, mientras las etapas del proceso OCDE promedian 3,1. La brecha mayor está en el seguimiento de la implementación y los resultados (2,8).", "destino": "#/ddhh/dimensiones"},
-      {"tema": "Riesgos", "titulo": "El riesgo está en la cadena de valor", "texto": "13 de los 18 riesgos involucran a proveedores o distribuidores, y 7 de los 9 riesgos de criticidad alta o media ocurren fuera de las plantas.", "destino": "#/ddhh/riesgos"},
-      {"tema": "Materialidad", "titulo": "Nueve temas materiales, cuatro de ellos en ambas dimensiones", "texto": "Seguridad de procesos, ética, continuidad del suministro y derechos laborales en la cadena son materiales tanto por su impacto en las personas como por su efecto financiero.", "destino": "#/materialidad/doble"},
-      {"tema": "Plan", "titulo": "Un plan de 58 acciones conecta todo", "texto": "Cada acción atiende un riesgo o cierra una brecha, y su avance se sigue en vivo.", "destino": "#/plan"}
+      {
+        "tema": "Estándares",
+        "titulo": "La gestión de los temas de derechos humanos es sólida; el proceso de debida diligencia, no",
+        "texto": "Los temas de derechos humanos promedian 4,0 sobre 5, mientras las etapas del proceso OCDE promedian 3,1. La brecha mayor está en el seguimiento de la implementación y los resultados (2,8).",
+        "destino": "#/ddhh/dimensiones"
+      },
+      {
+        "tema": "Riesgos",
+        "titulo": "El riesgo está en la cadena de valor",
+        "texto": "13 de los 18 riesgos involucran a proveedores o distribuidores, y 7 de los 9 riesgos de criticidad alta o media ocurren fuera de las plantas.",
+        "destino": "#/ddhh/riesgos"
+      },
+      {
+        "tema": "Materialidad",
+        "titulo": "Nueve temas materiales, cuatro de ellos en ambas dimensiones",
+        "texto": "Seguridad de procesos, ética, continuidad del suministro y derechos laborales en la cadena son materiales tanto por su impacto en las personas como por su efecto financiero.",
+        "destino": "#/materialidad/doble"
+      },
+      {
+        "tema": "Plan",
+        "titulo": "Un plan de 58 acciones conecta todo",
+        "texto": "Cada acción atiende un riesgo o cierra una brecha, y su avance se sigue en vivo.",
+        "destino": "#/plan"
+      }
     ]
   },
   "capitulos": [
-    {"id": "caso", "numero": "01", "titulo": "El caso", "bajada": "Quién es la empresa y para qué nos contrató."},
-    {"id": "metodologia", "numero": "02", "titulo": "Metodología", "bajada": "Cómo se hizo: proceso, estándares y actividades."},
-    {"id": "resultados", "numero": "03", "titulo": "Resultados generales", "bajada": "Lo esencial de la debida diligencia y de la materialidad, en una vista."},
-    {"id": "ddhh", "numero": "04", "titulo": "Debida diligencia en DDHH", "bajada": "Brechas por dimensión y riesgos identificados.",
-     "subcapitulos": [
-       {"id": "dimensiones", "titulo": "Resultados por dimensión"},
-       {"id": "riesgos", "titulo": "Riesgos identificados"}]},
-    {"id": "materialidad", "numero": "05", "titulo": "Doble materialidad", "bajada": "Qué temas importan, para quién y por qué.",
-     "subcapitulos": [
-       {"id": "impacto", "titulo": "Materialidad de impacto"},
-       {"id": "financiera", "titulo": "Materialidad financiera"},
-       {"id": "doble", "titulo": "Doble materialidad"}]},
-    {"id": "plan", "numero": "06", "titulo": "Plan de acción", "bajada": "Qué se hace, quién lo hace y cómo va."}
+    {
+      "id": "caso",
+      "numero": "01",
+      "titulo": "El caso",
+      "bajada": "Quién es la empresa y para qué nos contrató."
+    },
+    {
+      "id": "metodologia",
+      "numero": "02",
+      "titulo": "Metodología",
+      "bajada": "Cómo se hizo: proceso, estándares y actividades."
+    },
+    {
+      "id": "resultados",
+      "numero": "03",
+      "titulo": "Resultados generales",
+      "bajada": "Lo esencial de la debida diligencia y de la materialidad, en una vista."
+    },
+    {
+      "id": "ddhh",
+      "numero": "04",
+      "titulo": "Debida diligencia en DDHH",
+      "bajada": "Brechas por dimensión y riesgos identificados.",
+      "subcapitulos": [
+        {
+          "id": "dimensiones",
+          "titulo": "Resultados por dimensión"
+        },
+        {
+          "id": "riesgos",
+          "titulo": "Riesgos identificados"
+        }
+      ]
+    },
+    {
+      "id": "materialidad",
+      "numero": "05",
+      "titulo": "Doble materialidad",
+      "bajada": "Qué temas importan, para quién y por qué.",
+      "subcapitulos": [
+        {
+          "id": "impacto",
+          "titulo": "Materialidad de impacto"
+        },
+        {
+          "id": "financiera",
+          "titulo": "Materialidad financiera"
+        },
+        {
+          "id": "doble",
+          "titulo": "Doble materialidad"
+        }
+      ]
+    },
+    {
+      "id": "plan",
+      "numero": "06",
+      "titulo": "Plan de acción",
+      "bajada": "Qué se hace, quién lo hace y cómo va."
+    }
   ]
 }

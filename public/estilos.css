@@ -219,6 +219,8 @@ ol.texto-dato { padding-inline-start: 24px; white-space: normal; }
 .caso-hero .acciones { display: flex; gap: var(--e3); flex-wrap: wrap; margin-top: var(--e5); }
 .motivo-arco { position: relative; aspect-ratio: 1; width: 100%; max-width: 440px; justify-self: end; }
 .motivo-arco svg { width: 100%; height: 100%; overflow: visible; }
+.dato-fila { display: flex; align-items: center; gap: 14px; }
+.icono-dato { flex-shrink: 0; width: 56px; height: 56px; color: var(--principal); }
 .hechos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--e5); }
 
 .cadena { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; counter-reset: eslabon; }
