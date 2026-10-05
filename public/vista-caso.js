@@ -22,6 +22,20 @@
   /* Íconos de línea (48 × 48) para los datos de la empresa. Trazo en --principal; el dorado solo marca
      lo que importa (las regiones de operación en el mapa). */
   const ICONOS = {
+    personas: [
+      ['circle', {cx: 24, cy: 16, r: 6}], ['circle', {cx: 10, cy: 12, r: 4}], ['circle', {cx: 38, cy: 12, r: 4}],
+      ['path', {d: 'M15 40V32a9 9 0 0 1 18 0v8M3 32v-7a7 7 0 0 1 11-6M45 32v-7a7 7 0 0 0-11-6'}]
+    ],
+    empresas: [
+      ['path', {d: 'M4 42V20h12M16 42V6h16v36M32 16h12v26M2 42h44M21 13h6M21 21h6M21 29h6M9 26h3M9 34h3M36 23h3M36 31h3M22 42v-6h4v6'}]
+    ],
+    encuesta: [
+      ['path', {d: 'M17 8H9v36h30V8h-8'}], ['rect', {x:17,y:4,width:14,height:8,rx:3}],
+      ['path', {d: 'M14 21l3 3 5-6M26 21h7M14 33l3 3 5-6M26 33h7'}]
+    ],
+    taller: [
+      ['rect', {x:5,y:7,width:38,height:25,rx:2}], ['path', {d: 'M24 3v4M24 32v12M16 44l8-12 8 12M12 25l8-8 7 4 9-9'}]
+    ],
     planta: [
       ['path', {d: 'M4 40V21l8 5v-5l8 5v-5l8 5v14'}],
       ['circle', {cx: 37, cy: 22, r: 7}],
@@ -51,7 +65,7 @@
     ]
   };
   // Encuadre ajustado a cada dibujo para que llene el círculo; el trazo no se escala.
-  const ENCUADRE = {planta: '0 12 48 31', camion: '1 8 46 33', casco: '3 14 42 24', mapa: '6 0 36 48'};
+  const ENCUADRE = {personas: '0 5 48 38', empresas: '0 3 48 42', encuesta: '6 1 36 46', taller: '2 0 44 47', planta: '0 12 48 31', camion: '1 8 46 33', casco: '3 14 42 24', mapa: '6 0 36 48'};
   function icono(nombre) {
     const partes = ICONOS[nombre];
     if (!partes) return null;
