@@ -168,16 +168,18 @@
     const ulE=el('ul',null,'mat-vinetas'); estandares.forEach(x=>ulE.append(el('li',x))); bE.append(ulE);
     der.append(bR,bE); f2.append(izq,der);
     // Fila 3: dos cajas que despliegan su subficha
-    const tituloCal = sub==='financiera' ? 'Calificación del comité financiero' : sub==='doble' ? 'Calificación de grupos de interés y comité' : 'Calificación de los grupos de interés';
+    const tituloCal = sub==='financiera' ? 'Calificación de las áreas miembro del comité' : sub==='doble' ? 'Calificación de los grupos de interés y de las áreas miembro del comité' : 'Calificación de los grupos de interés';
     const zona=el('div',null,'mat-subficha'); zona.hidden=true;
-    const tablaCal=(titulos,filasT)=>{const tb=el('table',null,'mat-tabla-sub'),th=el('thead'),tr=el('tr');titulos.forEach(x=>{const c=el('th',x);c.scope='col';tr.append(c);});th.append(tr);tb.append(th);const body=el('tbody');filasT.forEach(([n,v])=>{const r=el('tr'),h=el('th',n);h.scope='row';const td=el('td',null,'mat-tabla-c');td.append(circulo(v));r.append(h,td);body.append(r);});tb.append(body);return tb;};
+    // Tabla de calificación: primera columna = quién califica; demás columnas = calificaciones en círculo de semáforo.
+    const tablaCal=(titulos,filasT)=>{const tb=el('table',null,'mat-tabla-sub mat-tabla-cal'),th=el('thead'),tr=el('tr');titulos.forEach(x=>{const c=el('th',x);c.scope='col';tr.append(c);});th.append(tr);tb.append(th);const body=el('tbody');filasT.forEach(([n,...vs])=>{const r=el('tr'),h=el('th',n);h.scope='row';r.append(h);vs.forEach(v=>{const td=el('td',null,'mat-tabla-c');td.append(circulo(v));r.append(td);});body.append(r);});tb.append(body);return tb;};
     const pg=M.porGrupo(t,cfg);
-    const evals=data.evaluadores_financieros.map(e=>{const x=t.evaluacion_financiera[e.id];return [e.nombre,(x.rentabilidad+x.gasto_operativo)/2];});
+    const filasGrupos=data.grupos.map(g=>{const ev=t.evaluacion_impacto[g.id],sev=M.severidad(ev,cfg);return [g.nombre,sev,ev.probabilidad,pg[g.id]];});
+    const evals=data.evaluadores_financieros.map(e=>{const x=t.evaluacion_financiera[e.id];return [e.nombre,x.rentabilidad,x.gasto_operativo,(x.rentabilidad+x.gasto_operativo)/2];});
     const subfichas={
       calificacion:()=>{const s=el('section');s.append(el('h3',tituloCal,'mat-sub-titulo'));
-        if(sub!=='financiera') s.append(tablaCal(['Grupo de interés','Calificación obtenida'],data.grupos.map(g=>[g.nombre,pg[g.id]])));
-        if(sub!=='impacto') s.append(tablaCal(['Función del comité','Calificación obtenida'],evals));
-        s.append(el('p',sub==='impacto'?'Importancia del impacto que asignó cada grupo (promedio de severidad y probabilidad).':sub==='financiera'?'Promedio de rentabilidad y gasto operativo que asignó cada función.':'Impacto según los grupos de interés y efecto financiero según el comité.','nota mat-sub-nota'));return s;},
+        if(sub!=='financiera') s.append(tablaCal(['Grupo de interés','Calificación severidad','Calificación probabilidad','Calificación promedio'],filasGrupos));
+        if(sub!=='impacto') s.append(tablaCal(['Áreas miembro del comité','Calificación rentabilidad','Calificación gasto operativo','Calificación promedio'],evals));
+        s.append(el('p',sub==='impacto'?'Severidad: promedio de escala, alcance e irremediabilidad que asignó cada grupo. Promedio: importancia del impacto (promedio de severidad y probabilidad).':sub==='financiera'?'Promedio: efecto financiero que asignó cada área (promedio de rentabilidad y gasto operativo).':'Impacto según los grupos de interés y efecto financiero según el comité.','nota mat-sub-nota'));return s;},
       plan:()=>{const s=el('section');s.append(el('h3','Relación con el plan de acción','mat-sub-titulo'));
         const tb=el('table',null,'mat-tabla-sub mat-tabla-plan'),th=el('thead'),tr=el('tr');['Acción','Estado','% de avance'].forEach(x=>{const c=el('th',x);c.scope='col';tr.append(c);});th.append(tr);tb.append(th);
         const body=el('tbody');
@@ -189,7 +191,7 @@
         tb.append(body);s.append(tb);return s;}
     };
     const f3=el('div',null,'mat-f3');
-    const botones=[['calificacion',tituloCal,(sub==='financiera'?evals.length+' funciones':sub==='doble'?data.grupos.length+' grupos · '+evals.length+' funciones':data.grupos.length+' grupos de interés')],['plan','Relación con el plan de acción',cruce.acciones.length+(cruce.acciones.length===1?' acción vinculada':' acciones vinculadas')]].map(([clave,texto,meta])=>{
+    const botones=[['calificacion',tituloCal,(sub==='financiera'?evals.length+' áreas del comité':sub==='doble'?data.grupos.length+' grupos · '+evals.length+' áreas del comité':data.grupos.length+' grupos de interés')],['plan','Relación con el plan de acción',cruce.acciones.length+(cruce.acciones.length===1?' acción vinculada':' acciones vinculadas')]].map(([clave,texto,meta])=>{
       const b=el('button',null,'mat-boton-sub');b.type='button';b.setAttribute('aria-expanded','false');b.dataset.sub=clave;
       const ver=el('span','Ver','mat-ver');b.verRotulo=ver;b.append(el('strong',texto),el('span',meta,'mat-sub'),ver);
       b.onclick=()=>{const abierto=b.getAttribute('aria-expanded')==='true';botones.forEach(o=>{o.setAttribute('aria-expanded','false');o.verRotulo.textContent='Ver';});
