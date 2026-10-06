@@ -204,47 +204,65 @@
       const hallazgos = el('section', null, 'dim-ficha-hallazgos');
       hallazgos.append(el('h3', 'Hallazgos clave'));
       const ul = el('ul'); (info.hallazgos || []).forEach(h => ul.append(el('li', h))); hallazgos.append(ul);
-      // Fila 3: tabla de indicadores
-      const tabla = el('table', null, 'dim-ficha-tabla');
-      const cols = el('colgroup'); ['indicador', 'calif', 'brecha', 'estandares'].forEach(c => { const col = el('col'); col.className = 'col-' + c; cols.append(col); }); tabla.append(cols);
-      const thead = el('thead'), tr = el('tr');
-      ['Indicador', 'Calificación', 'Brecha específica', 'Estándares relacionados'].forEach(t => { const th = el('th', t); th.scope = 'col'; tr.append(th); });
-      thead.append(tr); tabla.append(thead);
-      const tb = el('tbody');
+      // Fila 3: estándares relacionados (son generales del aspecto): fila completa en viñetas.
+      const estandaresFila = el('section', null, 'dim-ficha-estandares-fila');
+      estandaresFila.append(el('h3', 'Estándares relacionados'));
+      const ule = el('ul'); (info.estandares || []).forEach(x => ule.append(el('li', x))); estandaresFila.append(ule);
+      // Tabla de indicadores: Indicador | Calificación | Brecha específica (a más texto, más espacio).
       const indicadores = E.indicadoresEje(datos.estandares, eje.id);
+      const tablaDe = lista => {
+        const tabla = el('table', null, 'dim-ficha-tabla');
+        const cols = el('colgroup'); ['indicador', 'calif', 'brecha'].forEach(c => { const col = el('col'); col.className = 'col-' + c; cols.append(col); }); tabla.append(cols);
+        const thead = el('thead'), tr = el('tr');
+        ['Indicador', 'Calificación', 'Brecha específica'].forEach(t => { const th = el('th', t); th.scope = 'col'; tr.append(th); });
+        thead.append(tr); tabla.append(thead);
+        const tb = el('tbody');
+        lista.forEach(i => {
+          const fila = el('tr'), th = el('th'); th.scope = 'row';
+          th.append(el('span', i.codigo, 'dim-codigo'), document.createTextNode(i.pregunta));
+          const tdc = el('td', null, 'dim-ficha-c'); tdc.append(circulo(i.calificacion));
+          fila.append(th, tdc, el('td', i.brecha || 'Sin brecha registrada', i.brecha ? 'dim-ficha-brecha' : 'dim-ficha-brecha vacia'));
+          tb.append(fila);
+        });
+        tabla.append(tb);
+        const env = el('div', null, 'dim-ficha-tabla-env'); env.append(tabla); return env;
+      };
+      // Fila 4: componentes (criterios mínimos) que dan la calificación del aspecto; cada uno despliega sus indicadores.
       const grupos = eje.hallazgos?.grupos;
-      let primera = true;
-      const celdaEstandares = () => {
-        const td = el('td', null, 'dim-ficha-estandares'); td.rowSpan = indicadores.length + (grupos ? grupos.length : 0);
-        const lista = el('ul'); (info.estandares || []).forEach(x => lista.append(el('li', x))); td.append(lista); return td;
-      };
-      const filaIndicador = i => {
-        const fila = el('tr'), th = el('th'); th.scope = 'row';
-        th.append(el('span', i.codigo, 'dim-codigo'), document.createTextNode(i.pregunta));
-        const tdc = el('td', null, 'dim-ficha-c'); tdc.append(circulo(i.calificacion));
-        const tdb = el('td', i.brecha || 'Sin brecha registrada', i.brecha ? 'dim-ficha-brecha' : 'dim-ficha-brecha vacia');
-        fila.append(th, tdc, tdb);
-        if (primera) { fila.append(celdaEstandares()); primera = false; }
-        tb.append(fila);
-      };
-      if (grupos) {
+      const cuerpoInd = el('section', null, 'dim-ficha-cuerpo');
+      if (grupos && grupos.length) {
+        cuerpoInd.append(el('h3', 'Componentes de la calificación'), el('p', 'La calificación del aspecto es el promedio de sus componentes. Toque un componente para ver sus indicadores.', 'nota'));
+        const comps = el('div', null, 'dim-componentes');
         let n = 0;
         grupos.forEach((gr, k) => {
-          const criterio = eje.criterios?.[k];
-          const fila = el('tr', null, 'dim-ficha-grupo'), td = el('td'); td.colSpan = 3;
-          td.append(el('strong', criterio?.nombre || gr.nombre), el('span', ' · calificación ' + numero(E.parsearPuntaje(criterio?.calificacion)), 'nota'));
-          fila.append(td); if (primera) { fila.append(celdaEstandares()); primera = false; } tb.append(fila);
-          gr.indicadores.forEach(() => filaIndicador(indicadores[n++]));
+          const criterio = eje.criterios?.[k], cal = E.parsearPuntaje(criterio?.calificacion);
+          const propios = gr.indicadores.map(() => indicadores[n++]);
+          const nivelC = (datos.caso?.metodologia?.calificacion?.brechas?.niveles || []).find(x => typeof cal === 'number' && x.valor === Math.floor(cal));
+          const item = el('article', null, 'dim-comp');
+          const boton = el('button', null, 'dim-comp-boton'); boton.type = 'button'; boton.setAttribute('aria-expanded', 'false');
+          const idTabla = 'dim-comp-' + eje.id + '-' + k; boton.setAttribute('aria-controls', idTabla);
+          const textoC = el('span', null, 'dim-comp-texto');
+          textoC.append(el('span', 'Componente ' + (k + 1), 'dim-comp-num'), el('strong', criterio?.nombre || gr.nombre), el('span', (nivelC ? nivelC.nombre + ' · ' : '') + propios.length + ' indicadores', 'dim-comp-meta'));
+          const grande = circulo(cal); grande.classList?.add('grande'); if (!grande.classList) grande.className += ' grande';
+          boton.append(grande, textoC, el('span', 'Ver indicadores', 'dim-comp-accion'));
+          const region = el('div', null, 'dim-comp-indicadores'); region.id = idTabla; region.hidden = true; region.append(tablaDe(propios));
+          boton.onclick = () => {
+            const abrir = boton.getAttribute('aria-expanded') !== 'true';
+            boton.setAttribute('aria-expanded', String(abrir)); region.hidden = !abrir;
+            boton.querySelector('.dim-comp-accion').textContent = abrir ? 'Ocultar indicadores' : 'Ver indicadores';
+          };
+          item.append(boton, region); comps.append(item);
         });
-      } else indicadores.forEach(filaIndicador);
-      tabla.append(tb);
-      const envoltura = el('div', null, 'dim-ficha-tabla-env'); envoltura.append(tabla);
+        cuerpoInd.append(comps);
+      } else {
+        cuerpoInd.append(el('h3', 'Indicadores evaluados (' + indicadores.length + ')'), tablaDe(indicadores));
+      }
       // Pie: acciones del plan que cierran la brecha (trazabilidad)
       const acciones = App.obtenerPlan().filter(a => a.ejes?.includes(eje.id));
       const pieAcc = el('footer', null, 'dim-ficha-acciones');
       pieAcc.append(el('h3', acciones.length ? `Acciones del plan que cierran esta brecha (${acciones.length})` : 'Aún no hay acciones del plan vinculadas a esta dimensión'));
       const la = el('ul'); acciones.forEach(a => { const li = el('li'), link = el('a', a.titulo); link.href = '#/plan?accion=' + encodeURIComponent(a.id); li.append(link, el('span', ' · ' + a.estado.replace(/-/g, ' ') + ' · ' + a.avance + ' %', 'nota')); la.append(li); }); pieAcc.append(la);
-      panel.append(cerrar, cabeza, hallazgos, envoltura, pieAcc);
+      panel.append(cerrar, cabeza, hallazgos, estandaresFila, cuerpoInd, pieAcc);
       if (principal.origen !== 'fuente') panel.append(el('p', 'Las calificaciones por indicador y las brechas corresponden a la evaluación de diciembre de 2025.', 'nota'));
       fondo.append(panel); document.body.append(fondo); document.body.classList.add('dialogo-abierto');
       const regiones = [...document.querySelectorAll('body > header, body > main, body > footer, body > .saltar')]; regiones.forEach(n => { n.inert = true; });

@@ -21,6 +21,7 @@ async function montar({estado = 'base', guardar = async () => {}, plan = [], bas
     prepend(n) { n.parent = this; this.children.unshift(n); }
     replaceChildren(...n) { for (const c of this.children) c.parent = null; this.children = []; this.append(...n); }
     setAttribute(k,v) { this.attrs[k] = String(v); }
+    getAttribute(k) { return k in this.attrs ? this.attrs[k] : null; }
     removeAttribute(k) { delete this.attrs[k]; }
     addEventListener(k,fn) { this.eventos[k] = fn; }
     remove() { if (this.parent) this.parent.children = this.parent.children.filter(c => c !== this); this.parent = null; }
@@ -141,32 +142,42 @@ test('vista: ?eje=tema-ddhh-1 abre la ficha en ventana con título, calificació
   assert.equal(ficha.querySelector('h2').textContent, ejes.find(e => e.id === 'tema-ddhh-1').nombre);
   assert.match(ficha.querySelector('.dim-ficha-calif').textContent, /Calificación/);
   assert.deepEqual(ficha.querySelector('.dim-ficha-hallazgos').querySelectorAll('li').map(n => n.textContent), dimensiones.ejes['tema-ddhh-1'].hallazgos);
+  // Estándares generales del aspecto: fila completa debajo de los hallazgos.
+  assert.deepEqual(ficha.querySelector('.dim-ficha-estandares-fila').querySelectorAll('li').map(n => n.textContent), dimensiones.ejes['tema-ddhh-1'].estandares);
+  // Sin componentes intermedios: la tabla de tres columnas aparece directamente.
+  assert.equal(ficha.querySelectorAll('.dim-comp').length, 0);
   const encabezados = ficha.querySelector('.dim-ficha-tabla').querySelector('thead').querySelectorAll('th').map(n => n.textContent);
-  assert.deepEqual(encabezados, ['Indicador', 'Calificación', 'Brecha específica', 'Estándares relacionados']);
-  const filas = ficha.querySelector('tbody').children;
-  assert.equal(filas.length, E.indicadoresEje(estandares, 'tema-ddhh-1').length);
-  const celda = ficha.querySelector('.dim-ficha-estandares');
-  assert.equal(celda.rowSpan, filas.length);
-  assert.deepEqual(celda.querySelectorAll('li').map(n => n.textContent), dimensiones.ejes['tema-ddhh-1'].estandares);
+  assert.deepEqual(encabezados, ['Indicador', 'Calificación', 'Brecha específica']);
+  assert.equal(ficha.querySelector('tbody').children.length, E.indicadoresEje(estandares, 'tema-ddhh-1').length);
   assert.equal(ficha.querySelector('.dim-ficha-acciones').querySelector('a').href, '#/plan?accion=accion-prueba');
   assert.equal(v.ruta(), '#/ddhh/dimensiones?eval=eval-2025-12&eje=tema-ddhh-1');
   v.teclas.at(-1)({key:'Escape', preventDefault() {}});
   assert.equal(v.ficha(), null);
   assert.equal(v.ruta(), '#/ddhh/dimensiones?eval=eval-2025-12');
 });
-test('ficha: las etapas con criterios agrupan sus indicadores y cada indicador lleva su calificación y su brecha', async () => {
+test('ficha: las etapas OCDE muestran sus componentes con calificación y cada uno despliega sus indicadores', async () => {
   const v = await montar({filtros:'eje=etapa-ocde-2'});
   const ficha = v.ficha(), eje = ejes.find(e => e.id === 'etapa-ocde-2');
-  const grupos = ficha.querySelectorAll('.dim-ficha-grupo');
-  assert.equal(grupos.length, eje.hallazgos.grupos.length);
+  const comps = ficha.querySelectorAll('.dim-comp');
+  assert.equal(comps.length, eje.hallazgos.grupos.length);
   const indicadores = E.indicadoresEje(estandares, 'etapa-ocde-2');
-  const filas = ficha.querySelector('tbody').children.filter(n => !n.matches('.dim-ficha-grupo'));
-  assert.equal(filas.length, indicadores.length);
-  filas.forEach((f, k) => {
-    assert.match(f.querySelector('.dim-circulo').textContent, /^\d,\d$|^—$/);
-    assert.equal(f.querySelector('.dim-ficha-brecha').textContent, indicadores[k].brecha || 'Sin brecha registrada');
+  let n = 0;
+  comps.forEach((c, k) => {
+    const boton = c.querySelector('.dim-comp-boton'), region = c.querySelector('.dim-comp-indicadores');
+    assert.match(c.textContent, new RegExp(eje.criterios[k].nombre.slice(0, 20).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(c.querySelector('.dim-circulo').textContent, /^\d,\d$|^—$/);
+    assert.equal(region.hidden, true); assert.equal(boton.attrs['aria-expanded'], 'false');
+    boton.onclick();
+    assert.equal(region.hidden, false); assert.equal(boton.attrs['aria-expanded'], 'true');
+    const filas = region.querySelector('tbody').children;
+    assert.equal(filas.length, eje.hallazgos.grupos[k].indicadores.length);
+    filas.forEach(f => {
+      const ind = indicadores[n++];
+      assert.equal(f.querySelector('.dim-ficha-brecha').textContent, ind.brecha || 'Sin brecha registrada');
+    });
+    boton.onclick(); assert.equal(region.hidden, true);
   });
-  assert.equal(ficha.querySelector('.dim-ficha-estandares').rowSpan, indicadores.length + grupos.length);
+  assert.equal(n, indicadores.length);
   v.limpiar();
 });
 test('geometría: las diez etiquetas renderizadas no se solapan ni entran en el círculo de radio 300', async () => {
