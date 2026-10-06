@@ -149,7 +149,7 @@
     // Fila 1: tema material | dimensión ESG
     const f1=el('div',null,'mat-f1'), tit=el('div',null,'mat-f1-titulo'), titulo=el('h2',t.nombre); titulo.id='mat-titulo';
     tit.append(el('p',lectura[0]+' · Tema '+t.id.slice(-2),'antetitulo'),titulo,el('p',cuadrante(puntos.find(p=>p.id===t.id)),'mat-f1-cuadrante'));
-    const esg=el('div',null,'mat-f1-esg'); esg.append(el('span','Dimensión ESG','mat-rotulo'),el('strong',t.dimension_esg.charAt(0).toUpperCase()+t.dimension_esg.slice(1)),el('span','Ambiental · Social · Gobernanza','mat-sub'));
+    const esg=el('div',null,'mat-f1-esg'); esg.append(el('span','Dimensión ESG','mat-rotulo'),el('strong',t.dimension_esg.charAt(0).toUpperCase()+t.dimension_esg.slice(1)));
     f1.append(tit,esg);
     // Fila 2: variables de esta subpestaña con su calificación | riesgos DDHH y estándares relacionados
     const variables = sub==='impacto' ? [['Severidad',pi.y,'Promedio de escala, alcance e irremediabilidad'],['Probabilidad',pi.x,'Qué tan probable es que el impacto ocurra']]
