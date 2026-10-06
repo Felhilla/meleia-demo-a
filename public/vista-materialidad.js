@@ -12,8 +12,11 @@
     if (texto !== undefined) n.textContent = texto;
     return n;
   }
+  let NIVELES_SEM = [];
+  const semColor = v => (NIVELES_SEM.find(n => typeof v === 'number' && n.valor === Math.min(5, Math.floor(v))) || {}).color || 'gris';
+  function circulo(v, grande) { return el('span', typeof v === 'number' ? numero(v) : '—', 'mat-circulo sem-' + semColor(v) + (grande ? ' grande' : '')); }
   function cabeza(antetitulo, titulo, contexto) {
-    const c = el('div', null, 'seccion-cabeza'), t = el('div');
+    const c = el('div', null, 'seccion-cabeza mat-cabeza'), t = el('div');
     t.append(el('p', antetitulo, 'antetitulo'), el('h2', titulo)); c.append(t, el('p', contexto)); return c;
   }
   function barra(nombre, valor, umbral) {
@@ -21,6 +24,7 @@
     b.append(typeof nombre === 'string' ? el('span', nombre) : nombre, el('span', numero(valor), 'mat-valor'));
     const relleno = el('span', null, 'mat-relleno'), marca = el('span', null, 'mat-marca');
     relleno.style.width = valor / 5 * 100 + '%'; marca.style.left = umbral / 5 * 100 + '%';
+    relleno.className = 'mat-relleno sem-relleno-' + semColor(valor);
     pista.setAttribute('role', 'img'); pista.setAttribute('aria-label', `Puntaje ${numero(valor)} de 5; umbral ${numero(umbral)}`);
     pista.append(relleno, marca); b.append(pista); return b;
   }
@@ -31,6 +35,7 @@
   };
   function render(contenedor, datos, params = {}, sub = 'doble') {
     const raiz = el('div', null, 'materialidad'); contenedor.append(raiz);
+    NIVELES_SEM = datos.caso?.metodologia?.calificacion?.materialidad?.niveles || [];
     const cfg = datos.materialidadConfig, data = datos.materialidad;
     let filas;
     try {filas = M.clasificar(data.temas, cfg);} catch (_) {
@@ -96,7 +101,7 @@
     tabla.append(el('caption', sub === 'doble' ? 'Total de ordenación: promedio de impacto y financiera; la materialidad se decide por doble entrada.' : 'Importancia por ' + (sub === 'impacto' ? 'grupo de interés' : 'función evaluadora') + ' · Escala 0 a 5'));
     const columnas = ['Tema', ...(sub === 'doble' ? ['Impacto','Financiera','Cuadrante','Convergencia'] : [...grupos.map(g=>g.nombre),'Total'])];
     columnas.forEach(c => {const th = el('th',c); th.scope='col'; tr.append(th);}); head.append(tr);
-    function celda(v, max = 5) {return el('td',numero(v),'mat-calor mat-tono-' + M.tonoCalor(v,0,max));}
+    function celda(v) {const td = el('td', null, 'mat-calor mat-sem-' + semColor(v)); td.append(el('span', numero(v))); return td;}
     ordenadas.forEach(f => {
       const r = el('tr'), th = el('th'), a = linkTema(f.id); a.id='mat-fila-'+f.id; th.scope='row';
       if (material(f.id)) {const marca=el('span','●','mat-material-marca'); marca.setAttribute('aria-label','Material'); th.append(marca);}
@@ -138,18 +143,61 @@
       return;
     }
     const t=tema(params.id), f=fila(t.id), pi=mi.find(p=>p.id===t.id), pf=mf.find(p=>p.id===t.id);
-    const fondo=el('div',null,'fondo-dialogo mat-fondo'),dialogo=el('section',null,'panel materialidad mat-dialogo');
+    const fondo=el('div',null,'fondo-dialogo centrado mat-fondo'),dialogo=el('section',null,'panel materialidad mat-ficha');
     dialogo.setAttribute('role','dialog');dialogo.setAttribute('aria-modal','true');dialogo.setAttribute('aria-labelledby','mat-titulo');
-    const cerrar=el('button','Cerrar ficha ×','cerrar'),titulo=el('h2',t.nombre);titulo.id='mat-titulo';
-    dialogo.append(cerrar,titulo,el('p',t.dimension_esg+' · '+cuadrante(puntos.find(p=>p.id===t.id))),el('h3','Impacto'));
-    dialogo.append(barra('Severidad',pi.y,mi.umbrales.y),barra('Probabilidad',pi.x,mi.umbrales.x),barra('Importancia del impacto',f.impacto,limites.impacto),el('h3','Financiera'),barra('Rentabilidad',pf.y,mf.umbrales.y),barra('Gasto operativo',pf.x,mf.umbrales.x),barra('Promedio financiero',f.financiera,limites.financiera));
-    dialogo.append(el('p','Cada marca vertical indica el umbral de la dimensión o la media de la variable en el universo completo.'),el('h3','Importancia del impacto por grupo'));
-    const porGrupo=M.porGrupo(t,cfg);data.grupos.forEach(g=>dialogo.append(barra(g.nombre,porGrupo[g.id],limites.impacto)));
-    dialogo.append(el('h3','Riesgos en DDHH'),riesgos(t),el('h3','Ejes de estándares'));
-    const cruce=cruzar(t),ultima=[...datos.evaluaciones].sort((a,b)=>b.fecha.localeCompare(a.fecha)||b.id.localeCompare(a.id))[0];
-    cruce.ejes.forEach(e=>{const puntaje=ultima?.puntajes[e.id];dialogo.append(enlace(e.nombre+' · '+(Number.isFinite(puntaje)?numero(puntaje):'Sin puntaje')+(ultima?' · '+ultima.fecha+(ultima.origen==='ejemplo'?' (ejemplo)':''):''),'#/ddhh/dimensiones?eje='+encodeURIComponent(e.id)));});
-    dialogo.append(el('h3','Acciones del plan'));cruce.acciones.forEach(a=>{const c=el('article',null,'mat-accion');c.append(enlace(a.titulo,'#/plan?accion='+encodeURIComponent(a.id)),el('p',a.estado.replaceAll('_',' ')+' · Avance: '+numero(a.avance)+' %'));dialogo.append(c);});
-    if(!cruce.acciones.length) dialogo.append(el('p','Sin acciones vinculadas.'));sasb(t,dialogo);
+    const cerrar=el('button','Cerrar ×','cerrar mat-cerrar');cerrar.type='button';
+    // Fila 1: tema material | dimensión ESG
+    const f1=el('div',null,'mat-f1'), tit=el('div',null,'mat-f1-titulo'), titulo=el('h2',t.nombre); titulo.id='mat-titulo';
+    tit.append(el('p',lectura[0]+' · Tema '+t.id.slice(-2),'antetitulo'),titulo,el('p',cuadrante(puntos.find(p=>p.id===t.id)),'mat-f1-cuadrante'));
+    const esg=el('div',null,'mat-f1-esg'); esg.append(el('span','Dimensión ESG','mat-rotulo'),el('strong',t.dimension_esg.charAt(0).toUpperCase()+t.dimension_esg.slice(1)),el('span','Ambiental · Social · Gobernanza','mat-sub'));
+    f1.append(tit,esg);
+    // Fila 2: variables de esta subpestaña con su calificación | riesgos DDHH y estándares relacionados
+    const variables = sub==='impacto' ? [['Severidad',pi.y,'Promedio de escala, alcance e irremediabilidad'],['Probabilidad',pi.x,'Qué tan probable es que el impacto ocurra']]
+      : sub==='financiera' ? [['Rentabilidad',pf.y,'Efecto en ingresos y márgenes'],['Gasto operativo',pf.x,'Efecto en costos de operación']]
+      : [['Materialidad de impacto',f.impacto,'Umbral '+numero(limites.impacto)],['Materialidad financiera',f.financiera,'Umbral '+numero(limites.financiera)]];
+    const f2=el('div',null,'mat-f2'), izq=el('div',null,'mat-vars');
+    variables.forEach(([nombre,valor,ayuda])=>{const fila=el('div',null,'mat-var'),txt=el('div');txt.append(el('strong',nombre),el('span',ayuda,'mat-sub'));const cal=el('div',null,'mat-var-calif');cal.append(circulo(valor,true));fila.append(txt,cal);izq.append(fila);});
+    const der=el('div',null,'mat-rel'), cruce=cruzar(t);
+    const bR=el('section',null,'mat-rel-bloque'); bR.append(el('h3','Riesgos DDHH relacionados'));
+    const ulR=el('ul',null,'mat-rel-riesgos');
+    cruce.riesgos.forEach(r=>{const nivel=Riesgos.criticidad(r,datos.criticidad).nivel,li=el('li'),a=enlace('','#/ddhh/riesgos/'+r.id);a.append(el('span',r.id.slice(-2),'mat-num sem-'+({Alta:'rojo',Media:'ambar',Baja:'amarillo'}[nivel])),el('span',r.nombre));li.append(a);ulR.append(li);});
+    if(!cruce.riesgos.length) ulR.append(el('li','Este tema se sustenta en los ejes de estándares; no tiene riesgos vinculados.','mat-vacio'));
+    bR.append(ulR);
+    const estandares=[...new Set([...cruce.ejes.flatMap(e=>datos.dimensiones?.ejes?.[e.id]?.estandares||[]),...(t.sasb?[typeof t.sasb==='string'?t.sasb:Object.values(t.sasb).join(' · ')]:[]),cfg.marco||'GRI 3: Temas Materiales 2021'])];
+    const bE=el('section',null,'mat-rel-bloque'); bE.append(el('h3','Estándares relacionados'));
+    const ulE=el('ul',null,'mat-vinetas'); estandares.forEach(x=>ulE.append(el('li',x))); bE.append(ulE);
+    der.append(bR,bE); f2.append(izq,der);
+    // Fila 3: dos cajas que despliegan su subficha
+    const tituloCal = sub==='financiera' ? 'Calificación del comité financiero' : sub==='doble' ? 'Calificación de grupos de interés y comité' : 'Calificación de los grupos de interés';
+    const zona=el('div',null,'mat-subficha'); zona.hidden=true;
+    const tablaCal=(titulos,filasT)=>{const tb=el('table',null,'mat-tabla-sub'),th=el('thead'),tr=el('tr');titulos.forEach(x=>{const c=el('th',x);c.scope='col';tr.append(c);});th.append(tr);tb.append(th);const body=el('tbody');filasT.forEach(([n,v])=>{const r=el('tr'),h=el('th',n);h.scope='row';const td=el('td',null,'mat-tabla-c');td.append(circulo(v));r.append(h,td);body.append(r);});tb.append(body);return tb;};
+    const pg=M.porGrupo(t,cfg);
+    const evals=data.evaluadores_financieros.map(e=>{const x=t.evaluacion_financiera[e.id];return [e.nombre,(x.rentabilidad+x.gasto_operativo)/2];});
+    const subfichas={
+      calificacion:()=>{const s=el('section');s.append(el('h3',tituloCal,'mat-sub-titulo'));
+        if(sub!=='financiera') s.append(tablaCal(['Grupo de interés','Calificación obtenida'],data.grupos.map(g=>[g.nombre,pg[g.id]])));
+        if(sub!=='impacto') s.append(tablaCal(['Función del comité','Calificación obtenida'],evals));
+        s.append(el('p',sub==='impacto'?'Importancia del impacto que asignó cada grupo (promedio de severidad y probabilidad).':sub==='financiera'?'Promedio de rentabilidad y gasto operativo que asignó cada función.':'Impacto según los grupos de interés y efecto financiero según el comité.','nota mat-sub-nota'));return s;},
+      plan:()=>{const s=el('section');s.append(el('h3','Relación con el plan de acción','mat-sub-titulo'));
+        const tb=el('table',null,'mat-tabla-sub mat-tabla-plan'),th=el('thead'),tr=el('tr');['Acción','Estado','% de avance'].forEach(x=>{const c=el('th',x);c.scope='col';tr.append(c);});th.append(tr);tb.append(th);
+        const body=el('tbody');
+        if(!cruce.acciones.length){const r=el('tr'),td=el('td','Sin acciones vinculadas.');td.colSpan=3;r.append(td);body.append(r);}
+        cruce.acciones.forEach(a=>{const r=el('tr'),h=el('th');h.scope='row';h.append(enlace(a.titulo,'#/plan?accion='+encodeURIComponent(a.id)));
+          const est=el('td',null,'mat-estado');est.append(el('span',a.estado.replace(/-/g,' '),'mat-chip-estado estado-'+a.estado));
+          const av=el('td',null,'mat-avance'),pista=el('span',null,'mat-avance-pista'),rel=el('span',null,'mat-avance-relleno');rel.style.width=(a.avance||0)+'%';pista.append(rel);av.append(el('strong',numero(a.avance||0)+' %'),pista);
+          r.append(h,est,av);body.append(r);});
+        tb.append(body);s.append(tb);return s;}
+    };
+    const f3=el('div',null,'mat-f3');
+    const botones=[['calificacion',tituloCal,(sub==='financiera'?evals.length+' funciones':sub==='doble'?data.grupos.length+' grupos · '+evals.length+' funciones':data.grupos.length+' grupos de interés')],['plan','Relación con el plan de acción',cruce.acciones.length+(cruce.acciones.length===1?' acción vinculada':' acciones vinculadas')]].map(([clave,texto,meta])=>{
+      const b=el('button',null,'mat-boton-sub');b.type='button';b.setAttribute('aria-expanded','false');b.dataset.sub=clave;
+      const ver=el('span','Ver','mat-ver');b.verRotulo=ver;b.append(el('strong',texto),el('span',meta,'mat-sub'),ver);
+      b.onclick=()=>{const abierto=b.getAttribute('aria-expanded')==='true';botones.forEach(o=>{o.setAttribute('aria-expanded','false');o.verRotulo.textContent='Ver';});
+        if(abierto){zona.hidden=true;zona.replaceChildren();return;}
+        b.setAttribute('aria-expanded','true');b.verRotulo.textContent='Ocultar';zona.replaceChildren(subfichas[clave]());zona.hidden=false;};
+      f3.append(b);return b;});
+    dialogo.append(cerrar,f1,f2,f3,zona);
+    fondo.addEventListener('click',e=>{if(e.target===fondo)cerrar.onclick();});
     const anterior=document.activeElement,regiones=[...document.querySelectorAll('body > header, body > main, body > footer, body > .saltar')],inertes=regiones.map(n=>n.inert);
     regiones.forEach(n=>{n.inert=true;});fondo.append(dialogo);document.body.append(fondo);document.body.classList.add('dialogo-abierto');cerrar.focus();
     let limpio=false;

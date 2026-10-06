@@ -122,8 +122,18 @@
   }
 
   function cabezaCapitulo(cap, sub) {
+    // Banda Forest con el motivo de marca (arco y punto dorado), igual que «Para qué nos contrató».
     const cabeza = el('header', null, 'capitulo-cabeza');
-    cabeza.append(el('p', 'Capítulo ' + cap.numero, 'antetitulo'), el('h1', cap.titulo), el('p', cap.bajada, 'bajada'));
+    const banda = el('div', null, 'capitulo-banda');
+    banda.append(el('p', 'Capítulo ' + cap.numero, 'antetitulo'), el('h1', cap.titulo), el('p', cap.bajada, 'bajada'));
+    const ns = 'http://www.w3.org/2000/svg', arco = document.createElementNS(ns, 'svg');
+    arco.setAttribute('viewBox', '0 0 400 400'); arco.setAttribute('aria-hidden', 'true'); arco.setAttribute('class', 'capitulo-arco');
+    [[170, 'var(--gold)', 2.2], [138, 'var(--sage)', 1], [106, 'var(--sage)', 1]].forEach(([r, c, w]) => {
+      const p = document.createElementNS(ns, 'path'); p.setAttribute('d', `M ${200 - r} 300 A ${r} ${r} 0 0 1 ${200 + r} 300`);
+      p.setAttribute('fill', 'none'); p.setAttribute('stroke', c); p.setAttribute('stroke-width', w); arco.append(p);
+    });
+    const punto = document.createElementNS(ns, 'circle'); punto.setAttribute('cx', 200); punto.setAttribute('cy', 222); punto.setAttribute('r', 15); punto.setAttribute('fill', 'var(--gold)'); arco.append(punto);
+    banda.append(arco); cabeza.append(banda);
     if (cap.subcapitulos) {
       const subs = el('nav', null, 'subcapitulos'); subs.setAttribute('aria-label', 'Secciones de ' + cap.titulo);
       cap.subcapitulos.forEach(s => {

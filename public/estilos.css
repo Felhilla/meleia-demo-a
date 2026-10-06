@@ -126,7 +126,15 @@ footer { border-top: 1px solid var(--borde); color: var(--texto-suave); font-siz
 footer .pie { max-width: calc(var(--ancho) + 2 * var(--e5)); margin: 0 auto; padding: var(--e5); display: flex; justify-content: space-between; gap: var(--e4); flex-wrap: wrap; }
 
 /* Encabezado de capítulo */
-.capitulo-cabeza { margin-bottom: var(--e6); max-width: 820px; }
+.capitulo-cabeza { margin-bottom: var(--e6); }
+.capitulo-banda { position: relative; overflow: hidden; padding: var(--e6) var(--e6) var(--e6); border-radius: 24px; background: var(--forest); color: var(--ivory); }
+.capitulo-banda .antetitulo { color: var(--gold); } .capitulo-banda .antetitulo::before { background: var(--gold); }
+.capitulo-banda h1 { color: var(--ivory); margin-bottom: var(--e3); max-width: 760px; }
+.capitulo-banda .bajada { color: #DCE7DE; max-width: 640px; margin: 0; }
+.capitulo-arco { position: absolute; right: -40px; bottom: -150px; width: 400px; opacity: .5; pointer-events: none; }
+:root[data-tema="oscuro"] .capitulo-banda { background: #1F3D33; }
+@media (prefers-color-scheme: dark) { :root:not([data-tema="claro"]) .capitulo-banda { background: #1F3D33; } }
+@media (max-width: 767px) { .capitulo-banda { padding: var(--e5) var(--e4); } .capitulo-arco { width: 260px; bottom: -110px; } }
 .antetitulo, .eyebrow { display: inline-flex; align-items: center; gap: 12px; font-size: .95rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--oro-texto); margin-bottom: var(--e3); }
 .antetitulo::before { content: ""; width: 28px; height: 1px; background: var(--oro); }
 .capitulo-cabeza h1 { margin-bottom: var(--e3); }

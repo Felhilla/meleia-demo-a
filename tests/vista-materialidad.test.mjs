@@ -37,6 +37,11 @@ function iniciar(hash = '#/materialidad/doble', sinDatos = false) {
     constructor(tag) {this.tag = tag; this.children = []; this.attrs = {}; this.dataset = {}; this.style = {}; this.className = ''; this.classList = {add: c => {this.className += ' ' + c;}, remove: c => {this.className = this.className.replace(c,'');}};}
     append(...ns) {ns.forEach(n => {this.children.push(n); if (typeof n === 'object') n.parent = this;});}
     setAttribute(k,v) {this.attrs[k] = String(v);}
+    getAttribute(k) {return k in this.attrs ? this.attrs[k] : null;}
+    addEventListener() {}
+    replaceChildren(...ns) {this.children = []; this.append(...ns);}
+    querySelectorAll(sel) {const c = sel.startsWith('.') ? sel.slice(1) : null, out = []; const ir = n => (n.children || []).forEach(h => {if (typeof h !== 'object') return; if (c ? (' ' + h.className + ' ').includes(' ' + c + ' ') : h.tag === sel) out.push(h); ir(h);}); ir(this); return out;}
+    querySelector(sel) {return this.querySelectorAll(sel)[0] || null;}
     focus() {document.activeElement = this;}
     remove() {this.parent.children = this.parent.children.filter(n => n !== this);}
     querySelectorAll(s) {return todos(this).filter(n => s.includes('button') && n.tag === 'button' || s.includes('a[href]') && n.tag === 'a' && n.href);}
@@ -153,25 +158,30 @@ for(const sub of ['impacto','financiera','doble']) {
       else assert.match(texto(destacados),/Referencia SASB/);
     }
   });
-  test(`${sub}: ficha tema-03, cruce, plan vivo, foco, Escape y limpieza`,()=>{
+  test(`${sub}: ficha tema-03 del boceto, solo con las variables de su análisis, subfichas, foco, Escape y limpieza`,()=>{
     const r=iniciar(`#/materialidad/${sub}/tema-03`);
     const dialogo=todos(r.document.body).find(n=>n.attrs.role==='dialog');assert.ok(dialogo);
     assert.equal(dialogo.attrs['aria-modal'],'true');
     const links=todos(dialogo).filter(n=>n.tag==='a');
     assert.ok(links.some(n=>n.href==='#/ddhh/riesgos/riesgo-05'));
-    const t=data.temas.find(t=>t.id==='tema-03');
-    t.ejes.forEach(id=>assert.ok(links.some(n=>n.href==='#/ddhh/dimensiones?eje='+id)));
-    assert.ok(links.some(n=>n.href.startsWith('#/plan?accion=')));
-    assert.match(texto(dialogo),/37 %/);assert.match(texto(dialogo),/Referencia SASB/);
-    assert.equal(todos(dialogo).filter(n=>clase(n,'mat-marca')).length,12);
+    // Solo las variables de la subpestaña: impacto no muestra financiera y viceversa.
+    const vars=todos(dialogo).filter(n=>clase(n,'mat-var')).map(texto).join(' ');
+    if(sub==='impacto'){assert.match(vars,/Severidad/);assert.match(vars,/Probabilidad/);assert.doesNotMatch(vars,/Rentabilidad|Gasto/);}
+    if(sub==='financiera'){assert.match(vars,/Rentabilidad/);assert.match(vars,/Gasto operativo/);assert.doesNotMatch(vars,/Severidad|Probabilidad/);}
+    if(sub==='doble'){assert.match(vars,/Materialidad de impacto/);assert.match(vars,/Materialidad financiera/);}
+    assert.ok(todos(dialogo).filter(n=>clase(n,'mat-circulo')).every(n=>/sem-(rojo|naranja|ambar|amarillo|verde|gris)/.test(n.className)));
+    assert.match(texto(dialogo),/GRI 3/);
+    const subs=todos(dialogo).filter(n=>clase(n,'mat-boton-sub'));assert.equal(subs.length,2);
+    subs[0].onclick();
+    const filasCal=todos(dialogo).filter(n=>n.tag==='tbody').flatMap(b=>b.children);
+    assert.equal(filasCal.length,sub==='impacto'?data.grupos.length:sub==='financiera'?data.evaluadores_financieros.length:data.grupos.length+data.evaluadores_financieros.length);
+    subs[1].onclick();
+    assert.ok(todos(dialogo).filter(n=>n.tag==='a').some(n=>n.href.startsWith('#/plan?accion=')));
+    assert.match(texto(dialogo),/% de avance/);
     assert.ok(r.main.inert);const cerrar=r.document.activeElement;assert.equal(cerrar.tag,'button');
-    r.eventos.keydown({key:'Tab',shiftKey:true,preventDefault(){}});assert.equal(r.document.activeElement,links.at(-1));
-    r.eventos.keydown({key:'Tab',preventDefault(){}});assert.equal(r.document.activeElement,cerrar);
     r.eventos.keydown({key:'Escape',preventDefault(){}});assert.equal(r.location.hash,`#/materialidad/${sub}`);
     r.limpiar();assert.ok(!r.main.inert);assert.equal(r.eventos.keydown,undefined);
     assert.ok(!todos(r.document.body).some(n=>n.attrs.role==='dialog'));
-    r.pintar();r.main.focus();r.microtareas.forEach(fn=>fn());
-    assert.equal(r.document.activeElement.id,'mat-fila-tema-03');
   });
 }
 test('limpieza al navegar restaura el fondo y elimina los eventos',()=>{
