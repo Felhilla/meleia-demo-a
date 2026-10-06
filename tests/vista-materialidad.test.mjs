@@ -120,20 +120,13 @@ test('tono de calor: cinco niveles, recorte y escalas inválidas',()=>{
   for(const args of [[NaN,0,5],[1,5,0],[Infinity,0,5]]) assert.throws(()=>M.tonoCalor(...args));
 });
 for(const sub of ['impacto','financiera','doble']) {
-  test(`${sub}: mapa, matriz completa, resultados, nota única y teclado`,()=>{
+  test(`${sub}: solo el mapa de cuadrantes (sin matriz ni resultados), nota única y teclado`,()=>{
     const r=iniciar('#/materialidad/'+sub), ns=todos(r.main);
     assert.deepEqual(Object.keys(r.vistas).sort(),['materialidad','materialidad-financiera','materialidad-impacto']);
-    for(const c of ['mat-mapa','mat-matriz','mat-resultados']) assert.equal(ns.filter(n=>clase(n,c)).length,1);
+    assert.equal(ns.filter(n=>clase(n,'mat-mapa')).length,1);
+    for(const c of ['mat-matriz','mat-resultados','mat-ranking']) assert.equal(ns.filter(n=>clase(n,c)).length,0);
     assert.equal(ns.filter(n=>n.tag==='h1').length,0);
-    assert.doesNotMatch(texto(r.main),/Paso \d de 4|Siguiente:/);
     assert.equal(ns.filter(n=>clase(n,'nota')).length,1);
-    const tabla=ns.find(n=>n.id==='mat-tabla'), cab=tabla.children[1].children[0], rows=tabla.children[2].children;
-    assert.equal(rows.length,15);
-    const columnas=sub==='impacto'?data.grupos:sub==='financiera'?data.evaluadores_financieros:[];
-    assert.equal(cab.children.length,sub==='doble'?5:columnas.length+2);
-    columnas.forEach((g,i)=>assert.equal(texto(cab.children[i+1]).trim(),g.nombre));
-    const orden=sub==='doble'?[...filas].sort((a,b)=>(b.impacto+b.financiera)-(a.impacto+a.financiera)||a.id.localeCompare(b.id)).map(f=>f.id): (sub==='impacto'?M.matrizGrupos:M.matrizEvaluadores)(data.temas,cfg).map(f=>f.id);
-    assert.deepEqual(rows.map(row=>todos(row).find(n=>n.tag==='a').href.split('/').at(-1)),orden);
     const puntos=ns.filter(n=>n.attrs.role==='button'); assert.equal(puntos.length,15);
     const materiales=sub==='doble'?9:filas.filter(f=>f[sub]>M.umbrales(data.temas,cfg)[sub]).length;
     assert.equal(puntos.filter(n=>clase(n,'mat-material')).length,materiales);
@@ -143,20 +136,6 @@ for(const sub of ['impacto','financiera','doble']) {
       puntos.slice(i+1).forEach(q=>assert.ok(Math.hypot(c.attrs.cx-q.children[0].attrs.cx,c.attrs.cy-q.children[0].attrs.cy)>=40));
       for(const key of ['Enter',' ']) {let prevenido=false;p.onkeydown({key,preventDefault(){prevenido=true;}});assert.ok(prevenido);assert.equal(r.location.hash,`#/materialidad/${sub}/tema-${p.children[1].textContent}`);}
     });
-    rows[0].onclick({target:{}});assert.equal(r.location.hash,todos(rows[0]).find(n=>n.tag==='a').href);
-    const ranking=ns.find(n=>clase(n,'mat-ranking'));
-    assert.equal(todos(ranking).filter(n=>clase(n,'mat-marca')).length,sub==='doble'?30:15);
-    if(sub==='doble') {
-      const corta=ns.find(n=>clase(n,'mat-lista-corta'));
-      assert.equal(corta.children.length,3);
-      assert.deepEqual(corta.children.map(c=>todos(c).filter(n=>n.tag==='li').length),[4,3,2]);
-      assert.equal(ns.filter(n=>clase(n,'mat-cruce')).length,9);
-    } else {
-      const destacados=ns.find(n=>clase(n,'mat-destacados'));
-      assert.equal(destacados.children.length,3);
-      if(sub==='impacto') destacados.children.forEach(c=>assert.ok(todos(c).some(n=>n.href?.startsWith('#/ddhh/riesgos/riesgo-'))));
-      else assert.match(texto(destacados),/Referencia SASB/);
-    }
   });
   test(`${sub}: ficha tema-03 del boceto, solo con las variables de su análisis, subfichas, foco, Escape y limpieza`,()=>{
     const r=iniciar(`#/materialidad/${sub}/tema-03`);

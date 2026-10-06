@@ -85,7 +85,7 @@
     M.posicionesMatriz(puntos.map(p => ({...p,impacto:p.x,financiera:p.y})),360,200,30).forEach(p => {
       const px = p.x*3, py = p.y*3+30;
       if (p.x !== p.realX || p.y !== p.realY) grafico.append(svg('line',{x1:p.realX*3,y1:p.realY*3+30,x2:px,y2:py,class:'mat-conector'}));
-      const g = svg('g',{role:'button',tabindex:0,class:'mat-punto' + (p.material ? ' mat-material' : ''),'aria-label': `${p.id.slice(-2)} · ${tema(p.id).nombre}; ${lectura[2]}: ${numero(p.impacto)}; ${lectura[3]}: ${numero(p.financiera)}; ${p.material ? 'material' : 'no material'}`});
+      const g = svg('g',{id:'mat-punto-'+p.id,role:'button',tabindex:0,class:'mat-punto' + (p.material ? ' mat-material' : ''),'aria-label': `${p.id.slice(-2)} · ${tema(p.id).nombre}; ${lectura[2]}: ${numero(p.impacto)}; ${lectura[3]}: ${numero(p.financiera)}; ${p.material ? 'material' : 'no material'}`});
       g.append(svg('circle',{cx:px,cy:py,r:18}),svg('text',{x:px,y:py+5,'text-anchor':'middle'},p.id.slice(-2)));
       g.onclick = () => {location.hash = ruta(p.id);}; g.onkeydown = e => {if (e.key === 'Enter' || e.key === ' ') {e.preventDefault(); g.onclick();}}; grafico.append(g);
     });
@@ -93,52 +93,12 @@
     tarjeta.append(el('p', sub === 'doble' ? 'Un tema es material si supera al menos uno de los umbrales; la igualdad no lo supera.' : 'Los cuadrantes usan las medias de ambas variables. El relleno depende del total de la dimensión, no del cuadrante. La igualdad no supera el umbral.', 'mat-lectura'));
     mapa.append(tarjeta); raiz.append(mapa);
 
-    const matriz = el('section', null, 'seccion mat-matriz');
-    matriz.append(cabeza('Matriz', sub === 'doble' ? 'Dos dimensiones, una decisión por tema' : 'Las perspectivas detrás de cada puntaje', 'Los temas se ordenan de mayor a menor total. El punto dorado identifica los materiales; cada celda muestra su valor.'));
-    const grupos = sub === 'impacto' ? data.grupos : data.evaluadores_financieros;
-    const ordenadas = sub === 'doble' ? filas.map(f => ({...f,total:(f.impacto+f.financiera)/2})).sort((a,b) => b.total-a.total || a.id.localeCompare(b.id)) : sub === 'impacto' ? M.matrizGrupos(temas,cfg) : M.matrizEvaluadores(temas,cfg);
-    const tabla = el('table'), head = el('thead'), tr = el('tr'), body = el('tbody'); tabla.id = 'mat-tabla';
-    tabla.append(el('caption', sub === 'doble' ? 'Total de ordenación: promedio de impacto y financiera; la materialidad se decide por doble entrada.' : 'Importancia por ' + (sub === 'impacto' ? 'grupo de interés' : 'función evaluadora') + ' · Escala 0 a 5'));
-    const columnas = ['Tema', ...(sub === 'doble' ? ['Impacto','Financiera','Cuadrante','Convergencia'] : [...grupos.map(g=>g.nombre),'Total'])];
-    columnas.forEach(c => {const th = el('th',c); th.scope='col'; tr.append(th);}); head.append(tr);
-    function celda(v) {const td = el('td', null, 'mat-calor mat-sem-' + semColor(v)); td.append(el('span', numero(v))); return td;}
-    ordenadas.forEach(f => {
-      const r = el('tr'), th = el('th'), a = linkTema(f.id); a.id='mat-fila-'+f.id; th.scope='row';
-      if (material(f.id)) {const marca=el('span','●','mat-material-marca'); marca.setAttribute('aria-label','Material'); th.append(marca);}
-      th.append(a); r.append(th);
-      if (sub === 'doble') {
-        r.append(celda(f.impacto),celda(f.financiera),el('td',cfg.cuadrantes.find(c=>c.id===f.cuadrante).etiqueta,'mat-calor mat-tono-'+(f.material?2:0)));
-        const c=el('td','●'.repeat(f.convergencia)+'○'.repeat(3-f.convergencia)+` (${f.convergencia}/3)`,'mat-calor mat-tono-'+M.tonoCalor(f.convergencia,0,3)); r.append(c);
-      } else r.append(...grupos.map(g=>celda(f.celdas[g.id])),celda(f.total));
-      r.onclick = e => {if (!e.target?.closest?.('a')) location.hash=ruta(f.id);}; body.append(r);
-    });
-    tabla.append(head,body); const scroll=el('div',null,'mat-tabla-scroll'); scroll.tabIndex=0; scroll.setAttribute('role','region'); scroll.setAttribute('aria-label','Matriz de temas; desplazamiento horizontal disponible'); scroll.append(tabla); matriz.append(scroll);
-    matriz.append(el('p',sub==='doble' ? 'Convergencia: cuántas de las tres variables —impacto, rentabilidad y gasto— superan su media del universo. No cambia la regla de materialidad.' : 'El total es el promedio simple de las columnas; todas las perspectivas tienen el mismo peso.','mat-lectura')); raiz.append(matriz);
-
-    const resultados=el('section',null,'seccion mat-resultados'); resultados.id='mat-resultado'; resultados.tabIndex=-1;
-    resultados.append(cabeza('Resultados',sub==='impacto' ? 'La materialidad de impacto se alimenta de la debida diligencia' : sub==='financiera' ? 'Los mayores efectos financieros orientan la atención' : 'De la lista corta a las acciones vinculadas','Compare los puntajes y abra una ficha para seguir el vínculo entre tema, riesgos, ejes y acciones.'));
-    const ranking=el('div',null,'tarjeta mat-ranking'); ranking.append(el('h3','Ranking de temas'));
-    function rankingDimension(dimension) {
-      const bloque=el('div',null,'mat-ranking-dimension'); bloque.append(el('h4',dimension==='impacto'?'Importancia del impacto':'Materialidad financiera'),el('p',`Escala 0 a 5 · Línea vertical: umbral ${numero(limites[dimension])}`));
-      M.ordenar(filas,dimension).forEach(f=>bloque.append(barra(linkTema(f.id),f[dimension],limites[dimension]))); ranking.append(bloque);
-    }
-    if(sub==='doble') {rankingDimension('impacto');rankingDimension('financiera');} else rankingDimension(sub);
-    resultados.append(ranking);
-    if(sub!=='doble') {
-      const destacados=el('div',null,'rejilla tres mat-destacados');
-      M.ordenar(filas,sub).slice(0,3).forEach(f=>{const c=el('article',null,'tarjeta'); const h=el('h3');h.append(linkTema(f.id));c.append(h,el('p',numero(f[sub])+' de 5','cifra'));if(sub==='impacto') c.append(el('h4','Riesgos en DDHH que lo sustentan'),riesgos(tema(f.id))); else sasb(tema(f.id),c);destacados.append(c);});resultados.append(destacados);
-    } else {
-      resultados.append(el('h3','Lista corta · '+cantidad+' temas materiales'));
-      const corta=el('div',null,'rejilla tres mat-lista-corta');
-      ['doble','impacto','financiera'].forEach((q,i)=>{const c=el('article',null,'tarjeta mat-columna');c.append(el('h4',['Doble','Solo impacto','Solo financiera'][i]));const lista=el('ul');M.listaCorta(temas,cfg).filter(f=>f.cuadrante===q).forEach(f=>{const li=el('li');li.append(linkTema(f.id));lista.append(li);});c.append(lista);corta.append(c);});resultados.append(corta,el('h3','Del tema material a la acción'));
-      const acciones=el('div',null,'mat-cruces');
-      M.listaCorta(temas,cfg).forEach(f=>{const c=el('article',null,'tarjeta mat-cruce'),h=el('h4');h.append(linkTema(f.id));c.append(h);const cruce=cruzar(tema(f.id));['riesgos','ejes','acciones'].forEach(k=>{const a=enlace(`${cruce[k].length} ${k} · Ver vínculos`,ruta(f.id));c.append(a);});acciones.append(c);});resultados.append(acciones);
-    }
-    raiz.append(resultados,el('p',nota,'nota'));
+    // La matriz y los resultados se retiraron: las fichas de cada tema ya presentan esa información.
+    raiz.append(el('p',nota,'nota'));
     if(!params.id || !tema(params.id)) {
       if (focoPendiente?.ruta === ruta()) {
         const id = focoPendiente.id; focoPendiente = null;
-        window.queueMicrotask?.(() => document.getElementById('mat-fila-' + id)?.focus({preventScroll:true}));
+        window.queueMicrotask?.(() => document.getElementById('mat-punto-' + id)?.focus({preventScroll:true}));
       }
       return;
     }
@@ -203,7 +163,7 @@
     const anterior=document.activeElement,regiones=[...document.querySelectorAll('body > header, body > main, body > footer, body > .saltar')],inertes=regiones.map(n=>n.inert);
     regiones.forEach(n=>{n.inert=true;});fondo.append(dialogo);document.body.append(fondo);document.body.classList.add('dialogo-abierto');cerrar.focus();
     let limpio=false;
-    function limpiar() {if(limpio)return;limpio=true;document.removeEventListener('keydown',teclado);regiones.forEach((n,i)=>{n.inert=inertes[i];});fondo.remove();document.body.classList.remove('dialogo-abierto');(document.getElementById('mat-fila-'+t.id)||anterior)?.focus();}
+    function limpiar() {if(limpio)return;limpio=true;document.removeEventListener('keydown',teclado);regiones.forEach((n,i)=>{n.inert=inertes[i];});fondo.remove();document.body.classList.remove('dialogo-abierto');(document.getElementById('mat-punto-'+t.id)||anterior)?.focus();}
     cerrar.onclick=()=>{focoPendiente={ruta:ruta(),id:t.id};limpiar();location.hash=ruta();};
     function teclado(e) {if(e.key==='Escape'){e.preventDefault();cerrar.onclick();}if(e.key==='Tab'){const focos=[...dialogo.querySelectorAll('button, a[href]')],primero=focos[0],ultimo=focos.at(-1);if(e.shiftKey&&document.activeElement===primero){e.preventDefault();ultimo.focus();}else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primero.focus();}}}
     document.addEventListener('keydown',teclado);return limpiar;
