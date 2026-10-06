@@ -1,4 +1,4 @@
-/* Capítulo 03 · Resultados generales */
+/* Capítulo 03 · Estado actual de la organización */
 .relato-mensaje { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--e6); align-items: center; }
 .relato-mensaje:nth-of-type(odd) .relato-texto { order: 2; }
 .relato-texto h3 { font-size: var(--t-h2); margin-bottom: var(--e4); }

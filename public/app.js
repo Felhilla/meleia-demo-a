@@ -62,7 +62,7 @@
   /* ---------- Rutas del relato ----------
      #/                          01 El caso
      #/metodologia               02 Metodología
-     #/resultados                03 Resultados generales
+     #/resultados                03 Estado actual de la organización
      #/ddhh/{dimensiones|riesgos}[/riesgo-xx]           04 Debida diligencia en DDHH
      #/materialidad/{impacto|financiera|doble}[/tema-xx] 05 Doble materialidad
      #/plan                      06 Plan de acción
