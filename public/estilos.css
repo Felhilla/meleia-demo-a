@@ -73,6 +73,7 @@
 }
 
 /* ---------- Base ---------- */
+[hidden] { display: none !important; }
 * { box-sizing: border-box; }
 html { scroll-padding-top: 140px; -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--fondo); color: var(--texto); font: 400 var(--t-cuerpo)/1.6 var(--fuente); -webkit-font-smoothing: antialiased; }

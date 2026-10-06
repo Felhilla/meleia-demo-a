@@ -1,197 +1,217 @@
+/* Capítulo 06 · Plan de acción (bocetos de Felipe IMG_4427, 4428 y 4430).
+   Panel: título del plan; avance global (anillo + estados) | pilares de intervención (anillo de avance).
+   Ficha de pilar (o de un estado): tabla Acción | Responsable | Plazo de entrega | Estado.
+   Ficha de acción: acción (estado); descripción | responsable*, plazo*, soporte de cumplimiento, actualizar;
+   nota de seguimiento*. «Actualizar» habilita los campos con * y el estado; guarda con App.guardarAccion. */
 (function () {
   'use strict';
   const el = App.el;
-  const nombres = {pendiente: 'Pendiente', 'en-curso': 'En curso', cumplida: 'Cumplida', estado: 'Estado', avance: 'Avance', responsable: 'Responsable', plazo: 'Plazo', nota_seguimiento: 'Nota de seguimiento'};
-  const porcentaje = n => new Intl.NumberFormat('es-CO', {maximumFractionDigits: 1}).format(n) + ' %';
-  function fecha(valor) {
-    const d = new Date(valor.length === 10 ? valor + 'T12:00:00' : valor);
-    return Number.isNaN(d.getTime()) ? valor : d.toLocaleDateString('es-CO', {day: 'numeric', month: 'long', year: 'numeric'});
+  const ETIQUETA_ESTADO = {pendiente: 'Pendiente', 'en-curso': 'En curso', cumplida: 'Completada'};
+  const numero = v => App.numero(v, {maximumFractionDigits: 1});
+  const hoyISO = () => { const f = new Date(); return [f.getFullYear(), String(f.getMonth() + 1).padStart(2, '0'), String(f.getDate()).padStart(2, '0')].join('-'); };
+  const fecha = f => /^\d{4}-\d{2}-\d{2}$/.test(f || '') ? new Intl.DateTimeFormat('es-CO', {day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'}).format(new Date(f + 'T00:00:00Z')) : 'Sin plazo';
+  const SVG = 'http://www.w3.org/2000/svg';
+  function svg(tag, attrs) { const n = document.createElementNS(SVG, tag); Object.entries(attrs || {}).forEach(([k, v]) => n.setAttribute(k, v)); return n; }
+  function anillo(porcentaje, tam, grosor, etiqueta) {
+    const r = (tam - grosor) / 2, c = tam / 2, L = 2 * Math.PI * r;
+    const s = svg('svg', {viewBox: `0 0 ${tam} ${tam}`, width: tam, height: tam, role: 'img', 'aria-label': etiqueta, class: 'plan-anillo'});
+    s.append(svg('circle', {cx: c, cy: c, r, fill: 'none', stroke: 'var(--suave)', 'stroke-width': grosor}),
+      svg('circle', {cx: c, cy: c, r, fill: 'none', stroke: 'var(--principal)', 'stroke-width': grosor, 'stroke-linecap': 'round', 'stroke-dasharray': `${L * Math.max(0, Math.min(100, porcentaje)) / 100} ${L}`, transform: `rotate(-90 ${c} ${c})`}));
+    return s;
   }
-  function barra(valor, nombre) {
-    const caja = el('div', null, 'plan-avance');
-    const progreso = el('progress'); progreso.max = 100; progreso.value = valor; progreso.setAttribute('aria-label', nombre);
-    caja.append(progreso, el('span', porcentaje(valor))); return caja;
+  function chipEstado(a, hoy) {
+    const vencida = Plan.vencida(a, hoy);
+    const n = el('span', vencida ? 'Vencida' : ETIQUETA_ESTADO[a.estado] || a.estado, 'plan-estado estado-' + (vencida ? 'vencida' : a.estado));
+    return n;
   }
-  App.registrarVista('plan', {render(contenedor, datos, params) {
-    const cfg = datos.planConfig;
-    const filtros = new URLSearchParams(params.filtros);
-    const hoy = new Date();
-    const dia = [hoy.getFullYear(), String(hoy.getMonth() + 1).padStart(2, '0'), String(hoy.getDate()).padStart(2, '0')].join('-');
-    let vivo = true, fondo, limpiarDialogo = () => {};
-    const cerrados = new Set();
-    const pendientes = new Set();
-    const mensajes = new Map();
-    const raiz = el('section', null, 'vista-plan');
-    const resumen = el('section', null, 'superficie plan-resumen');
-    const ejemplo = el('p', 'El avance que se muestra es ilustrativo: simula el seguimiento del plan para mostrar cómo funciona la herramienta.', 'plan-ejemplo');
-    const lista = el('section');
-    const aviso = el('p', 'No hay conexión con la base de datos: se muestran los datos de respaldo y no se pueden guardar cambios ahora.', 'plan-conexion');
-    aviso.setAttribute('role', 'status'); aviso.hidden = App.estadoBase() === 'base';
-    raiz.append(el('h1', 'Plan de acción'), el('p', 'Paso 4 de 4 · Plan de acción', 'ayuda'), el('p', 'Convierta las prioridades en compromisos y decida dónde acelerar el avance.', 'intro'), ejemplo, aviso, el('p', 'Demostración pública: los cambios se guardan y los ve cualquiera con el enlace.', 'ayuda'), resumen);
-    contenedor.append(raiz);
-    function ruta(cambios) {
-      const q = new URLSearchParams(filtros);
-      Object.entries(cambios).forEach(([k, v]) => v ? q.set(k, v) : q.delete(k));
-      return '#/plan' + (q.size ? '?' + q.toString() : '');
-    }
-    function propuesta(a, campo, nodo) {
-      if ((a.campos_propuestos || []).includes(campo)) nodo.append(el('span', 'Propuesta', 'aviso'));
-      return nodo;
-    }
-    function selector(opciones, valor) {
-      const s = el('select'); opciones.forEach(([id, nombre]) => { const o = el('option', nombre); o.value = id; s.append(o); }); s.value = valor; return s;
-    }
-    const controles = el('form', null, 'plan-filtros');
-    controles.addEventListener('submit', e => e.preventDefault());
-    [['componente', 'Componente', cfg.componentes.map(c => [c.id, c.nombre])], ['estado', 'Estado', cfg.estados.map(e => [e, nombres[e]])], ['riesgo', 'Riesgo vinculado', datos.riesgos.map(r => [r.id, r.id.replace('riesgo-', '') + ' · ' + r.nombre])], ['eje', 'Eje de brecha', datos.estandares.ejes.map(e => [e.id, e.nombre])]].forEach(([campo, nombre, opciones]) => {
-      const label = el('label', nombre); const s = selector([['', 'Todos'], ...opciones], filtros.get(campo) || ''); s.id = 'plan-filtro-' + campo;
-      s.onchange = () => { location.hash = ruta({[campo]: s.value}); }; label.append(s); controles.append(label);
-    });
-    const buscar = el('label', 'Buscar en título y descripción'); const entrada = el('input'); entrada.type = 'search'; entrada.id = 'plan-buscar'; entrada.value = filtros.get('q') || '';
-    entrada.onchange = () => { location.hash = ruta({q: entrada.value}); }; buscar.append(entrada); controles.append(buscar);
-    const limpiar = el('a', 'Limpiar filtros', 'boton'); limpiar.href = '#/plan'; controles.append(limpiar);
-    raiz.append(controles, lista);
-    function estadoGuardado(id) {
-      const mensaje = el('p', mensajes.get(id) || '', 'plan-guardado'); mensaje.setAttribute('role', 'status'); mensaje.setAttribute('aria-live', 'polite'); mensaje.dataset.guardado = id; return mensaje;
-    }
-    function anunciar(id, texto) {
-      mensajes.set(id, texto);
-      [raiz, fondo].filter(Boolean).forEach(n => n.querySelectorAll('[data-guardado]').forEach(p => { if (p.dataset.guardado === id) p.textContent = texto; }));
-    }
-    async function guardar(id, campo, valor, control) {
-      if (pendientes.has(id)) return;
-      pendientes.add(id); control.disabled = true; anunciar(id, 'Guardando…');
-      [raiz, fondo].filter(Boolean).forEach(n => n.querySelectorAll('[data-edita]').forEach(c => { if (c.dataset.edita === id) c.disabled = true; }));
-      try {
-        await App.guardarAccion(id, {[campo]: valor});
-        if (!vivo) return;
-        anunciar(id, 'Guardado');
-        dibujar();
-        if (fondo) {
-          formulario.querySelectorAll('[data-campo]').forEach(c => { if (c.dataset.campo === campo) c.dataset.sucio = ''; });
-          actualizarDetalle();
-        }
-      } catch (error) { if (vivo) anunciar(id, error.message); }
-      finally {
-        pendientes.delete(id);
-        if (vivo) {
-          control.disabled = App.estadoBase() !== 'base';
-          [raiz, fondo].filter(Boolean).forEach(n => n.querySelectorAll('[data-edita]').forEach(c => { c.disabled = App.estadoBase() !== 'base' || pendientes.has(c.dataset.edita); }));
-          if (!fondo) document.getElementById(control.id)?.focus({preventScroll: true});
-        }
-      }
-    }
-    function editarControl(control, a) { control.dataset.edita = a.id; control.disabled = App.estadoBase() !== 'base' || pendientes.has(a.id); return control; }
-    function dibujar() {
-      const acciones = App.obtenerPlan(); const r = Plan.resumen(acciones, cfg, dia);
-      ejemplo.hidden = !acciones.some(a => a.seguimiento_ejemplo);
-      resumen.replaceChildren(el('h2', 'Avance global'), barra(r.avanceGlobal, 'Avance global'));
-      const cuentas = el('div', null, 'plan-estados');
-      cfg.estados.forEach(e => cuentas.append(el('span', nombres[e] + ': ' + r.porEstado[e], 'plan-estado estado-' + e)));
-      const vencidas = el('a', 'Vencidas: ' + r.vencidas, 'boton plan-vencidas');
-      vencidas.href = ruta({vencidas: filtros.get('vencidas') === '1' ? '' : '1'});
-      vencidas.setAttribute('aria-label', filtros.get('vencidas') === '1' ? 'Quitar filtro de vencidas' : 'Filtrar acciones vencidas');
-      if (filtros.get('vencidas') === '1') vencidas.setAttribute('aria-current', 'true');
-      cuentas.append(vencidas); resumen.append(cuentas);
-      const componentes = el('div', null, 'plan-componentes');
-      r.porComponente.forEach(c => {
-        const b = el('button'); b.type = 'button'; b.setAttribute('aria-pressed', String(filtros.get('componente') === c.componente));
-        b.append(el('strong', c.nombre), el('span', c.n + ' acciones'), barra(c.avance, c.nombre)); b.onclick = () => { location.hash = ruta({componente: c.componente}); }; componentes.append(b);
-      }); resumen.append(componentes);
-      const visibles = Plan.filtrar(acciones, Object.fromEntries(filtros), dia);
-      lista.replaceChildren(el('p', visibles.length + ' acciones', 'resultado'));
-      if (!visibles.length) lista.append(el('p', 'No hay acciones que coincidan con los filtros.'));
-      cfg.componentes.forEach(c => {
-        const grupo = visibles.filter(a => a.componente === c.id); if (!grupo.length) return;
-        const d = el('details', null, 'superficie plan-grupo'); d.open = !cerrados.has(c.id);
-        d.ontoggle = () => { if (d.isConnected) d.open ? cerrados.delete(c.id) : cerrados.add(c.id); };
-        const estadoGrupo = Plan.resumen(grupo, cfg, dia).porEstado;
-        const cabecera = el('summary');
-        cabecera.append(el('span', c.nombre + ' · ' + grupo.length + ' acciones'), el('span', estadoGrupo.cumplida + ' cumplidas · ' + estadoGrupo['en-curso'] + ' en curso', 'plan-conteo')); cabecera.append(barra(Plan.resumen(grupo, cfg, dia).avanceGlobal, 'Avance del grupo')); d.append(cabecera);
-        grupo.forEach(a => {
-          const tarjeta = el('article', null, 'accion plan-fila');
-          tarjeta.append(el('strong', 'A-' + Number(a.id.replace('accion-', '')), 'plan-numero'));
-          const titulo = el('h3'); const enlace = el('a', a.titulo); enlace.href = ruta({accion: a.id}); enlace.id = 'plan-abrir-' + a.id;
-          titulo.append(enlace);
-          if (a.seguimiento_ejemplo) titulo.append(el('span', 'Ejemplo', 'aviso'));
-          else if (a.campos_propuestos?.length) titulo.append(el('span', 'Propuesta', 'aviso'));
-          tarjeta.append(titulo, el('span', nombres[a.estado] || a.estado, 'plan-estado estado-' + a.estado), barra(a.avance, 'Avance de ' + a.titulo));
-          const responsable = el('span', a.responsable, 'plan-responsable'); responsable.title = a.responsable;
-          const plazo = el('span', new Date(a.plazo + 'T12:00:00').toLocaleDateString('es-CO') + (Plan.vencida(a, dia) ? ' · Vencida' : ''), 'plan-plazo' + (Plan.vencida(a, dia) ? ' alta' : ''));
-          tarjeta.append(responsable, plazo);
-          const rapida = el('div', null, 'plan-rapida');
-          const s = editarControl(selector(cfg.estados.map(e => [e, nombres[e]]), a.estado), a); s.id = 'plan-estado-' + a.id;
-          s.setAttribute('aria-label', 'Estado de ' + a.titulo); s.onchange = () => guardar(a.id, 'estado', s.value, s); rapida.append(s);
-          [-10, 10].forEach(paso => {
-            const boton = editarControl(el('button', paso < 0 ? '−' : '+'), a); boton.type = 'button'; boton.id = 'plan-avance-' + a.id + (paso < 0 ? '-menos' : '-mas');
-            boton.setAttribute('aria-label', (paso < 0 ? 'Reducir' : 'Aumentar') + ' avance de ' + a.titulo + ' en 10 puntos');
-            boton.onclick = () => guardar(a.id, 'avance', Math.max(0, Math.min(100, a.avance + paso)), boton); rapida.append(boton);
-          });
-          tarjeta.append(rapida, estadoGuardado(a.id)); d.append(tarjeta);
-        }); lista.append(d);
+
+  function render(contenedor, datos, params) {
+    const cfg = datos.planConfig, hoy = hoyISO();
+    const acciones = () => App.obtenerPlan();
+    const raiz = el('div', null, 'plan2'); contenedor.append(raiz);
+    if (App.estadoBase() !== 'base') raiz.append(el('p', 'No hay conexión con la base de datos: se muestran los datos de respaldo y no se pueden guardar cambios ahora.', 'aviso-conexion'));
+
+    function pintar() {
+      raiz.querySelectorAll('.plan-panel').forEach(n => n.remove());
+      const lista = acciones(), res = Plan.resumen(lista, cfg, hoy);
+      const panel = el('section', null, 'plan-panel');
+      // Título del plan (boceto)
+      panel.append(el('h2', 'Plan de acción para el cierre de brechas y la gestión de la debida diligencia en derechos humanos', 'plan-titulo'));
+      const cuerpo = el('div', null, 'plan-cuerpo');
+      // Avance global
+      const global = el('section', null, 'tarjeta plan-global');
+      global.append(el('h3', 'Avance global'));
+      const g = el('div', null, 'plan-global-anillo');
+      g.append(anillo(res.avanceGlobal, 200, 26, 'Avance global ' + numero(res.avanceGlobal) + ' %'), el('strong', numero(res.avanceGlobal) + ' %', 'plan-global-cifra'));
+      global.append(g);
+      const estados = el('div', null, 'plan-estados');
+      [['pendiente', 'Pendientes', res.porEstado.pendiente], ['en-curso', 'En curso', res.porEstado['en-curso']], ['cumplida', 'Completadas', res.porEstado.cumplida], ['vencida', 'Vencidas', res.vencidas]].forEach(([id, texto, n]) => {
+        const b = el('button', null, 'plan-chip estado-' + id); b.type = 'button'; b.dataset.estado = id;
+        b.append(el('span', texto), el('strong', String(n)));
+        b.onclick = () => { location.hash = '#/plan?estado=' + id; };
+        estados.append(b);
       });
-    }
-    let detalle, formulario, historia, tituloDetalle;
-    const accionId = filtros.get('accion');
-    function actualizarDetalle() {
-      const a = App.obtenerPlan().find(a => a.id === accionId); if (!a) return;
-      // Conserva las entradas no confirmadas de los otros campos.
-      formulario.querySelectorAll('[data-campo]').forEach(c => {
-        if (c.dataset.sucio !== 'si') c.value = a[c.dataset.campo] ?? '';
-        const marca = c.parentElement.querySelector('.aviso'); if (marca && !a.campos_propuestos.includes(c.dataset.campo)) marca.remove();
+      global.append(estados);
+      if (lista.some(a => a.seguimiento_ejemplo)) global.append(el('p', 'El avance es ilustrativo: simula el seguimiento del plan.', 'nota'));
+      // Pilares de intervención
+      const pilares = el('section', null, 'plan-pilares');
+      pilares.append(el('h3', 'Pilares de intervención', 'plan-pilares-titulo'));
+      res.porComponente.forEach((p, i) => {
+        const b = el('button', null, 'tarjeta plan-pilar'); b.type = 'button'; b.dataset.pilar = p.componente;
+        const txt = el('span', null, 'plan-pilar-texto');
+        txt.append(el('span', 'Pilar ' + (i + 1), 'plan-pilar-num'), el('strong', p.nombre), el('span', p.n + (p.n === 1 ? ' acción' : ' acciones'), 'plan-pilar-n'));
+        const av = el('span', null, 'plan-pilar-avance');
+        const pct = el('span', null, 'plan-pilar-pct'); pct.append(el('small', 'Avance'), el('strong', numero(p.avance) + ' %'));
+        av.append(anillo(p.avance, 64, 10, 'Avance ' + numero(p.avance) + ' %'), pct);
+        b.append(txt, av);
+        b.onclick = () => { location.hash = '#/plan?pilar=' + p.componente; };
+        pilares.append(b);
       });
-      historia.replaceChildren(el('h3', 'Historial de cambios'));
-      if (!a.historial?.length) historia.append(el('p', 'Todavía no hay cambios registrados.'));
-      [...(a.historial || [])].reverse().forEach(h => {
-        const valor = v => h.campo === 'plazo' && v ? fecha(String(v)) : nombres[v] || String(v);
-        historia.append(el('p', fecha(h.fecha) + ' · ' + (nombres[h.campo] || h.campo) + ': ' + valor(h.antes) + ' → ' + valor(h.despues)));
+      cuerpo.append(global, pilares); panel.append(cuerpo);
+      raiz.append(panel);
+    }
+    pintar();
+
+    // ---------- Ventana (ficha de pilar / de estado / de acción) ----------
+    const pilarId = params.filtros.get('pilar'), estadoId = params.filtros.get('estado'), accionId = params.filtros.get('accion');
+    if (!pilarId && !estadoId && !accionId) return;
+    const fondo = el('div', null, 'fondo-dialogo centrado');
+    const ventana = el('section', null, 'panel plan-ficha'); ventana.setAttribute('role', 'dialog'); ventana.setAttribute('aria-modal', 'true'); ventana.setAttribute('aria-labelledby', 'plan-ficha-titulo'); ventana.tabIndex = -1;
+    fondo.append(ventana); document.body.append(fondo); document.body.classList.add('dialogo-abierto');
+    const regiones = [...document.querySelectorAll('body > header, body > main, body > footer, body > .saltar')]; regiones.forEach(n => { n.inert = true; });
+    const cerrarTodo = () => { location.hash = '#/plan'; };
+    fondo.addEventListener('click', e => { if (e.target === fondo) cerrarTodo(); });
+    function teclado(e) { if (e.key === 'Escape') { e.preventDefault(); cerrarTodo(); } }
+    document.addEventListener('keydown', teclado);
+
+    function botonCerrar() { const b = el('button', 'Cerrar ×', 'plan-cerrar'); b.type = 'button'; b.onclick = cerrarTodo; return b; }
+
+    function fichaTabla(titulo, subtitulo, avance, lista, volverA) {
+      ventana.replaceChildren();
+      const cab = el('header', null, 'plan-f1');
+      const t = el('div', null, 'plan-f1-titulo'); const h = el('h2', titulo); h.id = 'plan-ficha-titulo';
+      t.append(el('p', subtitulo, 'antetitulo'), h);
+      const a = el('div', null, 'plan-f1-avance');
+      if (avance !== null) a.append(el('span', 'Avance', 'plan-rotulo'), el('strong', numero(avance) + ' %'));
+      a.append(el('span', lista.length + (lista.length === 1 ? ' acción' : ' acciones'), 'plan-sub'));
+      cab.append(t, a);
+      const tabla = el('table', null, 'plan-tabla');
+      const thead = el('thead'), tr = el('tr');
+      ['Acción', 'Responsable', 'Plazo de entrega', 'Estado'].forEach(x => { const th = el('th', x); th.scope = 'col'; tr.append(th); });
+      thead.append(tr); tabla.append(thead);
+      const tb = el('tbody');
+      if (!lista.length) { const r = el('tr'), td = el('td', 'No hay acciones en esta categoría.'); td.colSpan = 4; r.append(td); tb.append(r); }
+      lista.forEach(ac => {
+        const r = el('tr'), th = el('th'); th.scope = 'row';
+        const b = el('button', ac.titulo, 'plan-accion-link'); b.type = 'button'; b.dataset.accion = ac.id;
+        b.onclick = () => { location.hash = '#/plan?' + (volverA ? volverA + '&' : '') + 'accion=' + ac.id; };
+        th.append(b);
+        const tdE = el('td'); tdE.append(chipEstado(ac, hoy));
+        r.append(th, el('td', ac.responsable || 'Por definir'), el('td', fecha(ac.plazo), Plan.vencida(ac, hoy) ? 'plan-plazo vencido' : 'plan-plazo'), tdE);
+        tb.append(r);
       });
+      tabla.append(tb);
+      const env = el('div', null, 'plan-tabla-env'); env.append(tabla);
+      ventana.append(botonCerrar(), cab, env);
     }
-    dibujar();
-    if (accionId) {
-      const a = App.obtenerPlan().find(a => a.id === accionId);
-      if (!a) lista.prepend(el('p', 'No se encontró la acción solicitada.', 'plan-conexion'));
-      else {
-        fondo = el('div', null, 'fondo-dialogo'); detalle = el('section', null, 'panel plan-panel'); detalle.setAttribute('role', 'dialog'); detalle.setAttribute('aria-modal', 'true'); detalle.setAttribute('aria-labelledby', 'plan-detalle-titulo');
-        const cerrar = el('button', 'Cerrar'); cerrar.className = 'cerrar'; cerrar.onclick = () => { location.hash = ruta({accion: ''}); };
-        tituloDetalle = el('h2', a.titulo); tituloDetalle.id = 'plan-detalle-titulo'; detalle.append(cerrar, propuesta(a, 'titulo', tituloDetalle), propuesta(a, 'descripcion', el('p', a.descripcion, 'texto-dato')));
-        detalle.append(propuesta(a, 'indicador', el('p', 'Indicador: ' + a.indicador)));
-        const vinculos = el('div', null, 'plan-vinculos');
-        (a.riesgos || []).forEach(id => { const r = datos.riesgos.find(r => r.id === id); const l = el('a', r?.nombre || id); l.href = '#/ddhh/riesgos/' + encodeURIComponent(id); vinculos.append(l); });
-        (a.ejes || []).forEach(id => { const eje = datos.estandares.ejes.find(e => e.id === id); const l = el('a', eje?.nombre || id); l.href = '#/ddhh/dimensiones?eje=' + encodeURIComponent(id); vinculos.append(l); });
-        if (a.vinculos_estimados) vinculos.append(el('span', 'Vínculo estimado', 'aviso'));
-        detalle.append(vinculos);
-        if (a.actualizado) detalle.append(el('small', 'Actualizado el ' + fecha(a.actualizado)));
-        detalle.append(el('small', 'Fuente: ' + (a.fuente?.archivo || 'Sin referencia') + (a.fuente?.tabla !== undefined ? ' · Tabla ' + a.fuente.tabla : '') + (a.fuente?.fila !== undefined ? ' · Fila ' + a.fuente.fila : '')));
-        formulario = el('div', null, 'plan-formulario');
-        formulario.append(el('p', 'Confirma cada campo para guardarlo. Usa áreas responsables y evita incluir datos personales.', 'ayuda'));
-        ['estado', 'avance', 'responsable', 'plazo', 'nota_seguimiento'].forEach(campo => {
-          const form = el('form'); const label = propuesta(a, campo, el('label', nombres[campo]));
-          const input = editarControl(campo === 'estado' ? selector(cfg.estados.map(e => [e, nombres[e]]), a.estado) : el(campo === 'nota_seguimiento' ? 'textarea' : 'input'), a);
-          input.id = 'plan-detalle-' + campo; input.dataset.campo = campo; input.value = a[campo] ?? '';
-          if (campo === 'avance') { input.type = 'number'; input.min = 0; input.max = 100; input.step = 1; input.required = true; }
-          if (campo === 'plazo') { input.type = 'date'; input.required = true; }
-          if (campo === 'responsable') input.maxLength = 120;
-          if (campo === 'nota_seguimiento') input.maxLength = 500;
-          input.oninput = () => { input.dataset.sucio = 'si'; };
-          label.append(input); const confirmar = editarControl(el('button', 'Guardar ' + nombres[campo].toLowerCase()), a); confirmar.type = 'submit'; confirmar.id = 'plan-confirmar-' + campo;
-          form.onsubmit = async event => { event.preventDefault(); if (pendientes.has(a.id)) return; await guardar(a.id, campo, campo === 'avance' ? Number(input.value) : input.value, confirmar); };
-          form.append(label, confirmar); formulario.append(form);
-        });
-        historia = el('section'); detalle.append(formulario, estadoGuardado(a.id), historia); fondo.append(detalle); document.body.append(fondo);
-        const inertes = [...document.body.children].filter(n => n !== fondo && !['SCRIPT', 'STYLE'].includes(n.tagName)).map(n => [n, n.inert]); inertes.forEach(([n]) => { n.inert = true; }); document.body.classList.add('dialogo-abierto');
-        const teclado = event => {
-          if (event.key === 'Escape') { event.preventDefault(); cerrar.click(); }
-          if (event.key === 'Tab') {
-            const elementos = [...detalle.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href]')]; const primero = elementos[0], ultimo = elementos.at(-1);
-            if (event.shiftKey && document.activeElement === primero) { event.preventDefault(); ultimo.focus(); }
-            else if (!event.shiftKey && document.activeElement === ultimo) { event.preventDefault(); primero.focus(); }
-          }
-        };
-        detalle.addEventListener('keydown', teclado); actualizarDetalle(); cerrar.focus();
-        limpiarDialogo = () => { fondo.remove(); inertes.forEach(([n, previo]) => { n.inert = previo; }); document.body.classList.remove('dialogo-abierto'); queueMicrotask(() => { if (location.hash.startsWith('#/plan') && !new URLSearchParams(location.hash.split('?')[1]).has('accion')) document.getElementById('plan-abrir-' + accionId)?.focus(); }); };
-      }
+
+    function fichaAccion(ac, volverA) {
+      ventana.replaceChildren();
+      let editando = false;
+      const cerrar = botonCerrar();
+      const volver = volverA ? el('button', '← Volver a la lista', 'plan-volver') : null;
+      if (volver) { volver.type = 'button'; volver.onclick = () => { location.hash = '#/plan?' + volverA; }; }
+      // Fila 1: acción (estado)
+      const cab = el('header', null, 'plan-f1');
+      const t = el('div', null, 'plan-f1-titulo'); const h = el('h2', ac.titulo); h.id = 'plan-ficha-titulo';
+      const comp = cfg.componentes.find(c => c.id === ac.componente);
+      t.append(el('p', comp ? comp.nombre : 'Acción', 'antetitulo'), h);
+      const caja = el('div', null, 'plan-f1-estado');
+      const chip = chipEstado(ac, hoy);
+      const selEstado = el('select', null, 'plan-input'); selEstado.id = 'plan-campo-estado'; selEstado.setAttribute('aria-label', 'Estado');
+      cfg.estados.forEach(e => { const o = el('option', ETIQUETA_ESTADO[e] || e); o.value = e; selEstado.append(o); }); selEstado.value = ac.estado; selEstado.hidden = true;
+      caja.append(el('span', 'Estado', 'plan-rotulo'), chip, selEstado);
+      cab.append(t, caja);
+      // Fila 2: descripción | campos y botones
+      const f2 = el('div', null, 'plan-f2');
+      const desc = el('section', null, 'plan-caja plan-desc'); desc.append(el('h3', 'Descripción de la acción propuesta'));
+      App.listaNumerada(ac.descripcion).forEach(p => desc.append(el('p', p)));
+      const lado = el('div', null, 'plan-lado');
+      const campo = (rotulo, valor, tipo, id) => {
+        const c = el('section', null, 'plan-caja plan-campo');
+        c.append(el('h3', rotulo + ' *'));
+        const v = el('p', tipo === 'date' ? fecha(valor) : (valor || 'Por definir'), 'plan-valor');
+        const inp = el('input', null, 'plan-input'); inp.type = tipo; inp.value = valor || ''; inp.id = id; inp.hidden = true; inp.setAttribute('aria-label', rotulo);
+        if (tipo === 'text') inp.maxLength = 120;
+        c.append(v, inp); return {c, v, inp};
+      };
+      const resp = campo('Responsable', ac.responsable, 'text', 'plan-campo-responsable');
+      const plazo = campo('Plazo', ac.plazo, 'date', 'plan-campo-plazo');
+      const soporte = el('a', 'Soporte de cumplimiento', 'boton plan-soporte'); soporte.href = '#/plan?accion=' + ac.id;
+      const completada = ac.estado === 'cumplida';
+      if (!completada) { soporte.setAttribute('aria-disabled', 'true'); soporte.classList.add('inactivo'); soporte.removeAttribute('href'); soporte.title = 'Disponible cuando la acción esté completada'; }
+      else soporte.title = 'Demostración: aquí se abriría la carpeta donde la organización carga las evidencias de cumplimiento';
+      soporte.onclick = e => { e.preventDefault(); if (completada) mensaje.textContent = 'Demostración: aquí se abriría la carpeta de evidencias de cumplimiento de la organización.'; };
+      const actualizar = el('button', 'Actualizar', 'boton secundario plan-actualizar'); actualizar.type = 'button';
+      if (App.estadoBase() !== 'base') { actualizar.disabled = true; actualizar.title = 'Sin conexión con la base de datos'; }
+      lado.append(resp.c, plazo.c, soporte, actualizar);
+      f2.append(desc, lado);
+      // Fila 3: nota de seguimiento
+      const notaC = el('section', null, 'plan-caja plan-nota'); notaC.append(el('h3', 'Nota de seguimiento *'));
+      const notaV = el('p', ac.nota_seguimiento || 'Sin notas de seguimiento.', 'plan-valor');
+      const notaI = el('textarea', null, 'plan-input'); notaI.id = 'plan-campo-nota'; notaI.value = ac.nota_seguimiento || ''; notaI.maxLength = 500; notaI.rows = 4; notaI.hidden = true; notaI.setAttribute('aria-label', 'Nota de seguimiento');
+      notaC.append(notaV, notaI);
+      if (ac.actualizado) notaC.append(el('p', 'Última actualización: ' + fecha(ac.actualizado.slice(0, 10)) + (ac.seguimiento_ejemplo ? ' · seguimiento de ejemplo' : ''), 'nota'));
+      const mensaje = el('p', '', 'plan-mensaje'); mensaje.setAttribute('role', 'status');
+      const pieAcc = el('div', null, 'plan-pie-acciones');
+      const cancelar = el('button', 'Cancelar', 'plan-cancelar'); cancelar.type = 'button'; cancelar.hidden = true;
+      pieAcc.append(mensaje, cancelar);
+      const modo = on => {
+        editando = on;
+        [resp, plazo].forEach(x => { x.v.hidden = on; x.inp.hidden = !on; });
+        notaV.hidden = on; notaI.hidden = !on; chip.hidden = on; selEstado.hidden = !on;
+        actualizar.textContent = on ? 'Guardar cambios' : 'Actualizar'; cancelar.hidden = !on;
+        ventana.classList.toggle('editando', on);
+        if (on) resp.inp.focus();
+      };
+      cancelar.onclick = () => { resp.inp.value = ac.responsable || ''; plazo.inp.value = ac.plazo || ''; notaI.value = ac.nota_seguimiento || ''; selEstado.value = ac.estado; mensaje.textContent = ''; modo(false); };
+      actualizar.onclick = async () => {
+        if (!editando) { modo(true); return; }
+        const cambios = {};
+        if (resp.inp.value.trim() !== (ac.responsable || '')) cambios.responsable = resp.inp.value.trim();
+        if (plazo.inp.value && plazo.inp.value !== ac.plazo) cambios.plazo = plazo.inp.value;
+        if (notaI.value !== (ac.nota_seguimiento || '')) cambios.nota_seguimiento = notaI.value;
+        if (selEstado.value !== ac.estado) cambios.estado = selEstado.value;
+        if (!Object.keys(cambios).length) { modo(false); return; }
+        actualizar.disabled = true; mensaje.textContent = 'Guardando…';
+        try {
+          const nueva = await App.guardarAccion(ac.id, cambios);
+          pintar(); fichaAccion(nueva, volverA);
+          ventana.querySelector('.plan-mensaje').textContent = 'Cambios guardados.';
+        } catch (err) { mensaje.textContent = err.message || 'No se pudo guardar.'; actualizar.disabled = false; }
+      };
+      ventana.append(cerrar);
+      if (volver) ventana.append(volver);
+      ventana.append(cab, f2, notaC, pieAcc);
+      cerrar.focus();
     }
-    return () => { vivo = false; limpiarDialogo(); };
-  }});
+
+    const lista = acciones();
+    const volverA = pilarId ? 'pilar=' + pilarId : estadoId ? 'estado=' + estadoId : '';
+    if (accionId && lista.some(a => a.id === accionId)) fichaAccion(lista.find(a => a.id === accionId), volverA);
+    else if (pilarId) {
+      const p = Plan.resumen(lista, cfg, hoy).porComponente.find(x => x.componente === pilarId);
+      const i = cfg.componentes.findIndex(c => c.id === pilarId);
+      if (p) fichaTabla(p.nombre, 'Pilar de intervención ' + (i + 1), p.avance, lista.filter(a => a.componente === pilarId), volverA); else cerrarTodo();
+    } else if (estadoId) {
+      const nombres = {pendiente: 'Acciones pendientes', 'en-curso': 'Acciones en curso', cumplida: 'Acciones completadas', vencida: 'Acciones vencidas'};
+      const filtradas = estadoId === 'vencida' ? lista.filter(a => Plan.vencida(a, hoy)) : lista.filter(a => a.estado === estadoId);
+      fichaTabla(nombres[estadoId] || 'Acciones', 'Estado del plan', null, filtradas, volverA);
+    } else cerrarTodo();
+    ventana.querySelector('.plan-cerrar')?.focus();
+
+    return () => { document.removeEventListener('keydown', teclado); regiones.forEach(n => { n.inert = false; }); fondo.remove(); document.body.classList.remove('dialogo-abierto'); };
+  }
+
+  App.registrarVista('plan', {render});
 }());
