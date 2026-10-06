@@ -440,6 +440,25 @@
         "ejemplo": {
           "riesgo": "riesgo-15",
           "texto": "Corrupción o ilícitos corporativos: escala 3, alcance 3, irremediabilidad 3 → promedio 3,0 → gravedad Alta. Sus controles son efectivos (sistema antisoborno certificado) → probabilidad Baja. La empresa lo causaría directamente → vinculación Causa."
+        },
+        "priorizacion": {
+          "nota": "El nivel de priorización cruza la gravedad con la probabilidad de ocurrencia según controles: es la celda del mapa de riesgos.",
+          "matriz": {
+            "Alta|alta": "Alta",
+            "Alta|media": "Alta",
+            "Alta|baja": "Media",
+            "Media|alta": "Alta",
+            "Media|media": "Media",
+            "Media|baja": "Baja",
+            "Baja|alta": "Media",
+            "Baja|media": "Baja",
+            "Baja|baja": "Baja"
+          },
+          "colores": {
+            "Alta": "rojo",
+            "Media": "ambar",
+            "Baja": "amarillo"
+          }
         }
       },
       "materialidad": {
@@ -542,7 +561,7 @@
         },
         {
           "id": "riesgos",
-          "titulo": "Riesgos identificados"
+          "titulo": "Riesgos en Derechos Humanos Identificados"
         }
       ]
     },

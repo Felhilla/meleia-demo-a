@@ -1,0 +1,115 @@
+/* Capítulo 04 · Riesgos en Derechos Humanos Identificados (bocetos IMG_4415 a IMG_4419). */
+
+/* Tarjetas de conteo */
+.rie-conteos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--e3); margin-bottom: var(--e6); }
+.rie-conteo { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: var(--e3); padding: var(--e3) var(--e4); background: var(--superficie); border: 1px solid var(--borde); border-left: 6px solid var(--principal); border-radius: var(--radio); box-shadow: var(--sombra); transition: transform 160ms var(--ease-out), box-shadow 200ms ease; }
+.rie-conteo strong { font-size: 2.6rem; line-height: 1; color: var(--principal); letter-spacing: -.02em; }
+.rie-conteo span { font-size: 1rem; line-height: 1.3; }
+.rie-conteo.sem-borde-rojo { border-left-color: var(--sem-rojo); } .rie-conteo.sem-borde-ambar { border-left-color: var(--sem-ambar); } .rie-conteo.sem-borde-amarillo { border-left-color: var(--sem-amarillo); }
+.rie-conteo[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--principal), var(--sombra-alta); }
+.rie-conteo:focus-visible { outline: 2px solid var(--principal); outline-offset: 3px; }
+.rie-conteo:active { transform: scale(.98); }
+@media (hover: hover) and (pointer: fine) { .rie-conteo:hover { box-shadow: var(--sombra-alta); } }
+
+/* Mapa de riesgos */
+.rie-mapa-seccion { margin-top: 0; }
+.rie-mapa { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 0 var(--e2); }
+.rie-eje-y { grid-row: 1 / 4; writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-weight: 700; font-size: 1.05rem; color: var(--texto-suave); }
+.rie-fila { grid-column: 2; display: grid; grid-template-columns: 90px repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+.rie-rotulo-fila { align-self: center; font-weight: 700; font-size: 1.1rem; }
+.rie-celda { min-height: 128px; padding: 10px; border-radius: var(--radio-chico); display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--borde); }
+.rie-pie { margin-bottom: 0; }
+.rie-rotulo-col { text-align: center; font-weight: 700; font-size: 1.1rem; padding-top: 6px; }
+.rie-eje-x { grid-column: 2; text-align: center; font-weight: 700; font-size: 1.05rem; color: var(--texto-suave); padding: 6px 0 0 98px; }
+.rie-mini { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; background: var(--superficie); border: 1px solid var(--borde); border-radius: 8px; text-decoration: none; color: var(--texto); font-size: .95rem; line-height: 1.35; box-shadow: 0 1px 2px rgb(31 51 43 / 6%); transition: transform 150ms var(--ease-out), opacity 180ms ease; }
+.rie-mini:active { transform: scale(.98); }
+.rie-mini.atenuado { opacity: .32; }
+@media (hover: hover) and (pointer: fine) { .rie-mini:hover { border-color: var(--principal); } }
+.rie-mini-num { flex-shrink: 0; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; font-weight: 700; font-size: .85rem; color: #fff; background: var(--sem-gris); }
+.rie-mini-num.sem-rojo { background: var(--sem-rojo); } .rie-mini-num.sem-ambar { background: var(--sem-ambar); color: #1F332B; } .rie-mini-num.sem-amarillo { background: var(--sem-amarillo); color: #1F332B; }
+.rie-mini-nombre { padding-top: 4px; }
+.rie-sin-prob { margin: var(--e4) 0 0 130px; display: flex; flex-wrap: wrap; align-items: center; gap: var(--e3); }
+.rie-sin-prob .antetitulo { margin: 0; }
+.rie-leyenda { list-style: none; padding: 0; margin: var(--e4) 0 var(--e2) 130px; display: flex; flex-wrap: wrap; gap: var(--e4); font-size: .95rem; }
+.rie-leyenda li { display: flex; align-items: center; gap: 8px; }
+.rie-leyenda li::before { content: ""; width: 18px; height: 18px; border-radius: 4px; border: 1px solid var(--borde); }
+.rie-leyenda .sem-rojo::before { background: var(--sem-rojo-fondo); } .rie-leyenda .sem-ambar::before { background: var(--sem-ambar-fondo); } .rie-leyenda .sem-amarillo::before { background: var(--sem-amarillo-fondo); }
+.rie-mapa-seccion > .nota { margin-left: 130px; }
+.rie-lista { margin-top: var(--e5); border-top: 1px solid var(--borde); padding-top: var(--e3); }
+.rie-lista summary { cursor: pointer; font-weight: 700; color: var(--principal); }
+.rie-lista ol { margin-top: var(--e3); display: grid; gap: 6px; }
+
+/* Ficha del riesgo en ventana */
+.rie-ficha { position: relative; width: min(1180px, 96vw); height: auto; max-height: 92vh; border-radius: var(--radio); padding: 0; overflow-y: auto; }
+@starting-style { .rie-ficha { transform: translateY(12px); opacity: 0; } }
+.rie-ficha { transition: transform 240ms var(--ease-out), opacity 200ms ease; }
+.rie-cerrar { position: absolute; top: var(--e3); right: var(--e3); z-index: 2; border-radius: 999px; background: var(--superficie); }
+.rie-f1 { display: grid; grid-template-columns: minmax(0, 1fr) 340px; border-bottom: 1px solid var(--borde); }
+.rie-titulo { padding: var(--e5); }
+.rie-titulo h2 { margin: 0; font-size: var(--t-h2); line-height: 1.2; }
+.rie-prio { display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: var(--e4) 120px var(--e4) var(--e5); border-left: 1px solid var(--borde); }
+.rie-prio strong { font-size: 2.6rem; line-height: 1; }
+.rie-rotulo { font-size: .85rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+.rie-sub { font-size: .95rem; font-weight: 700; }
+.rie-fila3, .rie-fila2 { display: grid; border-bottom: 1px solid var(--borde); }
+.rie-fila3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.rie-fila2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.rie-caja { padding: var(--e4) var(--e5); min-width: 0; }
+.rie-caja + .rie-caja { border-left: 1px dashed var(--borde-fuerte); }
+.rie-caja h3 { font-size: .85rem; letter-spacing: .12em; text-transform: uppercase; color: var(--oro-texto); margin: 0 0 var(--e2); }
+.rie-destacado { display: block; font-size: 1.25rem; line-height: 1.3; }
+.rie-caja .nota { margin: var(--e2) 0 0; }
+.rie-nivel strong { display: block; font-size: 2rem; line-height: 1.1; }
+.rie-nivel p { margin: 6px 0 0; font-size: .95rem; }
+.rie-nivel h3 { color: inherit; }
+.rie-nota-actores { grid-column: 1 / -1; margin: 0; padding: var(--e2) var(--e5); }
+.rie-vinetas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rie-vinetas li { position: relative; padding-left: 18px; line-height: 1.45; }
+.rie-vinetas li::before { content: ""; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--oro); }
+.rie-estandares .rie-vinetas li { font-weight: 700; }
+.rie-subs { border-bottom: 0; gap: var(--e3); padding: var(--e4) var(--e5); }
+.rie-boton-sub { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px var(--e3); align-items: center; padding: var(--e4); border: 1px solid var(--borde); border-radius: var(--radio); background: var(--superficie); box-shadow: var(--sombra); transition: transform 160ms var(--ease-out), background-color 150ms ease; }
+.rie-boton-sub strong { font-size: 1.15rem; }
+.rie-boton-sub .nota { grid-column: 1; margin: 0; }
+.rie-ver { grid-column: 2; grid-row: 1 / 3; font-weight: 700; color: var(--principal); }
+.rie-ver::after { content: " ▾"; }
+.rie-boton-sub[aria-expanded="true"] { background: var(--suave); border-color: var(--principal); }
+.rie-boton-sub[aria-expanded="true"] .rie-ver::after { content: " ▴"; }
+.rie-boton-sub:focus-visible { outline: 2px solid var(--principal); outline-offset: 3px; }
+.rie-boton-sub:active { transform: scale(.98); }
+.rie-subficha { margin: 0 var(--e5) var(--e5); border: 1px solid var(--borde); border-radius: var(--radio); overflow: hidden; }
+.rie-sub-titulo { margin: 0; padding: var(--e3) var(--e4); background: var(--fondo-alterno); font-size: 1.1rem; border-bottom: 1px solid var(--borde); }
+.rie-sub-control { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.rie-sub-control > div { padding: var(--e4); }
+.rie-analisis { border-left: 1px dashed var(--borde-fuerte); background: var(--fondo); }
+.rie-analisis h4 { margin: 0 0 var(--e2); font-size: 1rem; }
+.rie-analisis p { margin: 0; line-height: 1.6; }
+.rie-tabla-acciones { margin: 0; font-size: .95rem; table-layout: fixed; }
+.rie-tabla-acciones th[scope="col"]:first-child { width: 58%; }
+.rie-tabla-acciones th, .rie-tabla-acciones td { padding: 14px var(--e4); }
+.rie-tabla-acciones td, .rie-tabla-acciones th + th { border-left: 1px dashed var(--borde-fuerte); }
+.rie-tabla-acciones th[scope="row"] strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+.rie-tabla-acciones td > * { display: block; margin-bottom: 4px; }
+.rie-comp { font-weight: 700; }
+.rie-responsables { padding: var(--e3) var(--e4); background: var(--fondo-alterno); border-top: 1px solid var(--borde); }
+.rie-responsables h4 { margin: 0 0 var(--e2); font-size: 1rem; }
+.rie-responsables .rie-vinetas { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+@media (max-width: 1000px) {
+  .rie-conteos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rie-fila { grid-template-columns: 64px repeat(3, minmax(160px, 1fr)); }
+  .rie-mapa { overflow-x: auto; }
+}
+@media (max-width: 767px) {
+  .rie-conteos { grid-template-columns: 1fr; }
+  .rie-f1, .rie-fila3, .rie-fila2, .rie-sub-control { grid-template-columns: 1fr; }
+  .rie-caja + .rie-caja, .rie-analisis { border-left: 0; border-top: 1px dashed var(--borde-fuerte); }
+  .rie-prio { border-left: 0; border-top: 1px solid var(--borde); padding-right: var(--e5); }
+  .rie-titulo { padding-top: 64px; }
+  .rie-sin-prob, .rie-leyenda, .rie-mapa-seccion > .nota { margin-left: 0; }
+}
+/* Celdas del mapa con tonos de priorización más distinguibles (rojo · ámbar · amarillo). */
+.rie-celda.sem-fondo-rojo { background: #F1CDC3; } .rie-celda.sem-fondo-ambar { background: #F4DBA6; } .rie-celda.sem-fondo-amarillo { background: #F7F0C4; }
+.rie-leyenda .sem-rojo::before { background: #F1CDC3; } .rie-leyenda .sem-ambar::before { background: #F4DBA6; } .rie-leyenda .sem-amarillo::before { background: #F7F0C4; }
+:root[data-tema="oscuro"] .rie-celda.sem-fondo-rojo { background: #4A2A21; } :root[data-tema="oscuro"] .rie-celda.sem-fondo-ambar { background: #4A3A18; } :root[data-tema="oscuro"] .rie-celda.sem-fondo-amarillo { background: #3D3B1C; }
+@media (prefers-color-scheme: dark) { :root:not([data-tema="claro"]) .rie-celda.sem-fondo-rojo { background: #4A2A21; } :root:not([data-tema="claro"]) .rie-celda.sem-fondo-ambar { background: #4A3A18; } :root:not([data-tema="claro"]) .rie-celda.sem-fondo-amarillo { background: #3D3B1C; } }

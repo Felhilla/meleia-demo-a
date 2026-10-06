@@ -179,7 +179,7 @@
     const vista = vistas.get(nombreVista);
     if (vista) {
       limpieza = vista.render(cuerpo, App.datos, {id: r.id, sub: r.sub, capitulo: r.capitulo, filtros: new URLSearchParams(r.query)});
-      if (!['caso', 'metodologia', 'resultados', 'estandares'].includes(nombreVista)) depurarVistaHeredada(cuerpo);
+      if (!['caso', 'metodologia', 'resultados', 'estandares', 'riesgos'].includes(nombreVista)) depurarVistaHeredada(cuerpo);
     } else {
       enPreparacion(cuerpo, (cap?.subcapitulos?.find(s => s.id === r.sub)?.titulo) || cap?.titulo || 'Sección');
     }
@@ -191,7 +191,7 @@
     document.querySelector('.saltar').onclick = event => { event.preventDefault(); document.getElementById('contenido').focus(); };
     const archivos = {empresa: 'config/empresa-config.json', caso: 'data/caso.json', riesgos: 'data/riesgos.json', plan: 'data/plan.json', estandares: 'data/estandares.json', evaluaciones: 'data/evaluaciones.json', criticidad: 'config/criticidad-config.json', planConfig: 'config/plan-config.json', umbrales: 'config/umbrales-config.json'};
     try {
-      const opcionales = {dimensiones: 'data/dimensiones.json', materialidad: 'data/materialidad.json', materialidadConfig: 'config/materialidad-config.json'};
+      const opcionales = {derechos: 'data/derechos.json', dimensiones: 'data/dimensiones.json', materialidad: 'data/materialidad.json', materialidadConfig: 'config/materialidad-config.json'};
       App.datos = Object.fromEntries(await Promise.all(Object.entries({...archivos, ...opcionales}).map(async ([clave, ruta]) => {
         try {
           const respuesta = await fetch(ruta);

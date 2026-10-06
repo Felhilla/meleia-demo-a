@@ -1,0 +1,60 @@
+{
+  "origen": "referencia",
+  "nota": "Estándares internacionales que protegen cada derecho humano afectado; se usan como estándares relacionados de cada riesgo.",
+  "derechos": {
+    "Derecho a la vida": [
+      "DUDH · art. 3",
+      "PIDCP · art. 6",
+      "OIT C155 · Seguridad y salud de los trabajadores"
+    ],
+    "Derecho a condiciones de trabajo dignas": [
+      "PIDESC · art. 7",
+      "OIT C155 y C187 · Seguridad y salud en el trabajo",
+      "GRI 403 · Salud y seguridad en el trabajo"
+    ],
+    "Derecho a condiciones laborales justas y equitativa": [
+      "PIDESC · art. 7",
+      "OIT C95 y C131 · Salarios",
+      "GRI 11 · Prácticas laborales"
+    ],
+    "Derecho a la igualdad y no discriminación": [
+      "DUDH · art. 7",
+      "OIT C100 y C111 · No discriminación",
+      "Convención sobre los derechos de las personas con discapacidad"
+    ],
+    "Derecho a la salud": [
+      "PIDESC · art. 12",
+      "OIT C155 · Seguridad y salud de los trabajadores",
+      "GRI 403 · Salud y seguridad en el trabajo"
+    ],
+    "Derechos del niño": [
+      "Convención sobre los Derechos del Niño",
+      "OIT C138 · Edad mínima",
+      "OIT C182 · Peores formas de trabajo infantil"
+    ],
+    "Derecho a la movilidad": [
+      "DUDH · art. 13",
+      "PIDCP · art. 12",
+      "GRI 11 · Comunidades locales"
+    ],
+    "Derecho al acceso a la información": [
+      "PIDCP · art. 19",
+      "PRNU · Principio 21",
+      "GRI 3 · Temas materiales"
+    ],
+    "Derecho al acceso a la justicia y reparación efectiva": [
+      "PRNU · Principios 25 a 31",
+      "PIDCP · art. 2",
+      "Guía OCDE · Paso 6"
+    ],
+    "Derecho al mínimo vital": [
+      "PIDESC · art. 11",
+      "SASB · Asequibilidad de la energía"
+    ],
+    "Derecho de asociación, libertad sindical, negociación colectiva": [
+      "OIT C87 · Libertad sindical",
+      "OIT C98 · Negociación colectiva",
+      "PIDESC · art. 8"
+    ]
+  }
+}

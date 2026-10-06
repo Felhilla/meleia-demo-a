@@ -1,163 +1,224 @@
+/* Capítulo 04 · Riesgos en Derechos Humanos Identificados (bocetos de Felipe IMG_4415 a IMG_4419).
+   Vista: cuatro tarjetas de conteo que resaltan su nivel en el mapa, y el mapa gravedad × probabilidad.
+   Ficha en ventana: riesgo | priorización; relación · derecho · estándares; gravedad | probabilidad;
+   actividades · actor que reporta · localización; y dos cajas que despliegan las subfichas de
+   mecanismos de control y de acciones recomendadas. */
 (function () {
   'use strict';
   const el = App.el;
-  // Convención visual, no modifica la criticidad calculada desde la fuente.
-  const MAPA_CALOR = {
-    'Alta|baja': 'medio', 'Alta|media': 'alto', 'Alta|alta': 'alto',
-    'Media|baja': 'bajo', 'Media|media': 'medio', 'Media|alta': 'alto',
-    'Baja|baja': 'bajo', 'Baja|media': 'bajo', 'Baja|alta': 'medio'
-  };
-  const etiqueta = valor => valor ? valor.charAt(0).toUpperCase() + valor.slice(1).replaceAll('-', ' ') : 'Sin asignar';
-  function textoLista(texto) {
-    const items = App.listaNumerada(texto);
-    const nodo = el(items.length > 1 ? 'ol' : 'p', items.length === 1 ? items[0] : undefined, 'texto-dato');
-    if (items.length > 1) items.forEach(t => nodo.append(el('li', t)));
-    return nodo;
-  }
+  const NIVELES = ['Alta', 'Media', 'Baja'];
+  const PROBABILIDADES = ['baja', 'media', 'alta'];
+  const etiqueta = v => v ? v.charAt(0).toUpperCase() + v.slice(1).replaceAll('-', ' ') : 'Sin asignar';
   const numero = r => r.id.split('-').at(-1);
-  const badge = nivel => el('span', nivel, 'criticidad ' + nivel.toLowerCase());
-  function aviso(texto, detalle) {
-    const n = el('span', texto, 'aviso'); n.title = detalle; n.tabIndex = 0;
-    n.setAttribute('aria-label', texto + ': ' + detalle); return n;
+  const vinculacion = {causa: 'Causa', contribuye: 'Contribuye', 'directamente-vinculada': 'Directamente vinculada'};
+  const SEM = {Alta: 'rojo', Media: 'ambar', Baja: 'amarillo'};
+  const fecha = f => /^\d{4}-\d{2}-\d{2}$/.test(f || '') ? new Intl.DateTimeFormat('es-CO', {day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'}).format(new Date(f + 'T00:00:00Z')) : (f || 'sin plazo');
+
+  function cfgPriorizacion(datos) { return datos.caso?.metodologia?.calificacion?.riesgos?.priorizacion || {matriz: {}, colores: SEM}; }
+  function priorizacion(datos, gravedad, probabilidad) {
+    if (!probabilidad) return null;
+    return cfgPriorizacion(datos).matriz[gravedad + '|' + probabilidad] || null;
   }
-  function ambitos(r, cfg) {
-    const n = el('span', r.ambitos.map(id => cfg.ambitos.find(a => a.id === id)?.etiqueta || etiqueta(id)).join(' · '));
-    if (r.campos_propuestos?.includes('ambitos')) n.append(' ', aviso('Estimado', 'La correspondencia de ámbitos es estimada y requiere confirmación.'));
-    return n;
+  function vinetas(texto) {
+    const items = Array.isArray(texto) ? texto : App.listaNumerada(texto);
+    const ul = el('ul', null, 'rie-vinetas');
+    (items.length ? items : ['Sin información en la fuente']).forEach(t => ul.append(el('li', t)));
+    return ul;
   }
+  function unicos(lista) { return [...new Set(lista.filter(Boolean))]; }
+  function caja(titulo, contenido, clase) {
+    const c = el('section', null, 'rie-caja ' + (clase || ''));
+    c.append(el('h3', titulo)); if (contenido) c.append(contenido); return c;
+  }
+  function nivelCaja(titulo, nivel, detalle) {
+    const c = el('section', null, 'rie-caja rie-nivel sem-fondo-' + (SEM[nivel] || 'gris'));
+    c.append(el('h3', titulo), el('strong', nivel || 'Sin asignar'));
+    if (detalle) c.append(el('p', detalle));
+    return c;
+  }
+
   function render(contenedor, datos, params) {
-    const cfg = datos.criticidad;
-    const filtros = Object.fromEntries(params.filtros);
-    const visibles = Riesgos.filtrar(datos.riesgos, filtros, cfg);
-    const ids = new Set(visibles.map(r => r.id));
-    const base = () => '#/ddhh/riesgos' + (params.filtros.size ? '?' + params.filtros : '');
-    const rutaRiesgo = id => '#/ddhh/riesgos/' + id + (params.filtros.size ? '?' + params.filtros : '');
-    function cambiar(clave, valor) {
-      const q = new URLSearchParams(params.filtros);
-      if (valor) q.set(clave, valor); else q.delete(clave);
-      location.hash = '#/ddhh/riesgos' + (q.size ? '?' + q : '');
-    }
-    contenedor.append(el('p', 'DEMO A · DEBIDA DILIGENCIA Y DDHH', 'eyebrow'), el('h1', 'Riesgos en derechos humanos'), el('p', 'Paso 3 de 4 · Riesgos', 'ayuda'), el('p', 'Decida qué riesgos atender primero y conecte su evaluación con controles y acciones.', 'intro'));
-    const resumen = Riesgos.resumen(datos.riesgos, cfg);
-    const tarjetas = el('div', null, 'resumen');
-    [['', datos.riesgos.length, 'Total de riesgos'], ...Object.entries(resumen).reverse().map(([nivel, n]) => [nivel, n, 'Criticidad ' + nivel])].forEach(([nivel, n, titulo]) => {
-      const b = el('button', null, 'resumen-item'); b.id = 'resumen-' + (nivel || 'total');
-      b.setAttribute('aria-pressed', String((filtros.criticidad || '') === nivel));
-      b.append(el('strong', n), el('span', titulo)); b.onclick = () => cambiar('criticidad', nivel); tarjetas.append(b);
-    }); contenedor.append(tarjetas);
-    const form = el('form', null, 'filtros'); form.setAttribute('aria-label', 'Filtrar riesgos'); form.onsubmit = e => e.preventDefault();
-    const opciones = Riesgos.opcionesFiltro(datos.riesgos, cfg);
-    [['criticidad', 'Criticidad'], ['ambito', 'Ámbito'], ['vinculacion', 'Tipo de vinculación'], ['derecho', 'Derecho humano impactado']].forEach(([clave, titulo]) => {
-      const label = el('label', titulo); const select = el('select'); select.id = 'filtro-' + clave;
-      const todos = el('option', 'Todos'); todos.value = ''; select.append(todos);
-      const values = [...opciones[clave]];
-      if (filtros[clave] && !values.includes(filtros[clave])) values.push(filtros[clave]);
-      values.forEach(valor => {
-        const texto = clave === 'ambito' ? cfg.ambitos.find(a => a.id === valor)?.etiqueta || etiqueta(valor) : etiqueta(valor);
-        const option = el('option', texto); option.value = valor; select.append(option);
-      }); select.value = filtros[clave] || ''; select.onchange = () => cambiar(clave, select.value);
-      label.append(select); form.append(label);
+    const cfg = datos.criticidad, riesgos = datos.riesgos;
+    const resumen = Riesgos.resumen(riesgos, cfg);
+    let resaltado = params.filtros.get('criticidad') || '';
+
+    // 1 · Tarjetas de conteo: resaltan su nivel en el mapa (no filtran ni ocultan).
+    const tarjetas = el('div', null, 'rie-conteos');
+    const conteos = [['', riesgos.length, riesgos.length === 1 ? 'Riesgo identificado' : 'Riesgos identificados'],
+      ...NIVELES.map(n => [n, resumen[n] || 0, (resumen[n] === 1 ? 'Riesgo' : 'Riesgos') + ' de criticidad ' + n.toLowerCase()])];
+    const botones = conteos.map(([nivel, n, texto]) => {
+      const b = el('button', null, 'rie-conteo' + (nivel ? ' sem-borde-' + SEM[nivel] : '')); b.type = 'button';
+      b.append(el('strong', String(n)), el('span', texto));
+      b.onclick = () => { resaltado = resaltado === nivel ? '' : nivel; pintarResaltado(); };
+      tarjetas.append(b); return [nivel, b];
     });
-    const limpiar = el('a', 'Limpiar filtros', 'boton secundario'); limpiar.id = 'limpiar-filtros'; limpiar.href = '#/ddhh/riesgos'; form.append(limpiar); contenedor.append(form);
-    const estado = el('p', `${visibles.length} de ${datos.riesgos.length} riesgos coinciden con los filtros.`, 'resultado'); estado.setAttribute('role', 'status'); contenedor.append(estado);
-    const seccion = el('section', null, 'superficie');
-    seccion.append(el('h2', 'Mapa de riesgos'), el('p', 'Los riesgos atenuados no coinciden con los filtros. El fondo es orientativo; la etiqueta expresa la criticidad.', 'ayuda'));
-    const ubicacion = Riesgos.ubicar(datos.riesgos, cfg);
-    function fichaPequena(id) {
-      const r = datos.riesgos.find(r => r.id === id); const a = el('a', null, 'ficha-mini' + (ids.has(id) ? '' : ' atenuado'));
-      a.href = rutaRiesgo(id); a.dataset.riesgo = id; a.title = r.nombre;
-      a.setAttribute('aria-label', `${numero(r)}. ${r.nombre}${ids.has(id) ? '' : '. No coincide con los filtros'}`);
-      a.append(el('strong', numero(r)), el('span', r.nombre.length > 65 ? r.nombre.slice(0, 62) + '…' : r.nombre));
-      if (r.evaluaciones.length > 1) a.append(el('small', r.evaluaciones.length + ' actores'));
+
+    // 2 · Mapa de riesgos (boceto IMG_4415): gravedad en filas (Alta arriba), probabilidad en columnas.
+    const ubicacion = Riesgos.ubicar(riesgos, cfg);
+    const mapa = el('section', null, 'seccion rie-mapa-seccion');
+    const cab = el('div', null, 'seccion-cabeza');
+    const tc = el('div'); tc.append(el('p', 'Mapa de riesgos', 'antetitulo'), el('h2', 'Gravedad × probabilidad de ocurrencia'));
+    cab.append(tc, el('p', 'Cada riesgo se ubica por su gravedad y por la probabilidad de que ocurra según los controles actuales. El color de la celda es el nivel de priorización. Toque un riesgo para ver su ficha.'));
+    const grid = el('div', null, 'rie-mapa'); grid.setAttribute('role', 'table'); grid.setAttribute('aria-label', 'Mapa de riesgos');
+    const ejeY = el('div', 'Gravedad', 'rie-eje-y'); ejeY.setAttribute('aria-hidden', 'true'); grid.append(ejeY);
+    NIVELES.forEach(g => {
+      const fila = el('div', null, 'rie-fila'); fila.setAttribute('role', 'row');
+      const rot = el('div', g, 'rie-rotulo-fila'); rot.setAttribute('role', 'rowheader'); fila.append(rot);
+      PROBABILIDADES.forEach(p => {
+        const prio = priorizacion(datos, g, p);
+        const celda = el('div', null, 'rie-celda sem-fondo-' + (SEM[prio] || 'gris')); celda.setAttribute('role', 'cell');
+        celda.setAttribute('aria-label', `Gravedad ${g.toLowerCase()}, probabilidad ${p}: priorización ${(prio || '').toLowerCase()}`);
+        (ubicacion.celdas[g + '|' + p] || []).forEach(id => celda.append(fichaMini(id)));
+        fila.append(celda);
+      });
+      grid.append(fila);
+    });
+    const pie = el('div', null, 'rie-fila rie-pie'); pie.append(el('div'));
+    PROBABILIDADES.forEach(p => pie.append(el('div', etiqueta(p), 'rie-rotulo-col')));
+    grid.append(pie, el('div', 'Probabilidad de ocurrencia', 'rie-eje-x'));
+    mapa.append(tarjetas, cab, grid);
+    if (ubicacion.sinProbabilidad.length) {
+      const sin = el('div', null, 'rie-sin-prob');
+      sin.append(el('p', 'Sin probabilidad asignada en la fuente', 'antetitulo'));
+      ubicacion.sinProbabilidad.forEach(id => sin.append(fichaMini(id)));
+      mapa.append(sin);
+    }
+    const ley = el('ul', null, 'rie-leyenda');
+    NIVELES.forEach(n => { const li = el('li', 'Priorización ' + n.toLowerCase(), 'sem-' + SEM[n]); ley.append(li); });
+    mapa.append(ley, el('p', cfgPriorizacion(datos).nota || '', 'nota'));
+
+    // Lista accesible (plegada): misma información que el mapa.
+    const lista = el('details', null, 'rie-lista');
+    lista.append(el('summary', 'Ver la lista de los ' + riesgos.length + ' riesgos'));
+    const ol = el('ol');
+    [...riesgos].sort((a, b) => NIVELES.indexOf(Riesgos.criticidad(a, cfg).nivel) - NIVELES.indexOf(Riesgos.criticidad(b, cfg).nivel) || a.id.localeCompare(b.id)).forEach(r => {
+      const li = el('li'), a = el('a', numero(r) + ' · ' + r.nombre); a.href = '#/ddhh/riesgos/' + r.id; a.id = 'fila-' + r.id;
+      li.append(a, el('span', ' · gravedad ' + Riesgos.criticidad(r, cfg).nivel.toLowerCase(), 'nota')); ol.append(li);
+    });
+    lista.append(ol); mapa.append(lista);
+    contenedor.append(mapa);
+
+    function fichaMini(id) {
+      const r = riesgos.find(x => x.id === id), nivel = Riesgos.criticidad(r, cfg).nivel;
+      const a = el('a', null, 'rie-mini'); a.href = '#/ddhh/riesgos/' + id; a.dataset.riesgo = id; a.dataset.nivel = nivel;
+      a.append(el('span', numero(r), 'rie-mini-num sem-' + SEM[nivel]), el('span', r.nombre, 'rie-mini-nombre'));
+      a.title = r.nombre + ' · gravedad ' + nivel.toLowerCase();
       return a;
     }
-    const matriz = el('div', null, 'matriz');
-    matriz.append(el('span', 'Gravedad', 'eje-gravedad'));
-    ['Alta', 'Media', 'Baja'].forEach(g => {
-      matriz.append(el('span', g, 'eje-fila'));
-      ['baja', 'media', 'alta'].forEach(p => {
-        const celda = el('section', null, 'celda calor-' + MAPA_CALOR[g + '|' + p]);
-        celda.setAttribute('aria-label', `Gravedad ${g} · Probabilidad ${etiqueta(p)}`);
-        ubicacion.celdas[g + '|' + p].forEach(id => celda.append(fichaPequena(id)));
-        if (!ubicacion.celdas[g + '|' + p].length) celda.append(el('span', 'Sin riesgos', 'ayuda'));
-        matriz.append(celda);
-      });
-    });
-    const columnas = el('div', null, 'eje-columnas');
-    ['Baja', 'Media', 'Alta'].forEach(t => columnas.append(el('span', t)));
-    matriz.append(columnas, el('p', 'Probabilidad de ocurrencia según controles', 'eje-probabilidad'));
-    seccion.append(matriz);
-    const sin = el('section', null, 'sin-probabilidad'); sin.append(el('h3', 'Sin probabilidad asignada'));
-    ubicacion.sinProbabilidad.forEach(id => sin.append(fichaPequena(id))); seccion.append(sin); contenedor.append(seccion);
-    const listado = el('section', null, 'superficie listado'); listado.append(el('h2', 'Detalle de riesgos'));
-    const tabla = el('table'); const caption = el('caption', 'Riesgos que coinciden con los filtros, ordenados por criticidad y número.', 'solo-lectores'); tabla.append(caption);
-    const head = el('thead'); const hr = el('tr');
-    ['Número', 'Riesgo', 'Criticidad', 'Ámbitos', 'Vinculación', 'Acciones'].forEach(t => {const th = el('th', t); th.scope = 'col'; hr.append(th);}); head.append(hr); tabla.append(head);
-    const body = el('tbody'); const niveles = cfg.gravedad.cortes.map(c => c.nivel).reverse();
-    [...visibles].sort((a, b) => niveles.indexOf(Riesgos.criticidad(a, cfg).nivel) - niveles.indexOf(Riesgos.criticidad(b, cfg).nivel) || a.id.localeCompare(b.id)).forEach(r => {
-      const tr = el('tr');
-      const link = el('a', r.nombre); link.href = rutaRiesgo(r.id); link.dataset.riesgo = r.id; link.id = 'fila-' + r.id;
-      [numero(r), link, badge(Riesgos.criticidad(r, cfg).nivel), ambitos(r, cfg), [...new Set(r.evaluaciones.map(e => etiqueta(e.vinculacion)))].join(' · '), Riesgos.accionesDe(r.id, App.obtenerPlan()).length].forEach((valor, i) => {
-        const td = el('td'); td.dataset.etiqueta = hr.children[i].textContent; td.append(valor); tr.append(td);
-      }); tr.onclick = e => {if (!e.target.closest('a, .aviso')) location.hash = rutaRiesgo(r.id);}; body.append(tr);
-    }); tabla.append(body); listado.append(tabla);
-    if (!visibles.length) listado.append(el('p', 'No hay riesgos que coincidan. Prueba otra combinación o limpia los filtros.'));
-    contenedor.append(listado);
-    if (!params.id) return;
-    return abrirDialogo(datos.riesgos.find(r => r.id === params.id), datos, base());
+    function pintarResaltado() {
+      botones.forEach(([nivel, b]) => b.setAttribute('aria-pressed', String(resaltado === nivel && nivel !== '')));
+      contenedor.querySelectorAll('.rie-mini').forEach(m => m.classList.toggle('atenuado', !!resaltado && m.dataset.nivel !== resaltado));
+    }
+    pintarResaltado();
+
+    if (params.id) return abrirFicha(riesgos.find(r => r.id === params.id), datos);
   }
-  function abrirDialogo(r, datos, rutaCerrar) {
-    const cfg = datos.criticidad;
-    const fondo = el('div', null, 'fondo-dialogo');
-    const panel = el('section', null, 'panel'); panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-labelledby', 'titulo-riesgo'); panel.tabIndex = -1; panel.dataset.riesgo = r.id;
-    const cerrar = el('button', 'Cerrar ficha ×', 'cerrar'); cerrar.onclick = () => {location.hash = rutaCerrar;};
-    const titulo = el('h2', `${numero(r)} · ${r.nombre}`); titulo.id = 'titulo-riesgo';
-    panel.append(cerrar, titulo, badge(Riesgos.criticidad(r, cfg).nivel), el('h3', 'Ámbitos'), ambitos(r, cfg));
-    function bloque(titulo, texto) {panel.append(el('h3', titulo), textoLista(texto || 'Sin información en la fuente'));}
-    bloque('Estándar asociado', r.derecho_humano);
-    panel.append(el('h3', 'Calificación'));
-    const dominante = Riesgos.criticidad(r, cfg).evaluacionDominante;
-    const tabla = el('table', null, 'calificaciones'); tabla.append(el('caption', 'Evaluaciones por actor'));
-    const encabezado = el('thead'); const fila = el('tr');
-    const columnas = ['Actor que genera', 'Escala', 'Alcance', 'Irremediabilidad', 'Promedio', 'Gravedad', 'Vinculación', 'Probabilidad', 'Evaluación'];
-    columnas.forEach(t => {const th = el('th', t); th.scope = 'col'; fila.append(th);}); encabezado.append(fila); tabla.append(encabezado);
-    const cuerpo = el('tbody');
-    r.evaluaciones.forEach(e => {
-      const g = Riesgos.gravedad(e, cfg); const tr = el('tr');
-      [e.actor_genera, e.escala, e.alcance, e.irreparable, App.numero(g.promedio, {maximumFractionDigits: 2}), g.nivel, etiqueta(e.vinculacion), etiqueta(e.probabilidad), e === dominante ? 'Dominante' : 'No dominante'].forEach((v, i) => {const td = el('td'); td.append(i === 0 ? textoLista(v) : typeof v === 'number' ? App.numero(v) : v); td.dataset.etiqueta = columnas[i]; tr.append(td);}); cuerpo.append(tr);
-    }); tabla.append(cuerpo); panel.append(tabla);
-    const nombres = {escala: 'escala', alcance: 'alcance', irreparable: 'irremediabilidad'};
-    const reglas = cfg.gravedad.cortes.map((c, i) => `${c.nivel}: ${c.menor_que === null ? 'desde ' + App.numero(cfg.gravedad.cortes[i - 1].menor_que) : 'menor que ' + App.numero(c.menor_que)}`).join('; ');
-    bloque('Cómo se calcula', `Gravedad = ${cfg.gravedad.agregacion.replace('maximo', 'máximo')} de ${cfg.gravedad.criterios.map(c => nombres[c] || c).join(', ')}. Escala de ${App.numero(cfg.gravedad.escala.minimo)} a ${App.numero(cfg.gravedad.escala.maximo)}. ${reglas}. Criticidad del riesgo: ${cfg.agregacion_riesgo.replace('maximo', 'máximo')} entre evaluaciones. La probabilidad y la vinculación son dimensiones independientes.`);
-    if (cfg.campos_propuestos?.includes('gravedad.cortes')) panel.append(aviso('Propuesta', 'Los cortes de gravedad están definidos por el encargo y corrigen el límite exacto de la fuente.'));
-    bloque('Localización', r.localizacion); bloque('Actividades', r.actividades);
-    bloque('Actores que reportan', r.evaluaciones.map(e => e.actor_reporta).join('\n'));
-    bloque('Acción recomendada', r.accion_recomendada);
-    bloque('Medidas de control actuales', r.medidas_control); bloque('Análisis de controles', r.analisis_controles); bloque('Responsables', r.responsables.join(' · '));
-    panel.append(el('h3', 'Acciones del plan'));
-    Riesgos.accionesDe(r.id, App.obtenerPlan()).forEach(a => {
-      const card = el('article', null, 'accion'); const link = el('a', a.titulo); link.href = '#/plan?accion=' + encodeURIComponent(a.id);
-      card.append(link, el('p', datos.planConfig.componentes.find(c => c.id === a.componente)?.nombre || etiqueta(a.componente)), el('p', `${etiqueta(a.estado)} · Plazo: ${a.plazo}`));
-      if (a.campos_propuestos?.length) card.append(aviso('Propuesta', 'Campos propuestos pendientes de validación: ' + a.campos_propuestos.map(etiqueta).join(', ') + '.'));
-      if (a.vinculos_estimados) card.append(aviso('Estimado', 'Esta acción contiene vínculos estimados con riesgos o ejes; requieren confirmación.'));
-      panel.append(card);
+
+  function abrirFicha(r, datos) {
+    const cfg = datos.criticidad, crit = Riesgos.criticidad(r, cfg), dom = crit.evaluacionDominante;
+    const prio = priorizacion(datos, crit.nivel, dom.probabilidad);
+    const fondo = el('div', null, 'fondo-dialogo centrado');
+    const panel = el('section', null, 'panel rie-ficha'); panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-labelledby', 'rie-titulo'); panel.tabIndex = -1; panel.dataset.riesgo = r.id;
+    const cerrar = el('button', 'Cerrar ×', 'rie-cerrar'); cerrar.type = 'button'; cerrar.onclick = () => { location.hash = '#/ddhh/riesgos'; };
+
+    // Fila 1: riesgo identificado | nivel de priorización
+    const f1 = el('div', null, 'rie-f1');
+    const tit = el('div', null, 'rie-titulo');
+    const h2 = el('h2', r.nombre); h2.id = 'rie-titulo';
+    tit.append(el('p', 'Riesgo ' + numero(r), 'antetitulo'), h2);
+    const p = el('div', null, 'rie-prio sem-fondo-' + (SEM[prio] || 'gris'));
+    p.append(el('span', 'Nivel de priorización', 'rie-rotulo'), el('strong', prio || 'Sin asignar'), el('span', prio ? 'Gravedad ' + crit.nivel.toLowerCase() + ' × probabilidad ' + dom.probabilidad : 'La fuente no asigna probabilidad', 'rie-sub'));
+    f1.append(tit, p);
+
+    // Fila 2: relación con la organización · derecho humano afectado · estándares relacionados
+    const f2 = el('div', null, 'rie-fila3');
+    const vinc = unicos(r.evaluaciones.map(e => vinculacion[e.vinculacion] || etiqueta(e.vinculacion)));
+    const respVinc = (datos.caso?.metodologia?.calificacion?.riesgos?.vinculacion || []).find(v => v.tipo === dom.vinculacion);
+    const cVinc = caja('Relación con la organización', null);
+    cVinc.append(el('strong', vinc.join(' · '), 'rie-destacado')); if (respVinc) cVinc.append(el('p', respVinc.texto, 'nota'));
+    const cDer = caja('Derecho humano afectado', el('strong', r.derecho_humano, 'rie-destacado'));
+    const est = datos.derechos?.derechos?.[r.derecho_humano] || [];
+    const cEst = caja('Estándares relacionados', vinetas(est), 'rie-estandares');
+    f2.append(cVinc, cDer, cEst);
+
+    // Fila 3: nivel de gravedad | probabilidad de ocurrencia
+    const f3 = el('div', null, 'rie-fila2');
+    const g = Riesgos.gravedad(dom, cfg);
+    const detG = `Escala ${dom.escala} · alcance ${dom.alcance} · irremediabilidad ${dom.irreparable} → promedio ${App.numero(g.promedio, {maximumFractionDigits: 2})}`;
+    const probCfg = (datos.caso?.metodologia?.calificacion?.riesgos?.probabilidad || []).find(x => x.nivel.toLowerCase() === dom.probabilidad);
+    f3.append(nivelCaja('Nivel de gravedad', crit.nivel, detG), nivelCaja('Probabilidad de ocurrencia', dom.probabilidad ? etiqueta(dom.probabilidad) : null, probCfg?.texto || (dom.probabilidad ? '' : 'La fuente no asigna probabilidad a este riesgo.')));
+    if (r.evaluaciones.length > 1) f3.append(el('p', 'Este riesgo se evaluó para ' + r.evaluaciones.length + ' actores; se muestra la evaluación de mayor gravedad.', 'nota rie-nota-actores'));
+
+    // Fila 4: actividades · actor que reporta · localización (viñetas)
+    const f4 = el('div', null, 'rie-fila3');
+    const reporta = unicos(r.evaluaciones.flatMap(e => App.listaNumerada(e.actor_reporta)));
+    f4.append(caja('Actividades que generan el riesgo', vinetas(r.actividades)), caja('Actor que reporta el riesgo', vinetas(reporta)), caja('Localización', vinetas(r.localizacion)));
+
+    // Fila 5: dos cajas que despliegan sus subfichas
+    const f5 = el('div', null, 'rie-fila2 rie-subs');
+    const zona = el('div', null, 'rie-subficha'); zona.hidden = true; zona.setAttribute('aria-live', 'polite');
+    const acciones = Riesgos.accionesDe(r.id, App.obtenerPlan());
+    const subfichas = {
+      control: () => {
+        const s = el('section'); s.append(el('h3', 'Mecanismos de control identificados', 'rie-sub-titulo'));
+        const cuerpo = el('div', null, 'rie-sub-control');
+        const izq = el('div'); izq.append(vinetas(r.medidas_control));
+        const der = el('div', null, 'rie-analisis'); der.append(el('h4', 'Análisis de los mecanismos de control'), el('p', r.analisis_controles || 'Sin análisis en la fuente.'));
+        cuerpo.append(izq, der); s.append(cuerpo); return s;
+      },
+      acciones: () => {
+        const s = el('section'); s.append(el('h3', 'Acciones recomendadas', 'rie-sub-titulo'));
+        const tabla = el('table', null, 'rie-tabla-acciones');
+        const thead = el('thead'), tr = el('tr'); ['Acción', 'Relación con el plan'].forEach(t => { const th = el('th', t); th.scope = 'col'; tr.append(th); }); thead.append(tr); tabla.append(thead);
+        const tb = el('tbody');
+        if (!acciones.length) { const f = el('tr'), td = el('td', 'No hay acciones del plan vinculadas a este riesgo.'); td.colSpan = 2; f.append(td); tb.append(f); }
+        acciones.forEach(a => {
+          const f = el('tr'), th = el('th'); th.scope = 'row';
+          th.append(el('strong', a.titulo)); if (a.actor_genera) th.append(el('span', 'Dirigida a: ' + a.actor_genera, 'nota'));
+          const td = el('td'), link = el('a', 'Ver en el plan →'); link.href = '#/plan?accion=' + encodeURIComponent(a.id);
+          const comp = datos.planConfig.componentes.find(c => c.id === a.componente)?.nombre || etiqueta(a.componente);
+          td.append(el('span', comp, 'rie-comp'), el('span', etiqueta(a.estado) + ' · ' + a.avance + ' % · plazo: ' + fecha(a.plazo), 'nota'), link);
+          f.append(th, td); tb.append(f);
+        });
+        tabla.append(tb); s.append(tabla);
+        const resp = el('div', null, 'rie-responsables');
+        resp.append(el('h4', 'Responsables de la gestión del riesgo'), vinetas(r.responsables || []));
+        s.append(resp); return s;
+      }
+    };
+    const botonesSub = [['control', 'Mecanismos de control identificados', (App.listaNumerada(r.medidas_control).length) + ' controles'], ['acciones', 'Acciones recomendadas', acciones.length + (acciones.length === 1 ? ' acción del plan' : ' acciones del plan')]].map(([clave, texto, meta]) => {
+      const b = el('button', null, 'rie-boton-sub'); b.type = 'button'; b.setAttribute('aria-expanded', 'false'); b.dataset.sub = clave;
+      b.append(el('strong', texto), el('span', meta, 'nota'), el('span', 'Ver', 'rie-ver'));
+      b.onclick = () => {
+        const abierto = b.getAttribute('aria-expanded') === 'true';
+        botonesSub.forEach(o => { o.setAttribute('aria-expanded', 'false'); o.querySelector('.rie-ver').textContent = 'Ver'; });
+        if (abierto) { zona.hidden = true; zona.replaceChildren(); return; }
+        b.setAttribute('aria-expanded', 'true'); b.querySelector('.rie-ver').textContent = 'Ocultar';
+        zona.replaceChildren(subfichas[clave]()); zona.hidden = false;
+        zona.scrollIntoView?.({block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+      };
+      f5.append(b); return b;
     });
+
+    panel.append(cerrar, f1, f2, f3, f4, f5, zona);
     fondo.append(panel); document.body.append(fondo); document.body.classList.add('dialogo-abierto');
-    const regiones = [...document.querySelectorAll('body > header, body > main, body > footer, body > .saltar')]; regiones.forEach(n => {n.inert = true;});
+    fondo.addEventListener('click', e => { if (e.target === fondo) location.hash = '#/ddhh/riesgos'; });
+    const regiones = [...document.querySelectorAll('body > header, body > main, body > footer, body > .saltar')]; regiones.forEach(n => { n.inert = true; });
     cerrar.focus();
     function teclado(e) {
-      if (e.key === 'Escape') {e.preventDefault(); location.hash = rutaCerrar;}
+      if (e.key === 'Escape') { e.preventDefault(); location.hash = '#/ddhh/riesgos'; }
       if (e.key === 'Tab') {
-        const focos = [...panel.querySelectorAll('button, a[href], [tabindex="0"]')]; const primero = focos[0]; const ultimo = focos.at(-1);
-        if (e.shiftKey && document.activeElement === primero) {e.preventDefault(); ultimo.focus();}
-        else if (!e.shiftKey && document.activeElement === ultimo) {e.preventDefault(); primero.focus();}
+        const focos = [...panel.querySelectorAll('button, a[href], [tabindex="0"]')]; const primero = focos[0], ultimo = focos.at(-1);
+        if (e.shiftKey && document.activeElement === primero) { e.preventDefault(); ultimo.focus(); }
+        else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus(); }
       }
     }
     document.addEventListener('keydown', teclado);
     return () => {
-      document.removeEventListener('keydown', teclado); regiones.forEach(n => {n.inert = false;}); fondo.remove(); document.body.classList.remove('dialogo-abierto');
-      document.getElementById('fila-' + r.id)?.focus();
+      document.removeEventListener('keydown', teclado); regiones.forEach(n => { n.inert = false; }); fondo.remove(); document.body.classList.remove('dialogo-abierto');
+      document.querySelector('.rie-mini[data-riesgo="' + r.id + '"]')?.focus();
     };
   }
+
   App.registrarVista('riesgos', {render});
 }());
